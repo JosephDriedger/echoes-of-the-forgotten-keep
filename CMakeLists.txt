@@ -6,12 +6,12 @@ set(CMAKE_CXX_STANDARD 20)
 #set SDL3 include and lib paths
 
 if (WIN32)
-    set(SDL3_PATH "C:/Dev/sdl3")
-    set(SDL3_IMAGE_PATH "C:/Dev/sdl3_image")
-    set(ASSIMP_PATH "C:/Dev/assimp-6.0.4")
+    set(SDL3_PATH "/Dev/sdl3")
+    set(SDL3_IMAGE_PATH "/Dev/sdl3_image")
+    set(ASSIMP_PATH "/Dev/assimp-6.0.4")
     include_directories(
-            ${SDL3_PATH}/include
-            ${SDL3_IMAGE_PATH}/include
+            ${PROJECT_SOURCE_DIR}${SDL3_PATH}/include
+            ${PROJECT_SOURCE_DIR}${SDL3_IMAGE_PATH}/include
             ${PROJECT_SOURCE_DIR}/src
             ${PROJECT_SOURCE_DIR}/src/utils
             ${PROJECT_SOURCE_DIR}/src/ecs
@@ -19,13 +19,13 @@ if (WIN32)
             ${PROJECT_SOURCE_DIR}/src/vendor
             ${PROJECT_SOURCE_DIR}/src/vendor/glad/include
             ${PROJECT_SOURCE_DIR}/src/renderer
-            ${ASSIMP_PATH}/include
-            ${ASSIMP_PATH}/build/include
+            ${PROJECT_SOURCE_DIR}${ASSIMP_PATH}/include
+            ${PROJECT_SOURCE_DIR}${ASSIMP_PATH}/build/include
     )
     link_directories(
-            ${SDL3_PATH}/lib
-            ${SDL3_IMAGE_PATH}/lib
-            ${ASSIMP_PATH}/build/lib
+            ${PROJECT_SOURCE_DIR}${SDL3_PATH}/lib
+            ${PROJECT_SOURCE_DIR}${SDL3_IMAGE_PATH}/lib
+            ${PROJECT_SOURCE_DIR}${ASSIMP_PATH}/build/lib
     )
 endif ()
 
@@ -51,6 +51,6 @@ target_link_libraries(echoes_of_the_forgotten_keep
         SDL3_image
         opengl32
         assimp
-        ${ASSIMP_PATH}/build/lib/libassimp.dll.a
+        ${PROJECT_SOURCE_DIR}${ASSIMP_PATH}/build/lib/libassimp.dll.a
 )
 
