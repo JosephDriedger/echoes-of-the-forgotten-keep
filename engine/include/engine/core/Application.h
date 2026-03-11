@@ -14,6 +14,7 @@
 
 namespace engine
 {
+    class Renderer;
     class Window;
 
     struct ApplicationSpecification
@@ -67,7 +68,6 @@ namespace engine
         bool IsRunning() const;
 
         Timestep Tick();
-        void Present() const;
 
         const Input& GetInput() const;
         Input& GetInput();
@@ -76,10 +76,12 @@ namespace engine
 
     private:
         bool PumpEvents(IApplicationListener& listener);
+        void RenderFrame(IApplicationListener& listener);
 
     private:
         ApplicationSpecification m_Specification;
         std::unique_ptr<Window> m_Window;
+        std::unique_ptr<Renderer> m_Renderer;
         Input m_Input;
         Time m_Time;
         bool m_IsInitialized;

@@ -4,6 +4,7 @@
 
 #include "engine/core/Application.h"
 #include "engine/platform/Window.h"
+#include "engine/rendering/Renderer.h"
 
 #include <SDL3/SDL.h>
 
@@ -50,6 +51,17 @@ namespace engine
             return false;
         }
 
+        m_Renderer = std::make_unique<Renderer>();
+
+        if (!m_Renderer->Initialize(*m_Window))
+        {
+            m_Renderer.reset();
+            m_Window.reset();
+            m_Input.Reset();
+            SDL_Quit();
+            return false;
+        }
+
         m_Input.Reset();
         m_Time.Reset();
         m_IsInitialized = true;
@@ -65,6 +77,13 @@ namespace engine
 
         m_IsRunning = false;
         m_Input.Reset();
+
+        if (m_Renderer)
+        {
+            m_Renderer->Shutdown();
+            m_Renderer.reset();
+        }
+
         m_Window.reset();
         SDL_Quit();
         m_IsInitialized = false;
@@ -104,8 +123,7 @@ namespace engine
                 break;
             }
 
-            listener.OnRender(*this);
-            Present();
+            RenderFrame(listener);
 
             const Uint64 frameEnd = SDL_GetTicks();
             const double frameTimeMs = static_cast<double>(frameEnd - frameStart);
@@ -159,6 +177,18 @@ namespace engine
         return m_IsRunning;
     }
 
+    void Application::RenderFrame(IApplicationListener& listener)
+    {
+        if (!m_IsInitialized || !m_Renderer || !m_Renderer->IsInitialized())
+        {
+            return;
+        }
+
+        m_Renderer->BeginFrame();
+        listener.OnRender(*this);
+        m_Renderer->EndFrame();
+    }
+
     Timestep Application::Tick()
     {
         if (!m_IsInitialized)
@@ -167,16 +197,6 @@ namespace engine
         }
 
         return m_Time.Tick();
-    }
-
-    void Application::Present() const
-    {
-        if (!m_IsInitialized || !m_Window)
-        {
-            return;
-        }
-
-        m_Window->SwapBuffers();
     }
 
     const Input& Application::GetInput() const
