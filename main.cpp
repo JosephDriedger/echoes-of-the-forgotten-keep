@@ -1,20 +1,23 @@
-#include "engine/core/Application.h"
+#include "game/GameApp.h"
 
+#include <exception>
 #include <iostream>
 
 int main()
 {
-    engine::Application app;
-
-    if (!app.Initialize())
+    try
     {
-        std::cerr << "Engine failed to initialize\n";
-        return -1;
+        game::GameApp app;
+        return app.Run();
+    }
+    catch (const std::exception& exception)
+    {
+        std::cerr << "[EFK] Unhandled exception: " << exception.what() << '\n';
+    }
+    catch (...)
+    {
+        std::cerr << "[EFK] Unhandled unknown exception.\n";
     }
 
-    std::cout << "Engine initialized successfully\n";
-
-    app.Shutdown();
-
-    return 0;
+    return -1;
 }
