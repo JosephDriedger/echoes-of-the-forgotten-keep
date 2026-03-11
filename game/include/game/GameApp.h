@@ -5,6 +5,7 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
 
+#include "engine/core/Application.h"
 #include "engine/core/Timestep.h"
 #include "game/GameState.h"
 
@@ -18,13 +19,12 @@ namespace game
         int Run();
 
     private:
-        void ProcessEvents(bool& isRunning);
         void Update(engine::Timestep timestep);
-        void Render();
+        void Render(engine::Application& application) const;
 
     private:
         GameState m_State;
-        unsigned int m_TargetFrameTimeMs;
+        double m_TargetFrameTimeMs;
     };
 }
 

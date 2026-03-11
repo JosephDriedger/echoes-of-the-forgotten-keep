@@ -38,10 +38,12 @@ namespace engine
         if (!m_Window->Create("Echoes of the Forgotten Keep", 1280, 720))
         {
             m_Window.reset();
+            m_Input.Reset();
             SDL_Quit();
             return false;
         }
 
+        m_Input.Reset();
         m_Time.Reset();
         m_IsInitialized = true;
 
@@ -55,9 +57,29 @@ namespace engine
             return;
         }
 
+        m_Input.Reset();
         m_Window.reset();
         SDL_Quit();
         m_IsInitialized = false;
+    }
+
+    bool Application::PollEvents()
+    {
+        if (!m_IsInitialized)
+        {
+            return false;
+        }
+
+        m_Input.BeginFrame();
+
+        SDL_Event event;
+
+        while (SDL_PollEvent(&event))
+        {
+            m_Input.ProcessEvent(event);
+        }
+
+        return !m_Input.IsQuitRequested();
     }
 
     Timestep Application::Tick()
@@ -68,5 +90,25 @@ namespace engine
         }
 
         return m_Time.Tick();
+    }
+
+    void Application::Present() const
+    {
+        if (!m_IsInitialized || !m_Window)
+        {
+            return;
+        }
+
+        m_Window->SwapBuffers();
+    }
+
+    const Input& Application::GetInput() const
+    {
+        return m_Input;
+    }
+
+    Input& Application::GetInput()
+    {
+        return m_Input;
     }
 }
