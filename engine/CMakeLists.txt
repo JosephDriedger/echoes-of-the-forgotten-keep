@@ -18,6 +18,12 @@ target_include_directories(efk_engine
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+target_link_libraries(efk_engine
+        PUBLIC
+        efk::dependencies
+        glad
+)
+
 target_compile_features(efk_engine PUBLIC cxx_std_17)
 
 target_compile_definitions(efk_engine
