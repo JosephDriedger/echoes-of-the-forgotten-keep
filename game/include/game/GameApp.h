@@ -5,4 +5,28 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
+#include "engine/core/Application.h"
+#include "engine/core/Timestep.h"
+#include "game/GameState.h"
+
+namespace game
+{
+    class GameApp final : public engine::IApplicationListener
+    {
+    public:
+        GameApp();
+
+        int Run();
+
+        bool OnInitialize(engine::Application& application) override;
+        void OnShutdown(engine::Application& application) override;
+        void OnUpdate(engine::Application& application, engine::Timestep timestep) override;
+        void OnRender(engine::Application& application) override;
+
+    private:
+        engine::ApplicationSpecification m_Specification;
+        GameState m_State;
+    };
+}
+
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
