@@ -37,8 +37,10 @@ namespace game
         {
             const Uint64 frameStart = SDL_GetTicks();
 
+            const engine::Timestep timestep = application.Tick();
+
             ProcessEvents(isRunning);
-            Update();
+            Update(timestep);
             Render();
 
             const Uint64 frameEnd = SDL_GetTicks();
@@ -81,15 +83,29 @@ namespace game
         }
     }
 
-    void GameApp::Update()
+    void GameApp::Update(engine::Timestep timestep)
     {
         switch (m_State)
         {
             case GameState::MainMenu:
+                break;
+
             case GameState::Playing:
+            {
+                const float deltaTime = timestep.GetSecondsFloat();
+                (void)deltaTime;
+                break;
+            }
+
             case GameState::Paused:
+                break;
+
             case GameState::GameOver:
+                break;
+
             case GameState::Quitting:
+                break;
+
             default:
                 break;
         }

@@ -5,8 +5,7 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
 
-#pragma once
-
+#include "engine/core/Timestep.h"
 #include "game/GameState.h"
 
 namespace game
@@ -20,7 +19,7 @@ namespace game
 
     private:
         void ProcessEvents(bool& isRunning);
-        void Update();
+        void Update(engine::Timestep timestep);
         void Render();
 
     private:
@@ -29,4 +28,4 @@ namespace game
     };
 }
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
