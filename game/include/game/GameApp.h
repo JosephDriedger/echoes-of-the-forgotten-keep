@@ -11,20 +11,21 @@
 
 namespace game
 {
-    class GameApp
+    class GameApp final : public engine::IApplicationListener
     {
     public:
         GameApp();
 
         int Run();
 
-    private:
-        void Update(engine::Timestep timestep);
-        void Render(engine::Application& application) const;
+        bool OnInitialize(engine::Application& application) override;
+        void OnShutdown(engine::Application& application) override;
+        void OnUpdate(engine::Application& application, engine::Timestep timestep) override;
+        void OnRender(engine::Application& application) override;
 
     private:
+        engine::ApplicationSpecification m_Specification;
         GameState m_State;
-        double m_TargetFrameTimeMs;
     };
 }
 
