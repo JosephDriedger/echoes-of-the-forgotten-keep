@@ -33,8 +33,14 @@ class CameraSystem {
                 auto& transform = e->getComponent<Transform3D>();
 
                 // this position the camera so the player is at the center of its view
-                transform.position.x = playerTransform.position.x -  0;
-                transform.position.z = playerTransform.position.z +  5;
+                // follow player
+                transform.position.x = playerTransform.position.x;
+                transform.position.y = playerTransform.position.y + 12.0f;
+                transform.position.z = playerTransform.position.z + 12.0f;
+
+                // look at player
+                glm::vec3 direction = playerTransform.position - transform.position;
+                cam.forward = glm::normalize(direction);
 
                 // the camera is position itself so player is centered, but the player could walk off the screen
                 // so clamp the camera so it stays within the window
