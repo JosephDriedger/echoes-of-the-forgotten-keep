@@ -10,8 +10,8 @@
 
 namespace engine
 {
-
     Application::Application()
+        : m_IsInitialized(false)
     {
     }
 
@@ -22,6 +22,11 @@ namespace engine
 
     bool Application::Initialize()
     {
+        if (m_IsInitialized)
+        {
+            return true;
+        }
+
         if (!SDL_Init(SDL_INIT_VIDEO))
         {
             std::cerr << "SDL Init failed: " << SDL_GetError() << std::endl;
@@ -32,16 +37,36 @@ namespace engine
 
         if (!m_Window->Create("Echoes of the Forgotten Keep", 1280, 720))
         {
+            m_Window.reset();
+            SDL_Quit();
             return false;
         }
+
+        m_Time.Reset();
+        m_IsInitialized = true;
 
         return true;
     }
 
     void Application::Shutdown()
     {
+        if (!m_IsInitialized)
+        {
+            return;
+        }
+
         m_Window.reset();
         SDL_Quit();
+        m_IsInitialized = false;
     }
 
+    Timestep Application::Tick()
+    {
+        if (!m_IsInitialized)
+        {
+            return Timestep(0.0);
+        }
+
+        return m_Time.Tick();
+    }
 }
