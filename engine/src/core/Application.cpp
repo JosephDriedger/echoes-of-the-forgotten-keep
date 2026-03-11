@@ -6,12 +6,16 @@
 #include "engine/platform/Window.h"
 
 #include <SDL3/SDL.h>
+
+#include <cmath>
 #include <iostream>
 
 namespace engine
 {
-    Application::Application()
-        : m_IsInitialized(false)
+    Application::Application(const ApplicationSpecification& specification)
+        : m_Specification(specification),
+          m_IsInitialized(false),
+          m_IsRunning(false)
     {
     }
 
@@ -35,7 +39,10 @@ namespace engine
 
         m_Window = std::make_unique<Window>();
 
-        if (!m_Window->Create("Echoes of the Forgotten Keep", 1280, 720))
+        if (!m_Window->Create(
+                m_Specification.Title,
+                m_Specification.Width,
+                m_Specification.Height))
         {
             m_Window.reset();
             m_Input.Reset();
@@ -46,7 +53,6 @@ namespace engine
         m_Input.Reset();
         m_Time.Reset();
         m_IsInitialized = true;
-
         return true;
     }
 
@@ -57,13 +63,78 @@ namespace engine
             return;
         }
 
+        m_IsRunning = false;
         m_Input.Reset();
         m_Window.reset();
         SDL_Quit();
         m_IsInitialized = false;
     }
 
-    bool Application::PollEvents()
+    int Application::Run(IApplicationListener& listener)
+    {
+        if (!Initialize())
+        {
+            return -1;
+        }
+
+        if (!listener.OnInitialize(*this))
+        {
+            std::cerr << "[Engine] Listener initialization failed.\n";
+            Shutdown();
+            return -1;
+        }
+
+        m_IsRunning = true;
+
+        while (m_IsRunning)
+        {
+            const Uint64 frameStart = SDL_GetTicks();
+
+            if (!PumpEvents(listener))
+            {
+                break;
+            }
+
+            const Timestep timestep = Tick();
+
+            listener.OnUpdate(*this, timestep);
+
+            if (!m_IsRunning)
+            {
+                break;
+            }
+
+            listener.OnRender(*this);
+            Present();
+
+            const Uint64 frameEnd = SDL_GetTicks();
+            const double frameTimeMs = static_cast<double>(frameEnd - frameStart);
+
+            if (m_Specification.TargetFrameTimeMs > 0.0 &&
+                frameTimeMs < m_Specification.TargetFrameTimeMs)
+            {
+                const double remainingMs = m_Specification.TargetFrameTimeMs - frameTimeMs;
+                SDL_Delay(static_cast<Uint32>(std::ceil(remainingMs)));
+            }
+        }
+
+        listener.OnShutdown(*this);
+        Shutdown();
+
+        return 0;
+    }
+
+    void Application::RequestQuit()
+    {
+        m_IsRunning = false;
+    }
+
+    bool Application::IsRunning() const
+    {
+        return m_IsRunning;
+    }
+
+    bool Application::PumpEvents(IApplicationListener& listener)
     {
         if (!m_IsInitialized)
         {
@@ -77,9 +148,15 @@ namespace engine
         while (SDL_PollEvent(&event))
         {
             m_Input.ProcessEvent(event);
+            listener.OnEvent(*this, event);
         }
 
-        return !m_Input.IsQuitRequested();
+        if (m_Input.IsQuitRequested())
+        {
+            RequestQuit();
+        }
+
+        return m_IsRunning;
     }
 
     Timestep Application::Tick()
@@ -110,5 +187,10 @@ namespace engine
     Input& Application::GetInput()
     {
         return m_Input;
+    }
+
+    const ApplicationSpecification& Application::GetSpecification() const
+    {
+        return m_Specification;
     }
 }
