@@ -4,16 +4,17 @@
 
 #include "game/GameApp.h"
 
-#include "engine/core/Application.h"
-
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_keycode.h>
+#include <glad/gl.h>
+#include <cmath>
 #include <iostream>
 
 namespace game
 {
     GameApp::GameApp()
         : m_State(GameState::MainMenu),
-          m_TargetFrameTimeMs(16)
+          m_TargetFrameTimeMs(1000.0 / 60.0)
     {
     }
 
@@ -39,16 +40,23 @@ namespace game
 
             const engine::Timestep timestep = application.Tick();
 
-            ProcessEvents(isRunning);
+            isRunning = application.PollEvents();
+
+            if (isRunning && application.GetInput().IsKeyPressed(SDLK_ESCAPE))
+            {
+                isRunning = false;
+            }
+
             Update(timestep);
-            Render();
+            Render(application);
 
             const Uint64 frameEnd = SDL_GetTicks();
-            const Uint64 frameTime = frameEnd - frameStart;
+            const double frameTimeMs = static_cast<double>(frameEnd - frameStart);
 
-            if (frameTime < m_TargetFrameTimeMs)
+            if (frameTimeMs < m_TargetFrameTimeMs)
             {
-                SDL_Delay(static_cast<Uint32>(m_TargetFrameTimeMs - frameTime));
+                const double remainingMs = m_TargetFrameTimeMs - frameTimeMs;
+                SDL_Delay(static_cast<Uint32>(std::ceil(remainingMs)));
             }
         }
 
@@ -58,29 +66,6 @@ namespace game
         std::cout << "[EFK] Shutdown complete.\n";
 
         return exitCode;
-    }
-
-    void GameApp::ProcessEvents(bool& isRunning)
-    {
-        SDL_Event event;
-
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_EVENT_QUIT)
-            {
-                isRunning = false;
-                return;
-            }
-
-            if (event.type == SDL_EVENT_KEY_DOWN)
-            {
-                if (event.key.key == SDLK_ESCAPE)
-                {
-                    isRunning = false;
-                    return;
-                }
-            }
-        }
     }
 
     void GameApp::Update(engine::Timestep timestep)
@@ -111,7 +96,10 @@ namespace game
         }
     }
 
-    void GameApp::Render()
+    void GameApp::Render(engine::Application& application) const
     {
+        glViewport(0, 0, 1280, 720);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        application.Present();
     }
 }

@@ -9,7 +9,6 @@
 
 namespace engine
 {
-
     Window::Window()
     {
     }
@@ -24,6 +23,7 @@ namespace engine
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
         m_Window = SDL_CreateWindow(
             title,
@@ -58,6 +58,11 @@ namespace engine
             return false;
         }
 
+        if (!SDL_GL_SetSwapInterval(1))
+        {
+            std::cerr << "Warning: Failed to enable VSync: " << SDL_GetError() << std::endl;
+        }
+
         std::cout << "OpenGL Version: "
                   << reinterpret_cast<const char*>(glGetString(GL_VERSION))
                   << std::endl;
@@ -80,4 +85,11 @@ namespace engine
         }
     }
 
+    void Window::SwapBuffers() const
+    {
+        if (m_Window)
+        {
+            SDL_GL_SwapWindow(m_Window);
+        }
+    }
 }

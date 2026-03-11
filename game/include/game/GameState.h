@@ -5,8 +5,6 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAMESTATE_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMESTATE_H
 
-#pragma once
-
 namespace game
 {
     enum class GameState
