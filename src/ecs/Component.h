@@ -102,6 +102,8 @@ struct Transform3D {
     glm::vec3 rotation; // pitch, yaw, roll in radians
     glm::vec3 scale;
 
+    glm::vec3 oldPosition;
+
     Transform3D(glm::vec3 pos = glm::vec3(0.0f),
                 glm::vec3 rot = glm::vec3(0.0f),
                 glm::vec3 scl = glm::vec3(1.0f))

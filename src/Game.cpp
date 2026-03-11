@@ -409,7 +409,7 @@ void Game::render(Uint64 ticks)
     //
     // glBindVertexArray(cubeVAO);
     //glDrawArrays(GL_TRIANGLES, 0, 36);
-
+    //SDL_RenderClear(renderer);
     sceneManager.render();
 
     SDL_GL_SwapWindow(window);

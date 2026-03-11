@@ -14,20 +14,22 @@ class MovementSystem {
     public:
     void update(const std::vector<std::unique_ptr<Entity>>& entities, const float dt) {
         for (auto& entity : entities) {
-            if (entity->hasComponent<Transform>() && entity->hasComponent<Velocity>()) {
-                auto& t = entity->getComponent<Transform>();
-                auto& v = entity->getComponent<Velocity>();
+            if (entity->hasComponent<Transform3D>() && entity->hasComponent<Velocity3D>()) {
+                auto& t = entity->getComponent<Transform3D>();
+                auto& v = entity->getComponent<Velocity3D>();
 
                 // track previous frames position
                 t.oldPosition = t.position;
 
-                Vector2D directionVec = v.direction;
+                glm::vec3 directionVec = v.direction;
 
                 // normalizing
-                directionVec.normalize();
+                if (glm::length(directionVec) > 0.0001f) {
+                    directionVec = glm::normalize(directionVec);
+                }
 
                 // Vector2D needs an operator function to multiply a float to itself
-                Vector2D velocityVector = directionVec * v.speed;
+                glm::vec3 velocityVector = directionVec * v.speed;
 
                 // t.position = t.position + velocityVector * dt
                 t.position += velocityVector * dt;

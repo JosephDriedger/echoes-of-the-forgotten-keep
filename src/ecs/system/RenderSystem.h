@@ -23,6 +23,7 @@ public:
             "../src/renderer/shaders/fragment.glsl"
         );
         std::cout << "3D shader initialized in RenderSystem.\n";
+        shader3D->use();
     }
 
     void render(const std::vector<std::unique_ptr<Entity>>& entities) {
@@ -53,7 +54,7 @@ public:
                 auto& transform = entity->getComponent<Transform3D>(); // for position, rotation, scale
 
                 // Bind shader
-                shader3D->use();
+                //shader3D->use();
 
                 // Compute matrices
                 glm::mat4 modelMat = glm::mat4(1.0f);
@@ -83,28 +84,28 @@ public:
                     mesh.Draw(*shader3D);
                 }
             }
-            if (entity->hasComponent<Transform>() && entity->hasComponent<Sprite>()) {
-
-                auto& t = entity->getComponent<Transform>();
-                auto& sprite = entity->getComponent<Sprite>();
-
-                // we are converting from world space to screen space
-                //sprite.dst.x = t.position.x - cam.view.x;
-                //sprite.dst.y = t.position.y - cam.view.y;
-
-                // if the entity has animation, update the source rect
-                if (entity->hasComponent<Animation>()) {
-                    auto& anim = entity->getComponent<Animation>();
-                    sprite.src = anim.clips[anim.currentClip].frameIndices[anim.currentFrame];
-
-                    // Player offset to match collider
-                    if (entity->hasComponent<PlayerTag>()) {
-                        sprite.dst.x -= 48;
-                        sprite.dst.y -= 64;
-                    }
-                }
-                TextureManager::draw(sprite.texture, sprite.src, sprite.dst);
-            }
+            // if (entity->hasComponent<Transform>() && entity->hasComponent<Sprite>()) {
+            //
+            //     auto& t = entity->getComponent<Transform>();
+            //     auto& sprite = entity->getComponent<Sprite>();
+            //
+            //     // we are converting from world space to screen space
+            //     //sprite.dst.x = t.position.x - cam.view.x;
+            //     //sprite.dst.y = t.position.y - cam.view.y;
+            //
+            //     // if the entity has animation, update the source rect
+            //     if (entity->hasComponent<Animation>()) {
+            //         auto& anim = entity->getComponent<Animation>();
+            //         sprite.src = anim.clips[anim.currentClip].frameIndices[anim.currentFrame];
+            //
+            //         // Player offset to match collider
+            //         if (entity->hasComponent<PlayerTag>()) {
+            //             sprite.dst.x -= 48;
+            //             sprite.dst.y -= 64;
+            //         }
+            //     }
+            //     TextureManager::draw(sprite.texture, sprite.src, sprite.dst);
+            // }
         }
     }
 };
