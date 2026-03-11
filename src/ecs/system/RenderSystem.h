@@ -9,8 +9,7 @@
 
 #include "Component.h"
 #include "Entity.h"
-//#include "Texture.h"
-#include "TextureManager.h"
+#include <iostream>
 
 class RenderSystem {
 public:

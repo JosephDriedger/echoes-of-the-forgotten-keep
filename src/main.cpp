@@ -1,14 +1,10 @@
-#include <iostream>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_timer.h>
 
-
 #include "Game.h"
-
 
 // global variable
 Game *game = nullptr;
-
 
 // TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 int main() {

@@ -44,6 +44,7 @@ add_executable(echoes_of_the_forgotten_keep src/main.cpp
         src/vendor/glad/glad.c
         src/renderer/Shader.cpp
         src/renderer/Animation3D.cpp
+        src/renderer/modelManager.cpp
 )
 
 target_link_libraries(echoes_of_the_forgotten_keep

@@ -10,8 +10,6 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <glad/glad.h>
-#include <SDL3/SDL_opengl.h>
-
 #include "World.h"
 #include "manager/Scene.h"
 #include "manager/SceneManager.h"
@@ -30,9 +28,6 @@ public:
     void update(float deltaTime); // handles the game logic and change to game state
     void render(Uint64 ticks); // handles the drawing of the current game state to the screen
 
-    void week4output();
-    void week1(Uint64 ticks);
-
     // used to free resources
     void destroy();
 
@@ -45,7 +40,6 @@ public:
     SDL_GLContext glContext = nullptr;
 
     SceneManager sceneManager;
-    //SceneManager* sceneManager;
     static std::function<void (std::string)> onSceneChangeRequest;
 
 private:
@@ -55,24 +49,5 @@ private:
     SDL_Window* window = nullptr;
     SDL_Event event;
 
-    // SDL stores colors channels as 8-bit unsigned
-    // range is 0-255
-    Uint8 r=255;
-    Uint8 g=255;
-    Uint8 b=255;
-    Uint8 a=255;
-
-    GLuint VAO = 0;
-    GLuint VBO = 0;
-    GLuint shaderProgram = 0;
-
-    GLuint cubeVAO = 0, cubeVBO = 0;
-    GLuint cubeTexture = 0;
-
-    Shader* shader;
-
-    std::vector<Mesh> meshes;
-
-    float colorTimer = 0.0f;
 
 };
