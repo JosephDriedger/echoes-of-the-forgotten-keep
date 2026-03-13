@@ -10,7 +10,8 @@
 
 class ModelManager {
 public:
-    static std::vector<Mesh> load(const std::string modelPath);
+    static std::unordered_map<std::string, std::vector<Mesh>*> modelMeshes;
+    static std::vector<Mesh>* load(const std::string modelPath);
 
 };
 

@@ -16,9 +16,19 @@
 
 #include "assimp/Importer.hpp"
 
-std::vector<Mesh> ModelManager::load(const std::string modelPath) {
+std::unordered_map<std::string, std::vector<Mesh>*> ModelManager::modelMeshes;
+
+std::vector<Mesh>* ModelManager::load(const std::string modelPath) {
+
+    auto it = modelMeshes.find(modelPath);
+    if (it != modelMeshes.end()) {
+        std::cout << "Model loaded successfully from modelMeshes: " << modelPath << "\n";
+        return it->second;
+    }
+
+
     Assimp::Importer importer;
-    std::vector<Mesh> meshes;
+    std::vector<Mesh>* meshes = new std::vector<Mesh>();
     const aiScene* scene = importer.ReadFile(
         modelPath,
         aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace
@@ -59,7 +69,10 @@ std::vector<Mesh> ModelManager::load(const std::string modelPath) {
                 indices.push_back(face.mIndices[j]);
         }
 
-        meshes.push_back(Mesh(vertices, indices));
+        meshes->push_back(Mesh(vertices, indices));
     }
+
+    modelMeshes[modelPath] = meshes;
+
     return meshes;
 }

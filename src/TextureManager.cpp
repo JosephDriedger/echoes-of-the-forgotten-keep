@@ -10,7 +10,7 @@
 // doesn't create any extra memory, just grabs the reference of the object
 extern Game* game;
 std::unordered_map<std::string, SDL_Texture*> TextureManager::textures;
-std::unordered_map<std::string, GLuint> TextureManager::textures3D;
+std::unordered_map<std::string, GLuint*> TextureManager::textures3D;
 
 // load our texture with a path
 SDL_Texture* TextureManager::load(const char* path) {
@@ -48,7 +48,7 @@ SDL_Texture* TextureManager::load(const char* path) {
     return texture;
 }
 
-GLuint TextureManager::load3D(const char* path) {
+GLuint* TextureManager::load3D(const char* path) {
     // check cache
     auto it = textures3D.find(path);
     if (it != textures3D.end()) return it->second;
@@ -59,9 +59,9 @@ GLuint TextureManager::load3D(const char* path) {
         return 0;
     }
 
-    GLuint id;
-    glGenTextures(1, &id);
-    glBindTexture(GL_TEXTURE_2D, id);
+    GLuint* id;
+    glGenTextures(1, id);
+    glBindTexture(GL_TEXTURE_2D, *id);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
@@ -91,7 +91,7 @@ void TextureManager::clean() {
     }
     textures.clear();
     for (auto& tex : textures3D) {
-        glDeleteTextures(1, &tex.second);
+        glDeleteTextures(1, tex.second);
     }
     textures3D.clear();
 }
