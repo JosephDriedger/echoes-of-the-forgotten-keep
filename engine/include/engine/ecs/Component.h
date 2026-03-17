@@ -5,4 +5,11 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H
 
+#include <cstdint>
+
+namespace engine
+{
+    using ComponentType = std::uint8_t;
+}
+
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H
