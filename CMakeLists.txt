@@ -45,6 +45,7 @@ add_executable(echoes_of_the_forgotten_keep src/main.cpp
         src/renderer/Shader.cpp
         src/renderer/Animation3D.cpp
         src/renderer/modelManager.cpp
+        src/renderer/AnimationManager.cpp
 )
 
 target_link_libraries(echoes_of_the_forgotten_keep

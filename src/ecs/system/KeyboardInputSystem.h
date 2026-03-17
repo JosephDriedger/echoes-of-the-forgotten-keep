@@ -15,8 +15,11 @@ class KeyboardInputSystem {
 public:
     void update(const std::vector<std::unique_ptr<Entity>>& entities, const SDL_Event& event) {
         for (auto& e : entities) {
-            if (e->hasComponent<PlayerTag>() && e->hasComponent<Velocity3D>()) {
+            if (e->hasComponent<PlayerTag>() && e->hasComponent<Velocity3D>() &&
+                e->hasComponent<Animator>() && e->hasComponent<Animation3D>()) {
                 auto& v = e->getComponent<Velocity3D>();
+                auto& a = e->getComponent<Animator>();
+                auto& anim = e->getComponent<Animation3D>();
                 if (event.type == SDL_EVENT_KEY_DOWN) {
                     switch (event.key.key) {
                         case SDLK_W:
@@ -31,6 +34,15 @@ public:
                             break;
                         case SDLK_D:
                             v.direction.x = 1;
+                            break;
+                        case SDLK_SPACE:
+                            a.currentClip++;
+                            if (a.currentClip >= anim.clips->size())
+                                a.currentClip = 0;
+                            a.currentTime = 0.0f;
+                            std::cout << "Switched to animation: "
+                                << anim.clips->at(a.currentClip).name
+                                << " (" << a.currentClip << ")\n";
                             break;
                         default:
                             break;

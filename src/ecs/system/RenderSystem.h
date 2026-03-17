@@ -51,6 +51,7 @@ public:
                 auto& model = entity->getComponent<Model>();
                 auto& tex3D = entity->getComponent<Texture3D>();
                 auto& transform = entity->getComponent<Transform3D>(); // for position, rotation, scale
+                bool hasAnimator = entity->hasComponent<Animator>();
 
                 // Bind shader
                 //shader3D->use();
@@ -78,8 +79,37 @@ public:
                 glBindTexture(GL_TEXTURE_2D, tex3D.id);
                 glUniform1i(glGetUniformLocation(shader3D->ID, "texture_diffuse1"), 0);
 
+                if (hasAnimator)
+                {
+                    auto& animator = entity->getComponent<Animator>();
+
+                    for (int i = 0; i < animator.finalBoneMatrices.size(); i++)
+                    {
+                        std::string name = "finalBonesMatrices[" + std::to_string(i) + "]";
+                        glUniformMatrix4fv(
+                            glGetUniformLocation(shader3D->ID, name.c_str()),
+                            1,
+                            GL_FALSE,
+                            glm::value_ptr(animator.finalBoneMatrices[i])
+                        );
+                    }
+                }
+                else
+                {
+                    // No animation → identity matrices
+                    for (int i = 0; i < 100; i++)
+                    {
+                        std::string name = "finalBonesMatrices[" + std::to_string(i) + "]";
+                        glUniformMatrix4fv(
+                            glGetUniformLocation(shader3D->ID, name.c_str()),
+                            1,
+                            GL_FALSE,
+                            glm::value_ptr(glm::mat4(1.0f))
+                        );
+                    }
+                }
                 // render each mesh
-                for (auto& mesh : model.meshes) {
+                for (auto& mesh : *model.meshes) {
                     mesh.Draw(*shader3D);
                 }
             }

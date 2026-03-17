@@ -5,15 +5,16 @@
 #ifndef ASSIGNMENT1_COMPONENT_H
 #define ASSIGNMENT1_COMPONENT_H
 #include <functional>
-//#include <iostream>
 #include <SDL3/SDL_render.h>
 #include <string>
 #include <unordered_map>
-#include <vendor/glm/glm.hpp>
 #include <vendor/glm/gtc/matrix_transform.hpp>
 #include <vendor/glm/gtc/type_ptr.hpp>
 #include "Mesh.h"
 #include "AinmationClip.h"
+#include "Animation3DClips.h"
+#include "BoneInfo.h"
+#include "BoneNode.h"
 #include "TextureManager.h"
 #include "Vector2D.h"
 
@@ -69,17 +70,6 @@ struct SceneState {
 
 // 3D Components
 
-struct MeshRenderer {
-    GLuint vao = 0;
-    GLuint texture = 0;
-    int vertexCount = 0;
-};
-
-struct SkeletonComponent {
-    //std::shared_ptr<Skeleton> skeleton;
-    std::vector<glm::mat4> boneMatrices; // matrices for shader skinning
-};
-
 struct Velocity3D {
     glm::vec3 direction{0.0f};
     float speed{0.0f};
@@ -117,32 +107,50 @@ struct Camera3D {
 
 // Model tested
 struct Model {
-    std::vector<Mesh> meshes;
+    std::vector<Mesh>* meshes;
 
-    Model(const std::vector<Mesh> meshes) : meshes(meshes) {};
+    std::unordered_map<std::string, int> boneMap;
+    std::vector<BoneInfo> boneInfo;
+    int boneCounter = 0;
+
+    std::vector<BoneNode> skeleton; // runtime skeleton
+    int rootBoneIndex;         // index of hips
+
+    Model() = default;
+    Model(Model* model) :
+        meshes(model->meshes),
+        boneMap(model->boneMap),
+        boneInfo(model->boneInfo),
+        boneCounter(model->boneCounter),
+        skeleton(model->skeleton),
+        rootBoneIndex(model->rootBoneIndex) {};
 };
 
 // Texture3D tested
 struct Texture3D {
     GLuint id;
 
-    Texture3D(const GLuint id) : id(id) {};
+    Texture3D(GLuint id) : id(id) {};
 };
 
-// Animation3D
-// struct Animation3D {
-//     std::string path;
-//     // store animation data loaded via Assimp (e.g., aiAnimation pointers)
-//     const aiScene* scene = nullptr;
-//
-//     Animation3D(const std::string& animPath) : path(animPath) {
-//         Assimp::Importer importer;
-//         scene = importer.ReadFile(animPath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-//         if (!scene) {
-//             std::cerr << "Failed to load animation: " << importer.GetErrorString() << std::endl;
-//         }
-//     }
-// };
+struct Animation3D
+{
+    std::vector<Animation3DClip>* clips;
+
+    Animation3D() = default;
+
+    Animation3D(std::vector<Animation3DClip>* clips) : clips(clips) {};
+};
+
+struct Animator
+{
+    float currentTime = 0.0f;
+    int currentClip = 0;
+
+    std::vector<glm::mat4> finalBoneMatrices;
+
+    Animator() : finalBoneMatrices(100, glm::mat4(1.0f)) {};
+};
 
 struct PlayerTag{};
 struct ProjectileTag {};

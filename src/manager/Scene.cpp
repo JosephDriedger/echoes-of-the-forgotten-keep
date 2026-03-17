@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 
+#include "AnimationManager.h"
 #include "AssetManager.h"
 #include "ModelManager.h"
 
@@ -72,8 +73,19 @@ void Scene::createItems() {
 void Scene::createPlayer() {
     auto& player(world.createEntity());
     auto& playerTransform = player.addComponent<Transform3D>(glm::vec3(-2,0,0));
-    player.addComponent<Model>(*ModelManager::load("../asset/Knight.glb"));
+    player.addComponent<Model>(ModelManager::load("../asset/Knight.glb"));
     player.addComponent<Texture3D>(*TextureManager::load3D("../asset/knight_texture.png"));
+    auto& anim3D = player.addComponent<Animation3D>(AnimationManager::load("../asset/animations/Rig_Medium_General.glb"));
+    AnimationManager::appendClips("../asset/animations/Rig_Medium_MovementBasic.glb", *anim3D.clips);
+    AnimationManager::appendClips("../asset/animations/Rig_Medium_MovementAdvanced.glb", *anim3D.clips);
+    AnimationManager::appendClips("../asset/animations/Rig_Medium_Simulation.glb", *anim3D.clips);
+    AnimationManager::appendClips("../asset/animations/Rig_Medium_Special.glb", *anim3D.clips);
+    AnimationManager::appendClips("../asset/animations/Rig_Medium_Tools.glb", *anim3D.clips);
+    AnimationManager::appendClips("../asset/animations/Rig_Medium_CombatMelee.glb", *anim3D.clips);
+    AnimationManager::appendClips("../asset/animations/Rig_Medium_CombatRanged.glb", *anim3D.clips);
+    auto& animator = player.addComponent<Animator>();
+    animator.currentClip = 0;
+
     //player.addComponent<Animation3D>("../asset/Knight_anim.glb");
 
     //player.addComponent<Velocity>(Vector2D(0,0), 120.0f);
@@ -97,32 +109,32 @@ void Scene::createPlayer() {
 
     auto& player2(world.createEntity());
     auto& playerTransform2 = player2.addComponent<Transform3D>(glm::vec3(2,0,-4));
-    player2.addComponent<Model>(*ModelManager::load("../asset/Rogue_Hooded.glb"));
+    player2.addComponent<Model>(ModelManager::load("../asset/animations/Rig_Medium_General.glb"));
     player2.addComponent<Texture3D>(*TextureManager::load3D("../asset/rogue_texture.png"));
 
     auto& wall(world.createEntity());
     auto& wallTransform = wall.addComponent<Transform3D>(glm::vec3(-2,0,-1));
-    wall.addComponent<Model>(*ModelManager::load("../asset/dungeon/wall.gltf"));
+    wall.addComponent<Model>(ModelManager::load("../asset/dungeon/wall.gltf"));
     wall.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
 
     auto& doorway(world.createEntity());
     auto& doorwayTransform = doorway.addComponent<Transform3D>(glm::vec3(2,0,-1));
-    doorway.addComponent<Model>(*ModelManager::load("../asset/dungeon/wall_doorway_scaffold.gltf"));
+    doorway.addComponent<Model>(ModelManager::load("../asset/dungeon/wall_doorway_scaffold.gltf"));
     doorway.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
 
     auto& door(world.createEntity());
-    auto& doorTransform = door.addComponent<Transform3D>(glm::vec3(1.18,0,-1),glm::vec3(0,0,0));
-    door.addComponent<Model>(*ModelManager::load("../asset/dungeon/door.gltf"));
+    auto& doorTransform = door.addComponent<Transform3D>(glm::vec3(1.18,0,-1),glm::vec3(0,60,0));
+    door.addComponent<Model>(ModelManager::load("../asset/dungeon/door.gltf"));
     door.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
 
     auto& tile(world.createEntity());
     auto& tileTransform = tile.addComponent<Transform3D>(glm::vec3(0,-.1,1));
-    tile.addComponent<Model>(*ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
+    tile.addComponent<Model>(ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
     tile.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
 
     auto& tile2(world.createEntity());
     auto& tileTransform2 = tile2.addComponent<Transform3D>(glm::vec3(2,-.1,1));
-    tile2.addComponent<Model>(*ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
+    tile2.addComponent<Model>(ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
     tile2.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
 }
 

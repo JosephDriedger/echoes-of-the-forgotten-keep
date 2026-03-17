@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "AnimationSystem.h"
+#include "Animation3DSystem.h"
 #include "CameraSystem.h"
 #include "CollisionSystem.h"
 #include "DestructionSystem.h"
@@ -33,6 +34,7 @@ private:
     EventManager eventManager;
     SpawnTimerSystem spawnTimerSystem;
     DestructionSystem destructionSystem;
+    Animation3DSystem animation3DSystem;
 public:
     World();
     void update(const float dt, const SDL_Event& event) {
@@ -43,6 +45,7 @@ public:
         cameraSystem.update(entities);
         spawnTimerSystem.update(entities, dt);
         destructionSystem.update(entities);
+        animation3DSystem.update(entities, dt);
         synchronizeEntities();
         cleanup();
     }
