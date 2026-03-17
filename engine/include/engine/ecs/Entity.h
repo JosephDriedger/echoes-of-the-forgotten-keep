@@ -21,8 +21,8 @@ namespace engine
         Entity();
         explicit Entity(EntityId id);
 
-        EntityId GetId() const;
-        bool IsValid() const;
+        [[nodiscard]] EntityId GetId() const;
+        [[nodiscard]] bool IsValid() const;
 
         explicit operator bool() const;
 
@@ -35,4 +35,4 @@ namespace engine
     };
 }
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITY_H
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITY_H
