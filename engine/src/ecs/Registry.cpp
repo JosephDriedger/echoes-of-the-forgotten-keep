@@ -12,7 +12,9 @@ namespace engine
         : m_Alive{},
           m_Signatures{},
           m_ActiveEntities{},
-          m_AliveEntityCount(0)
+          m_AliveEntityCount(0),
+          m_ComponentTypes{},
+          m_NextComponentType(0)
     {
         Reset();
     }
@@ -87,6 +89,8 @@ namespace engine
 
         m_ActiveEntities.clear();
         m_AliveEntityCount = 0;
+
+        ClearComponentRegistrations();
     }
 
     std::size_t Registry::GetAliveCount() const
@@ -132,6 +136,17 @@ namespace engine
     const std::vector<Entity>& Registry::GetActiveEntities() const
     {
         return m_ActiveEntities;
+    }
+
+    void Registry::ClearComponentRegistrations()
+    {
+        m_ComponentTypes.clear();
+        m_NextComponentType = 0;
+    }
+
+    std::size_t Registry::GetRegisteredComponentCount() const
+    {
+        return m_ComponentTypes.size();
     }
 
     bool Registry::IsInRange(const EntityId entityId) const
