@@ -8,7 +8,7 @@
 #include "AssetManager.h"
 #include "ModelManager.h"
 
-Scene::Scene (const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName) {
+Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName), type(sceneType) {
 
     // load our map
     world.getMap().load(mapPath, TextureManager::load("../asset/tileset.png"));

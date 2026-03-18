@@ -70,6 +70,19 @@ public:
     void deactivateComponent() {
         componentBitSet[getComponentTypeID<T>()] = false;
     }
+
+    template<typename T>
+    void removeComponent()
+    {
+        ComponentTypeID id = getComponentTypeID<T>();
+
+        if (!componentBitSet[id])
+            return;
+
+        delete static_cast<T*>(componentArray[id]);
+        componentArray[id] = nullptr;
+        componentBitSet[id] = false;
+    }
 };
 
 #endif //ASSIGNMENT1_ENTITY_H

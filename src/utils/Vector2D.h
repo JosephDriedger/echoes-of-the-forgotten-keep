@@ -45,6 +45,9 @@ public:
     Vector2D& operator-();
 
     Vector2D& normalize();
+    Vector2D normalized() const;
+    float length() const;
+    float lengthSquared() const;
 };
 
 #endif //ASSIGNMENT1_VECTOR2D_H

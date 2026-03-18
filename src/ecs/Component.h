@@ -15,6 +15,7 @@
 #include "Animation3DClips.h"
 #include "BoneInfo.h"
 #include "BoneNode.h"
+#include "Entity.h"
 #include "TextureManager.h"
 #include "Vector2D.h"
 
@@ -31,15 +32,30 @@ struct Velocity {
     float speed{};
 };
 
+enum class RenderLayer {
+    World,
+    UI
+};
+
 struct Sprite {
     SDL_Texture *texture = nullptr;
     SDL_FRect src{};
     SDL_FRect dst{};
+    RenderLayer renderLayer = RenderLayer::World;
+    bool visible = true;
+};
+
+struct Clickable {
+    std::function<void()> onPressed{};
+    std::function<void()> onReleased{};
+    std::function<void()> onCancel{};
+    bool pressed = false;
 };
 
 struct Collider {
     std::string tag;
     SDL_FRect rect{};
+    bool enabled = true;
 };
 
 struct Animation {
@@ -68,6 +84,72 @@ struct SceneState {
     int coinsCollected = 0;
 };
 
+// Combat
+
+struct Health {
+    int currentHealth{};
+};
+
+enum class AIState {
+    Idle,
+    Patrol,
+    Chase,
+    Attack
+};
+
+struct AI {
+    AIState state = AIState::Idle;
+    float stateTimer = 0.0f;
+
+    float visionRange = 200.0f;
+
+    Entity* target = nullptr;
+
+    float maxChaseTime = 5.0f;
+    float loseTargetCooldown = 2.0f;
+    float loseTargetTimer = 0.0f;
+};
+
+struct Patrol {
+    Vector2D pointA{};
+    Vector2D pointB{};
+    bool movingToB = true;
+};
+
+struct Attack {
+    float cooldown = 3.0f;
+    float timer = 0.0f;
+};
+
+struct AttackRequest {
+    Vector2D direction{};
+    std::string tag;
+};
+
+struct Combat {
+    Attack attack;
+    float attackRange = 40.0f;
+};
+
+struct Damage {
+    int amount = 1;
+};
+
+struct DamageEvent {
+    Entity* target = nullptr;
+    int amount = 1;
+};
+
+struct Parent {
+    Entity* entity = nullptr;
+};
+
+struct Children {
+    std::vector<Entity*> children{};
+};
+
+struct EnemyTag{};
+
 // 3D Components
 
 struct Velocity3D {
@@ -79,6 +161,7 @@ struct Collider3D {
     std::string tag;
     glm::vec3 size{1.0f, 1.0f, 1.0f};
     glm::vec3 offset{0.0f};
+    bool enabled = true;
 };
 
 // Transform3D tested

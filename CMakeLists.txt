@@ -46,6 +46,12 @@ add_executable(echoes_of_the_forgotten_keep src/main.cpp
         src/renderer/Animation3D.cpp
         src/renderer/modelManager.cpp
         src/renderer/AnimationManager.cpp
+        src/ecs/system/EventResponseSystem.cpp
+        src/ecs/system/MainMenuSystem.cpp
+        src/ecs/system/EnemyAISystem.cpp
+        src/ecs/system/DamageSystem.cpp
+        src/ecs/system/CombatSystem.cpp
+        src/ecs/system/MouseInputSystem.cpp
 )
 
 target_link_libraries(echoes_of_the_forgotten_keep
