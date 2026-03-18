@@ -22,6 +22,7 @@ public:
     std::set<CollisionKey> activeCollisions;
 private:
     std::vector<Entity*> queryCollidables(const std::vector<std::unique_ptr<Entity>>& entities);
+    std::vector<Entity*> queryCollidables3D(const std::vector<std::unique_ptr<Entity>>& entities);
     CollisionKey makeKey(Entity* entityA, Entity* entityB) {
         return std::minmax(entityA, entityB); // automatically orders our pair so smaller number (memory address) is ordered first
     }
