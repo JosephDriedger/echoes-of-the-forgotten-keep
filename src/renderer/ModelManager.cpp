@@ -200,6 +200,7 @@ Model* ModelManager::load(const std::string& modelPath) {
 
     PrintSkeletonHierarchy(scene->mRootNode, model->boneMap, 0);
 
+    PrintAllNodes(scene->mRootNode);
     models[modelPath] = model;
 
     return model;
@@ -239,6 +240,19 @@ void ModelManager::PrintSkeletonHierarchy(aiNode* node,
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
         PrintSkeletonHierarchy(node->mChildren[i], boneMap, depth + 1);
+    }
+}
+
+void ModelManager::PrintAllNodes(aiNode* node, int depth)
+{
+    for (int i = 0; i < depth; i++)
+        std::cout << "  ";
+
+    std::cout << node->mName.C_Str() << "\n";
+
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
+        PrintAllNodes(node->mChildren[i], depth + 1);
     }
 }
 

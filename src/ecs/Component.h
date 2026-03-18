@@ -15,6 +15,7 @@
 #include "Animation3DClips.h"
 #include "BoneInfo.h"
 #include "BoneNode.h"
+#include "Entity.h"
 #include "TextureManager.h"
 #include "Vector2D.h"
 
@@ -84,10 +85,13 @@ struct Collider3D {
 // Transform3D tested
 struct Transform3D {
     glm::vec3 position;
-    glm::vec3 rotation; // pitch, yaw, roll in radians
+    glm::vec3 rotation;
     glm::vec3 scale;
 
     glm::vec3 oldPosition;
+
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    bool useMatrix = false; // 🔥 NEW
 
     Transform3D(glm::vec3 pos = glm::vec3(0.0f),
                 glm::vec3 rot = glm::vec3(0.0f),
@@ -113,8 +117,8 @@ struct Model {
     std::vector<BoneInfo> boneInfo;
     int boneCounter = 0;
 
-    std::vector<BoneNode> skeleton; // runtime skeleton
-    int rootBoneIndex;         // index of hips
+    std::vector<BoneNode> skeleton;
+    int rootBoneIndex;
 
     Model() = default;
     Model(Model* model) :
@@ -148,8 +152,16 @@ struct Animator
     int currentClip = 0;
 
     std::vector<glm::mat4> finalBoneMatrices;
+    std::unordered_map<std::string, glm::mat4> finalNodeTransforms;
 
     Animator() : finalBoneMatrices(100, glm::mat4(1.0f)) {};
+};
+
+struct BoneAttachment
+{
+    Entity* parent = nullptr;
+    std::string boneName;
+    glm::mat4 offset = glm::mat4(1.0f);
 };
 
 struct PlayerTag{};

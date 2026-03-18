@@ -18,6 +18,7 @@ public:
     static void PrintSkeletonHierarchy(aiNode* node,
                             const std::unordered_map<std::string, int>& boneMap,
                             int depth);
+    static void PrintAllNodes(aiNode* node, int depth = 0);
     static int BuildRuntimeSkeleton(aiNode* node,
                                        Model& model,
                                        int parentIndex = -1);

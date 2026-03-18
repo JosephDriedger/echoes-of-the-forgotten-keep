@@ -57,12 +57,21 @@ public:
                 //shader3D->use();
 
                 // Compute matrices
-                glm::mat4 modelMat = glm::mat4(1.0f);
-                modelMat = glm::translate(modelMat, transform.position);
-                modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.x), glm::vec3(1,0,0));
-                modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.y), glm::vec3(0,1,0));
-                modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.z), glm::vec3(0,0,1));
-                modelMat = glm::scale(modelMat, transform.scale);
+                glm::mat4 modelMat;
+
+                if (transform.useMatrix)
+                {
+                    modelMat = transform.modelMatrix;
+                }
+                else
+                {
+                    modelMat = glm::mat4(1.0f);
+                    modelMat = glm::translate(modelMat, transform.position);
+                    modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.x), glm::vec3(1,0,0));
+                    modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.y), glm::vec3(0,1,0));
+                    modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.z), glm::vec3(0,0,1));
+                    modelMat = glm::scale(modelMat, transform.scale);
+                }
 
                 // camera view & projection
                 auto& camTrans = cameraEntity->getComponent<Transform3D>();

@@ -107,6 +107,8 @@ inline void Calculate(
 
     glm::mat4 globalTransform = parentTransform * nodeTransform;
 
+    animator.finalNodeTransforms[node.name] = globalTransform;
+
     if (node.boneID >= 0 && node.boneID < animator.finalBoneMatrices.size())
     {
         // multiply by offset if you stored it in Model.boneInfo

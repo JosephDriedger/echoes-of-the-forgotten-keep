@@ -86,6 +86,18 @@ void Scene::createPlayer() {
     auto& animator = player.addComponent<Animator>();
     animator.currentClip = 0;
 
+    auto& sword(world.createEntity());
+    auto& swordTransform = sword.addComponent<Transform3D>(glm::vec3(-2,0,0));
+    sword.addComponent<Model>(ModelManager::load("../asset/sword_1handed.gltf"));
+    sword.addComponent<Texture3D>(*TextureManager::load3D("../asset/knight_texture.png"));
+    sword.addComponent<BoneAttachment>(&player, "handslot.r", glm::mat4(1.0f));
+
+    auto& shield(world.createEntity());
+    auto& shieldTransform = shield.addComponent<Transform3D>(glm::vec3(-2,0,0));
+    shield.addComponent<Model>(ModelManager::load("../asset/shield_spikes.gltf"));
+    shield.addComponent<Texture3D>(*TextureManager::load3D("../asset/knight_texture.png"));
+    shield.addComponent<BoneAttachment>(&player, "handslot.l", glm::mat4(1.0f));
+
     //player.addComponent<Animation3D>("../asset/Knight_anim.glb");
 
     //player.addComponent<Velocity>(Vector2D(0,0), 120.0f);

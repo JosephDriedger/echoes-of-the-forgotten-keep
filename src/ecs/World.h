@@ -9,6 +9,7 @@
 
 #include "AnimationSystem.h"
 #include "Animation3DSystem.h"
+#include "AttachmentSystem.h"
 #include "CameraSystem.h"
 #include "CollisionSystem.h"
 #include "DestructionSystem.h"
@@ -35,6 +36,7 @@ private:
     SpawnTimerSystem spawnTimerSystem;
     DestructionSystem destructionSystem;
     Animation3DSystem animation3DSystem;
+    AttachmentSystem attachmentSystem;
 public:
     World();
     void update(const float dt, const SDL_Event& event) {
@@ -46,6 +48,7 @@ public:
         spawnTimerSystem.update(entities, dt);
         destructionSystem.update(entities);
         animation3DSystem.update(entities, dt);
+        attachmentSystem.update(entities);
         synchronizeEntities();
         cleanup();
     }
