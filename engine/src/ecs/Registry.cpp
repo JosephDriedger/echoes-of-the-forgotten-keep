@@ -14,6 +14,7 @@ namespace engine
           m_ActiveEntities{},
           m_AliveEntityCount(0),
           m_ComponentTypes{},
+          m_ComponentStorages{},
           m_NextComponentType(0)
     {
         Reset();
@@ -46,6 +47,14 @@ namespace engine
         if (!IsAlive(entity))
         {
             return;
+        }
+
+        for (const std::shared_ptr<IComponentStorage>& storage : m_ComponentStorages)
+        {
+            if (storage)
+            {
+                storage->Remove(entity);
+            }
         }
 
         m_Alive[entityId] = false;
@@ -81,6 +90,16 @@ namespace engine
         {
             signature.reset();
         }
+
+        for (const std::shared_ptr<IComponentStorage>& storage : m_ComponentStorages)
+        {
+            if (storage)
+            {
+                storage->Clear();
+            }
+        }
+
+        m_ComponentStorages.fill(nullptr);
 
         for (EntityId entityId = MIN_ENTITY_ID; entityId <= MAX_ENTITIES; ++entityId)
         {
@@ -141,6 +160,7 @@ namespace engine
     void Registry::ClearComponentRegistrations()
     {
         m_ComponentTypes.clear();
+        m_ComponentStorages.fill(nullptr);
         m_NextComponentType = 0;
     }
 
