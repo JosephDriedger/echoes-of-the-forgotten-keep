@@ -8,7 +8,7 @@
 #include <array>
 #include <cstddef>
 #include <memory>
-#include <queue>
+#include <stack>
 #include <stdexcept>
 #include <typeindex>
 #include <unordered_map>
@@ -28,6 +28,7 @@ namespace engine
 
         Entity CreateEntity();
         void DestroyEntity(Entity entity);
+        void DestroyAllEntities();
 
         [[nodiscard]] bool IsAlive(Entity entity) const;
 
@@ -73,8 +74,9 @@ namespace engine
         [[nodiscard]] std::size_t GetRegisteredComponentCount() const;
 
     private:
-        [[nodiscard]] bool IsInRange(EntityId entityId) const;
-        void RebuildActiveEntityList();
+        static bool IsInRange(EntityId entityId) ;
+        void RemoveAllComponentsFromEntity(Entity entity) const;
+        void ResetEntityState(EntityId entityId);
 
         template <typename TComponent>
         ComponentStorage<TComponent>& GetComponentStorage();
@@ -82,9 +84,10 @@ namespace engine
         template <typename TComponent>
         const ComponentStorage<TComponent>& GetComponentStorage() const;
 
-        std::queue<EntityId> m_AvailableEntityIds;
+        std::stack<EntityId> m_AvailableEntityIds;
         std::array<bool, MAX_ENTITIES + 1> m_Alive;
         std::array<Signature, MAX_ENTITIES + 1> m_Signatures;
+        std::array<std::size_t, MAX_ENTITIES + 1> m_ActiveEntityIndices;
         std::vector<Entity> m_ActiveEntities;
         std::size_t m_AliveEntityCount;
 

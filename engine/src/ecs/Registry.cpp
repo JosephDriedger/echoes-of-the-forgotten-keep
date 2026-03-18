@@ -4,13 +4,21 @@
 
 #include "engine/ecs/Registry.h"
 
+#include <limits>
 #include <stdexcept>
 
 namespace engine
 {
+    namespace
+    {
+        constexpr std::size_t INVALID_ACTIVE_ENTITY_INDEX = std::numeric_limits<std::size_t>::max();
+    }
+
     Registry::Registry()
-        : m_Alive{},
+        : m_AvailableEntityIds(),
+          m_Alive{},
           m_Signatures{},
+          m_ActiveEntityIndices{},
           m_ActiveEntities{},
           m_AliveEntityCount(0),
           m_ComponentTypes{},
@@ -27,20 +35,19 @@ namespace engine
             throw std::runtime_error("Registry::CreateEntity failed: maximum entity count reached.");
         }
 
-        const EntityId entityId = m_AvailableEntityIds.front();
+        const EntityId entityId = m_AvailableEntityIds.top();
         m_AvailableEntityIds.pop();
 
         m_Alive[entityId] = true;
         m_Signatures[entityId].reset();
+        m_ActiveEntityIndices[entityId] = m_ActiveEntities.size();
+        m_ActiveEntities.emplace_back(entityId);
         ++m_AliveEntityCount;
 
-        const Entity entity(entityId);
-        m_ActiveEntities.push_back(entity);
-
-        return entity;
+        return Entity(entityId);
     }
 
-    void Registry::DestroyEntity(Entity entity)
+    void Registry::DestroyEntity(const Entity entity)
     {
         const EntityId entityId = entity.GetId();
 
@@ -49,23 +56,37 @@ namespace engine
             return;
         }
 
-        for (const std::shared_ptr<IComponentStorage>& storage : m_ComponentStorages)
+        RemoveAllComponentsFromEntity(entity);
+
+        const std::size_t removedIndex = m_ActiveEntityIndices[entityId];
+        const std::size_t lastIndex = m_ActiveEntities.size() - 1;
+
+        if (removedIndex != lastIndex)
         {
-            if (storage)
-            {
-                storage->Remove(entity);
-            }
+            const Entity movedEntity = m_ActiveEntities[lastIndex];
+
+            m_ActiveEntities[removedIndex] = movedEntity;
+            m_ActiveEntityIndices[movedEntity.GetId()] = removedIndex;
         }
 
-        m_Alive[entityId] = false;
-        m_Signatures[entityId].reset();
+        m_ActiveEntities.pop_back();
+
+        ResetEntityState(entityId);
         m_AvailableEntityIds.push(entityId);
         --m_AliveEntityCount;
-
-        RebuildActiveEntityList();
     }
 
-    bool Registry::IsAlive(Entity entity) const
+    void Registry::DestroyAllEntities()
+    {
+        const std::vector<Entity> activeEntities = m_ActiveEntities;
+
+        for (const Entity entity : activeEntities)
+        {
+            DestroyEntity(entity);
+        }
+    }
+
+    bool Registry::IsAlive(const Entity entity) const
     {
         const EntityId entityId = entity.GetId();
 
@@ -85,6 +106,7 @@ namespace engine
         }
 
         m_Alive.fill(false);
+        m_ActiveEntityIndices.fill(INVALID_ACTIVE_ENTITY_INDEX);
 
         for (Signature& signature : m_Signatures)
         {
@@ -99,9 +121,7 @@ namespace engine
             }
         }
 
-        m_ComponentStorages.fill(nullptr);
-
-        for (EntityId entityId = MIN_ENTITY_ID; entityId <= MAX_ENTITIES; ++entityId)
+        for (EntityId entityId = MAX_ENTITIES; entityId >= MIN_ENTITY_ID; --entityId)
         {
             m_AvailableEntityIds.push(entityId);
         }
@@ -169,22 +189,26 @@ namespace engine
         return m_ComponentTypes.size();
     }
 
-    bool Registry::IsInRange(const EntityId entityId) const
+    bool Registry::IsInRange(const EntityId entityId)
     {
         return entityId >= MIN_ENTITY_ID && entityId <= MAX_ENTITIES;
     }
 
-    void Registry::RebuildActiveEntityList()
+    void Registry::RemoveAllComponentsFromEntity(const Entity entity) const
     {
-        m_ActiveEntities.clear();
-        m_ActiveEntities.reserve(m_AliveEntityCount);
-
-        for (EntityId entityId = MIN_ENTITY_ID; entityId <= MAX_ENTITIES; ++entityId)
+        for (const std::shared_ptr<IComponentStorage>& storage : m_ComponentStorages)
         {
-            if (m_Alive[entityId])
+            if (storage)
             {
-                m_ActiveEntities.emplace_back(entityId);
+                storage->Remove(entity);
             }
         }
+    }
+
+    void Registry::ResetEntityState(const EntityId entityId)
+    {
+        m_Alive[entityId] = false;
+        m_Signatures[entityId].reset();
+        m_ActiveEntityIndices[entityId] = INVALID_ACTIVE_ENTITY_INDEX;
     }
 }

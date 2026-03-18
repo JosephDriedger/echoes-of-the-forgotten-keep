@@ -35,38 +35,58 @@ int main()
     registry.RegisterComponent<Position>();
     registry.RegisterComponent<Velocity>();
 
-    const engine::Entity entity = registry.CreateEntity();
+    const engine::Entity entityA = registry.CreateEntity();
+    const engine::Entity entityB = registry.CreateEntity();
+    const engine::Entity entityC = registry.CreateEntity();
 
-    registry.AddComponent<Position>(entity, Position{10.0f, 20.0f});
-    assert(registry.HasComponent<Position>(entity));
+    assert(registry.IsAlive(entityA));
+    assert(registry.IsAlive(entityB));
+    assert(registry.IsAlive(entityC));
+    assert(registry.GetAliveCount() == 3);
+    assert(registry.GetActiveEntities().size() == 3);
 
-    const Position& position = registry.GetComponent<Position>(entity);
-    assert(position.X == 10.0f);
-    assert(position.Y == 20.0f);
+    registry.AddComponent<Position>(entityA, Position{10.0f, 20.0f});
+    registry.AddComponent<Position>(entityB, Position{30.0f, 40.0f});
+    registry.EmplaceComponent<Velocity>(entityA, 1.5f, -2.0f);
 
-    Velocity& velocity = registry.EmplaceComponent<Velocity>(entity, 1.5f, -2.0f);
-    assert(velocity.X == 1.5f);
-    assert(velocity.Y == -2.0f);
-    assert(registry.HasComponent<Velocity>(entity));
+    assert(registry.HasComponent<Position>(entityA));
+    assert(registry.HasComponent<Position>(entityB));
+    assert(registry.HasComponent<Velocity>(entityA));
+    assert(!registry.HasComponent<Velocity>(entityB));
 
-    const engine::Signature& signatureAfterAdd = registry.GetSignature(entity);
-    assert(signatureAfterAdd.test(registry.GetComponentType<Position>()));
-    assert(signatureAfterAdd.test(registry.GetComponentType<Velocity>()));
+    const Position& positionA = registry.GetComponent<Position>(entityA);
+    assert(positionA.X == 10.0f);
+    assert(positionA.Y == 20.0f);
 
-    registry.RemoveComponent<Position>(entity);
-    assert(!registry.HasComponent<Position>(entity));
-    assert(registry.HasComponent<Velocity>(entity));
+    const engine::Signature& signatureA = registry.GetSignature(entityA);
+    assert(signatureA.test(registry.GetComponentType<Position>()));
+    assert(signatureA.test(registry.GetComponentType<Velocity>()));
 
-    const engine::Signature& signatureAfterRemove = registry.GetSignature(entity);
-    assert(!signatureAfterRemove.test(registry.GetComponentType<Position>()));
-    assert(signatureAfterRemove.test(registry.GetComponentType<Velocity>()));
+    registry.DestroyEntity(entityB);
 
-    registry.DestroyEntity(entity);
-    assert(!registry.IsAlive(entity));
+    assert(!registry.IsAlive(entityB));
+    assert(registry.GetAliveCount() == 2);
+    assert(registry.GetActiveEntities().size() == 2);
+    assert(!registry.HasComponent<Position>(entityB));
+
+    const engine::Entity reusedEntity = registry.CreateEntity();
+    assert(reusedEntity.GetId() == entityB.GetId());
+    assert(registry.IsAlive(reusedEntity));
+    assert(registry.GetAliveCount() == 3);
+
+    registry.DestroyAllEntities();
+
     assert(registry.GetAliveCount() == 0);
+    assert(registry.GetActiveEntities().empty());
+    assert(!registry.IsAlive(entityA));
+    assert(!registry.IsAlive(entityC));
+    assert(!registry.IsAlive(reusedEntity));
 
-    const engine::Entity anotherEntity = registry.CreateEntity();
-    registry.AddComponent<Position>(anotherEntity, Position{3.0f, 4.0f});
+    registry.RegisterComponent<Position>();
+    registry.RegisterComponent<Velocity>();
+
+    const engine::Entity resetEntity = registry.CreateEntity();
+    registry.AddComponent<Position>(resetEntity, Position{3.0f, 4.0f});
 
     registry.Reset();
 
