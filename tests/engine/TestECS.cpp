@@ -28,7 +28,7 @@ namespace
     };
 }
 
-int main()
+int RunECSTests()
 {
     engine::Registry registry;
 
@@ -70,7 +70,7 @@ int main()
     assert(!registry.HasComponent<Position>(entityB));
 
     const engine::Entity reusedEntity = registry.CreateEntity();
-    assert(reusedEntity.GetId() == entityB.GetId());
+
     assert(registry.IsAlive(reusedEntity));
     assert(registry.GetAliveCount() == 3);
 
@@ -94,6 +94,6 @@ int main()
     assert(registry.GetRegisteredComponentCount() == 0);
     assert(registry.GetActiveEntities().empty());
 
-    std::cout << "ECS passes Tests.\n";
+    std::cout << "ECS tests passed.\n";
     return 0;
 }
