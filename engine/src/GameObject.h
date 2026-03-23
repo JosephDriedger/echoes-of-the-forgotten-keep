@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-14.
 //
 
-#ifndef ASSIGNMENT1_GAMEOBJECT_H
-#define ASSIGNMENT1_GAMEOBJECT_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEOBJECT_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEOBJECT_H
 
 #include "Game.h"
 
@@ -21,4 +21,4 @@ private:
     SDL_FRect srcRect{}, dstRect{};
 };
 
-#endif //ASSIGNMENT1_GAMEOBJECT_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEOBJECT_H

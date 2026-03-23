@@ -2,8 +2,8 @@
 // Created by adamd on 2026-02-25.
 //
 
-#ifndef ASSIGNMENT1_SCENEMANAGER_H
-#define ASSIGNMENT1_SCENEMANAGER_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_SCENEMANAGER_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_SCENEMANAGER_H
 #include <iostream>
 #include <memory>
 #include <string>
@@ -62,4 +62,4 @@ public:
 };
 
 
-#endif //ASSIGNMENT1_SCENEMANAGER_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_SCENEMANAGER_H

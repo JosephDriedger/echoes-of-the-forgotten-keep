@@ -2,8 +2,8 @@
 // Created by adamd on 2026-02-25.
 //
 
-#ifndef ASSIGNMENT1_SCENE_H
-#define ASSIGNMENT1_SCENE_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_SCENE_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_SCENE_H
 #include <SDL3/SDL_events.h>
 #include "World.h"
 
@@ -32,4 +32,4 @@ private:
     void createPlayer();
 };
 
-#endif //ASSIGNMENT1_SCENE_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_SCENE_H

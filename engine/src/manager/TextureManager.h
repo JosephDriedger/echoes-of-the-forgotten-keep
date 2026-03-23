@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-14.
 //
 
-#ifndef ASSIGNMENT1_TEXTUREMANAGER_H
-#define ASSIGNMENT1_TEXTUREMANAGER_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_TEXTUREMANAGER_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_TEXTUREMANAGER_H
 
 #include <string>
 #include <unordered_map>
@@ -23,4 +23,4 @@ public:
     static void clean();
 };
 
-#endif //ASSIGNMENT1_TEXTUREMANAGER_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_TEXTUREMANAGER_H

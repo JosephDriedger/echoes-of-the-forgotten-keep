@@ -2,8 +2,8 @@
 // Created by adamd on 2026-02-04.
 //
 
-#ifndef ASSIGNMENT1_COLLISION_H
-#define ASSIGNMENT1_COLLISION_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_COLLISION_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_COLLISION_H
 
 #include <SDL3/SDL_rect.h>
 
@@ -16,4 +16,4 @@ public:
     static bool AABB(const Collider& colA, const Collider& colB);
 };
 
-#endif //ASSIGNMENT1_COLLISION_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COLLISION_H

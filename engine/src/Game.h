@@ -2,10 +2,8 @@
 // Created by adamd on 2026-01-07.
 //
 
-// #ifndef ASSIGNMENT1_GAME_H
-// #define ASSIGNMENT1_GAME_H
-//
-// #endif //ASSIGNMENT1_GAME_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_H
 
 #pragma once
 #include <SDL3/SDL.h>
@@ -51,3 +49,5 @@ private:
 
     float timeAccumulator;
 };
+
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_H

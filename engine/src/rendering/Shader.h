@@ -2,8 +2,8 @@
 // Created by adamd on 2026-03-03.
 //
 
-#ifndef ASSIGNMENT1_SHADER_H
-#define ASSIGNMENT1_SHADER_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H
 
 #pragma once
 
@@ -28,4 +28,4 @@ public:
     void setMat4(const std::string& name, const glm::mat4& mat) const;
 };
 
-#endif //ASSIGNMENT1_SHADER_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H

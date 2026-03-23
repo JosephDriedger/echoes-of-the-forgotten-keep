@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-28.
 //
 
-#ifndef ASSIGNMENT1_VECTOR2D_H
-#define ASSIGNMENT1_VECTOR2D_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_VECTOR2D_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_VECTOR2D_H
 
 class Vector2D {
 public:
@@ -47,4 +47,4 @@ public:
     Vector2D& normalize();
 };
 
-#endif //ASSIGNMENT1_VECTOR2D_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_VECTOR2D_H

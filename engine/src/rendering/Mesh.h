@@ -2,8 +2,8 @@
 // Created by adamd on 2026-03-03.
 //
 
-#ifndef ASSIGNMENT1_MESH_H
-#define ASSIGNMENT1_MESH_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_MESH_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_MESH_H
 
 #pragma once
 
@@ -77,4 +77,4 @@ public:
     }
 };
 
-#endif //ASSIGNMENT1_MESH_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_MESH_H

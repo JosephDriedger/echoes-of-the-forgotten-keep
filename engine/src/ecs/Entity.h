@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-21.
 //
 
-#ifndef ASSIGNMENT1_ENTITY_H
-#define ASSIGNMENT1_ENTITY_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITY_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITY_H
 #include <bitset>
 #include <cstddef>
 #include <array>
@@ -72,4 +72,4 @@ public:
     }
 };
 
-#endif //ASSIGNMENT1_ENTITY_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITY_H

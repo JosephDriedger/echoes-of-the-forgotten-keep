@@ -3,7 +3,7 @@
 //
 
 #include "TextureManager.h"
-#include "../Game.h"
+#include "Game.h"
 #include <iostream>
 #include <ostream>
 

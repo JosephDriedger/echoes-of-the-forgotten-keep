@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-07.
 //
 
-#include "../../src/Game.h"
-#include "../../src/Map.h"
+#include "Game.h"
+#include "Map.h"
 #include <iostream>
 #include <ostream>
 #include <assimp/postprocess.h>

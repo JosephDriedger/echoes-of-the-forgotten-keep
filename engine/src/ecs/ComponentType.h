@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-21.
 //
 
-#ifndef ASSIGNMENT1_COMPONENTTYPE_H
-#define ASSIGNMENT1_COMPONENTTYPE_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENTTYPE_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENTTYPE_H
 #include <cstddef>
 
 // creating a type alias for std:size_t
@@ -31,4 +31,4 @@ ComponentTypeID getComponentTypeID() {
     return typeID;
 }
 
-#endif //ASSIGNMENT1_COMPONENTTYPE_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENTTYPE_H

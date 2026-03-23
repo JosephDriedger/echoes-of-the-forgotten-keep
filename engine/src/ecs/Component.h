@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-21.
 //
 
-#ifndef ASSIGNMENT1_COMPONENT_H
-#define ASSIGNMENT1_COMPONENT_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H
 #include <functional>
 #include <SDL3/SDL_render.h>
 #include <string>
@@ -77,6 +77,7 @@ struct Transform3D {
     glm::vec3 rotation;
     glm::vec3 scale;
 
+    float rotationY = 0.0f; // current yaw
     glm::vec3 oldPosition;
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -156,4 +157,4 @@ struct BoneAttachment
 struct PlayerTag{};
 struct ProjectileTag {};
 
-#endif //ASSIGNMENT1_COMPONENT_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H

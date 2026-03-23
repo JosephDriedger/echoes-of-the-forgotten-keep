@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-14.
 //
 
-#ifndef ASSIGNMENT1_MAP_H
-#define ASSIGNMENT1_MAP_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_MAP_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_MAP_H
 
 #include <vector>
 #include <SDL3/SDL.h>
@@ -26,4 +26,4 @@ public:
 
 };
 
-#endif //ASSIGNMENT1_MAP_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_MAP_H

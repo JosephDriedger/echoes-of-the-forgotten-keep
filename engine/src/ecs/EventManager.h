@@ -2,8 +2,8 @@
 // Created by adamd on 2026-02-04.
 //
 
-#ifndef ASSIGNMENT1_EVENTMANAGER_H
-#define ASSIGNMENT1_EVENTMANAGER_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_EVENTMANAGER_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_EVENTMANAGER_H
 #include <functional>
 
 #include "Entity.h"
@@ -57,4 +57,4 @@ private:
     std::vector<std::function<void(const CollisionEvent&)>> collisionListeners;
 };
 
-#endif //ASSIGNMENT1_EVENTMANAGER_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_EVENTMANAGER_H

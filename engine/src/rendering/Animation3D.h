@@ -2,8 +2,8 @@
 // Created by adamd on 2026-03-03.
 //
 
-#ifndef ASSIGNMENT1_ANIMATION_H
-#define ASSIGNMENT1_ANIMATION_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ANIMATION_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_ANIMATION_H
 
 #pragma once
 
@@ -31,4 +31,4 @@ private:
     float m_TicksPerSecond = 0.0f;
 };
 
-#endif //ASSIGNMENT1_ANIMATION_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_ANIMATION_H

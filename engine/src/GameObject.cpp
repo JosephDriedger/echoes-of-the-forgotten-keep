@@ -2,7 +2,7 @@
 // Created by adamd on 2026-01-14.
 //
 
-#include "../../src/GameObject.h"
+#include "GameObject.h"
 
 #include "TextureManager.h"
 

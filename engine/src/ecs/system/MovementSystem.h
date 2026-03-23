@@ -23,10 +23,27 @@ class MovementSystem {
 
                 glm::vec3 directionVec = v.direction;
 
+
                 // normalizing
                 if (glm::length(directionVec) > 0.0001f) {
                     directionVec = glm::normalize(directionVec);
+
+                    float targetYaw = atan2(directionVec.x, directionVec.z);
+
+                    float rotationSpeed = 10.0f;
+
+                    float delta = targetYaw - t.rotationY;
+                    delta = atan2(sin(delta), cos(delta));
+
+                    t.rotationY += delta * rotationSpeed * dt;
+
+                    // optional clamp
+                    t.rotationY = atan2(sin(t.rotationY), cos(t.rotationY));
+
+                    t.rotation = glm::vec3(0, glm::degrees(t.rotationY), 0);
                 }
+
+
 
                 // Vector2D needs an operator function to multiply a float to itself
                 glm::vec3 velocityVector = directionVec * v.speed;

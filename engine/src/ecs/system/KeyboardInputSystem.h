@@ -14,27 +14,37 @@
 class KeyboardInputSystem {
 public:
     void update(const std::vector<std::unique_ptr<Entity>>& entities, const SDL_Event& event) {
+        const bool *keyState = SDL_GetKeyboardState(NULL);
+
         for (auto& e : entities) {
             if (e->hasComponent<PlayerTag>() && e->hasComponent<Velocity3D>() &&
                 e->hasComponent<Animator>() && e->hasComponent<Animation3D>()) {
                 auto& v = e->getComponent<Velocity3D>();
                 auto& a = e->getComponent<Animator>();
                 auto& anim = e->getComponent<Animation3D>();
+
+                v.direction = glm::vec3(0.0f);
+
+                if (keyState[SDL_SCANCODE_W]) v.direction.z -= 1;
+                if (keyState[SDL_SCANCODE_S]) v.direction.z += 1;
+                if (keyState[SDL_SCANCODE_A]) v.direction.x -= 1;
+                if (keyState[SDL_SCANCODE_D]) v.direction.x += 1;
+
                 if (event.type == SDL_EVENT_KEY_DOWN) {
                     switch (event.key.key) {
-                        case SDLK_W:
-                            //up
-                            v.direction.z = -1;
-                            break;
-                        case SDLK_S:
-                            v.direction.z = 1;
-                            break;
-                        case SDLK_A:
-                            v.direction.x = -1;
-                            break;
-                        case SDLK_D:
-                            v.direction.x = 1;
-                            break;
+                        // case SDLK_W:
+                        //     //up
+                        //     v.direction.z = -1;
+                        //     break;
+                        // case SDLK_S:
+                        //     v.direction.z = 1;
+                        //     break;
+                        // case SDLK_A:
+                        //     v.direction.x = -1;
+                        //     break;
+                        // case SDLK_D:
+                        //     v.direction.x = 1;
+                        //     break;
                         case SDLK_RIGHT:
                             a.currentClip++;
                             if (a.currentClip >= anim.clips->size())
@@ -58,25 +68,26 @@ public:
 
                     }
                 }
-                if (event.type == SDL_EVENT_KEY_UP) {
-                    switch (event.key.key) {
-                        case SDLK_W:
-                            //up
-                            v.direction.z = 0;
-                            break;
-                        case SDLK_S:
-                            v.direction.z = 0;
-                            break;
-                        case SDLK_A:
-                            v.direction.x = 0;
-                            break;
-                        case SDLK_D:
-                            v.direction.x = 0;
-                            break;
-                        default:
-                            break;
-                    }
+                else if (event.type == SDL_EVENT_KEY_UP) {
+                    // switch (event.key.key) {
+                    //     case SDLK_W:
+                    //         //up
+                    //         v.direction.z = 0;
+                    //         break;
+                    //     case SDLK_S:
+                    //         v.direction.z = 0;
+                    //         break;
+                    //     case SDLK_A:
+                    //         v.direction.x = 0;
+                    //         break;
+                    //     case SDLK_D:
+                    //         v.direction.x = 0;
+                    //         break;
+                    //     default:
+                    //         break;
+                    // }
                 }
+
             }
         }
     }

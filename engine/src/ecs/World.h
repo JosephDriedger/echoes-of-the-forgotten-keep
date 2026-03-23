@@ -2,8 +2,8 @@
 // Created by adamd on 2026-01-21.
 //
 
-#ifndef ASSIGNMENT1_WORLD_H
-#define ASSIGNMENT1_WORLD_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_WORLD_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_WORLD_H
 #include <memory>
 #include <vector>
 
@@ -105,4 +105,4 @@ public:
 };
 
 static void onCollision(const CollisionEvent& collision);
-#endif //ASSIGNMENT1_WORLD_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_WORLD_H

@@ -4,8 +4,8 @@
 
 #include "Scene.h"
 
-#include "../rendering/AnimationManager.h"
-#include "../rendering/ModelManager.h"
+#include "AnimationManager.h"
+#include "ModelManager.h"
 
 Scene::Scene (const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName) {
 
