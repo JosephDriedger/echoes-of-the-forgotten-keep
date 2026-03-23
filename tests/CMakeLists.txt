@@ -15,7 +15,7 @@ if(EFK_TEST_SOURCES)
             efk_game
     )
 
-    target_compile_features(efk_tests PRIVATE cxx_std_17)
+    target_compile_features(efk_tests PRIVATE cxx_std_20)
 
     add_test(NAME efk_tests COMMAND efk_tests)
 

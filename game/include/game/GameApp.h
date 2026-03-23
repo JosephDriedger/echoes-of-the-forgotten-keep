@@ -7,7 +7,7 @@
 
 #include "engine/core/Application.h"
 #include "engine/core/Timestep.h"
-#include "game/GameState.h"
+#include "engine/scene/SceneManager.h"
 
 namespace game
 {
@@ -25,7 +25,7 @@ namespace game
 
     private:
         engine::ApplicationSpecification m_Specification;
-        GameState m_State;
+        engine::SceneManager m_SceneManager;
     };
 }
 
