@@ -49,5 +49,5 @@ private:
     SDL_Window* window = nullptr;
     SDL_Event event;
 
-
+    float timeAccumulator;
 };

@@ -12,9 +12,8 @@
 #include <vendor/glm/gtc/type_ptr.hpp>
 #include "Mesh.h"
 #include "AinmationClip.h"
-#include "Animation3DClips.h"
+#include "AnimationKey.h"
 #include "BoneInfo.h"
-#include "BoneNode.h"
 #include "Entity.h"
 #include "TextureManager.h"
 #include "Vector2D.h"
@@ -148,7 +147,7 @@ struct Animation3D
 
 struct Animator
 {
-    float currentTime = 0.0f;
+    double currentTime = 0.0f;
     int currentClip = 0;
 
     std::vector<glm::mat4> finalBoneMatrices;

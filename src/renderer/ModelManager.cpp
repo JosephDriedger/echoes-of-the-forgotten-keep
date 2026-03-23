@@ -193,6 +193,9 @@ Model* ModelManager::load(const std::string& modelPath) {
             break;
         }
     }
+
+
+
     std::cout << "Skeleton index: " << model->rootBoneIndex << "\n";
     // If not found, fallback to first node
     if (model->rootBoneIndex == -1)
@@ -200,7 +203,15 @@ Model* ModelManager::load(const std::string& modelPath) {
 
     PrintSkeletonHierarchy(scene->mRootNode, model->boneMap, 0);
 
+
     PrintAllNodes(scene->mRootNode);
+
+    for (int i = 0; i < model->skeleton.size(); i++)
+    {
+        std::cout << i << ": " << model->skeleton[i].name
+                  << " parent: " << model->skeleton[i].parentIndex << "\n";
+    }
+
     models[modelPath] = model;
 
     return model;
@@ -261,9 +272,17 @@ int ModelManager::BuildRuntimeSkeleton(aiNode* node,
                                        int parentIndex)
 {
     BoneNode bn;
-    bn.name = node->mName.C_Str();
-    bn.boneID = model.boneMap.count(bn.name) ? model.boneMap[bn.name] : -1;
 
+    bn.name = node->mName.C_Str();
+
+    // Bone ID mapping
+    auto it = model.boneMap.find(bn.name);
+    bn.boneID = (it != model.boneMap.end()) ? it->second : -1;
+
+    // 🔥 store parent instead of children
+    bn.parentIndex = parentIndex;
+
+    // Transform
     aiMatrix4x4 t = node->mTransformation;
     bn.localTransform = glm::mat4(
         t.a1, t.b1, t.c1, t.d1,
@@ -272,15 +291,15 @@ int ModelManager::BuildRuntimeSkeleton(aiNode* node,
         t.a4, t.b4, t.c4, t.d4
     );
 
+    // Push node
     int index = (int)model.skeleton.size();
     model.skeleton.push_back(bn);
 
-    if (parentIndex >= 0)
-        model.skeleton[parentIndex].children.push_back(index);
-
-    // Recurse children
+    // 🔥 recurse children AFTER pushing (ensures parent comes first)
     for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
         BuildRuntimeSkeleton(node->mChildren[i], model, index);
+    }
 
     return index;
 }

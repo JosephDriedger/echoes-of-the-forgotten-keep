@@ -11,11 +11,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <vector>
-#include <string>
-#include <iostream>
 
-#include "AnimationBone.h"
-#include "BoneNode.h"
 #include "Component.h"
 
 namespace CalculateBoneTransform {
@@ -36,7 +32,14 @@ inline glm::vec3 InterpolatePosition(const std::vector<KeyPosition>& positions, 
     std::vector<KeyPosition>::value_type p0 = positions[i];
     std::vector<KeyPosition>::value_type p1 = positions[i + 1];
 
-    float factor = (time - p0.timeStamp) / (p1.timeStamp - p0.timeStamp);
+    float delta = p1.timeStamp - p0.timeStamp;
+
+    if (fabs(delta) < 0.0001f)
+        return p0.position;
+
+    float factor = (time - p0.timeStamp) / delta;
+    factor = glm::clamp(factor, 0.0f, 1.0f);
+
     return glm::mix(p0.position, p1.position, factor);
 }
 
@@ -55,8 +58,17 @@ inline glm::quat InterpolateRotation(const std::vector<KeyRotation>& rotations, 
     std::vector<KeyRotation>::value_type r0 = rotations[i];
     std::vector<KeyRotation>::value_type r1 = rotations[i + 1];
 
-    float factor = (time - r0.timeStamp) / (r1.timeStamp - r0.timeStamp);
-    return glm::slerp(r0.orientation, r1.orientation, factor);
+    float delta = r1.timeStamp - r0.timeStamp;
+
+    if (fabs(delta) < 0.0001f)
+        return r0.orientation;
+
+    float factor = (time - r0.timeStamp) / delta;
+
+    factor = glm::clamp(factor, 0.0f, 1.0f);
+    // float factor = (time - r0.timeStamp) / (r1.timeStamp - r0.timeStamp);
+    return glm::normalize(glm::slerp(r0.orientation, r1.orientation, factor));
+    // return glm::slerp(r0.orientation, r1.orientation, factor);
 }
 
 inline glm::vec3 InterpolateScale(const std::vector<KeyScale>& scales, float time)
@@ -74,59 +86,71 @@ inline glm::vec3 InterpolateScale(const std::vector<KeyScale>& scales, float tim
     std::vector<KeyScale>::value_type s0 = scales[i];
     std::vector<KeyScale>::value_type s1 = scales[i + 1];
 
-    float factor = (time - s0.timeStamp) / (s1.timeStamp - s0.timeStamp);
+    float delta = s1.timeStamp - s0.timeStamp;
+
+    if (fabs(delta) < 0.0001f)
+        return s0.scale;
+
+    float factor = (time - s0.timeStamp) / delta;
+    factor = glm::clamp(factor, 0.0f, 1.0f);
+
+    // float factor = (time - s0.timeStamp) / (s1.timeStamp - s0.timeStamp);
     return glm::mix(s0.scale, s1.scale, factor);
 }
 
-// Recursive calculation
 inline void Calculate(
-    BoneNode& node,
-    const glm::mat4& parentTransform,
-    Model& model,
-    const Animation3DClip& clip,
-    Animator& animator
-)
+        Model& model,
+        const Animation3DClip& clip,
+        Animator& animator
+    )
 {
-    glm::mat4 nodeTransform = node.localTransform;
+    std::vector<glm::mat4> globalTransforms(model.skeleton.size());
 
-    // Find animation for this bone
-    for (const auto& animBone : clip.bones)
+    for (int i = 0; i < model.skeleton.size(); i++)
     {
-        if (animBone.first == node.name)
-        {
-            glm::vec3 pos = InterpolatePosition(animBone.second.positions, animator.currentTime);
-            glm::quat rot = InterpolateRotation(animBone.second.rotations, animator.currentTime);
-            glm::vec3 scale = InterpolateScale(animBone.second.scales, animator.currentTime);
+        BoneNode& node = model.skeleton[i];
 
-            nodeTransform = glm::translate(glm::mat4(1.0f), pos)
-                          * glm::toMat4(rot)
-                          * glm::scale(glm::mat4(1.0f), scale);
-            break;
+        glm::mat4 nodeTransform = node.localTransform;
+
+        // 🔥 animation lookup
+        auto it = clip.bones.find(node.name);
+        if (it != clip.bones.end())
+        {
+            const auto& animBone = it->second;
+
+            glm::vec3 pos = InterpolatePosition(animBone.positions, animator.currentTime);
+            glm::quat rot = InterpolateRotation(animBone.rotations, animator.currentTime);
+            glm::vec3 scale = InterpolateScale(animBone.scales, animator.currentTime);
+
+            nodeTransform =
+                glm::translate(glm::mat4(1.0f), pos) *
+                glm::toMat4(rot) *
+                glm::scale(glm::mat4(1.0f), scale);
+        }
+
+        // 🔥 parent transform
+        glm::mat4 parentTransform = glm::mat4(1.0f);
+
+        if (node.parentIndex != -1)
+            parentTransform = globalTransforms[node.parentIndex];
+
+        glm::mat4 globalTransform = parentTransform * nodeTransform;
+
+        globalTransforms[i] = globalTransform;
+
+        // 🔥 store for attachments
+        animator.finalNodeTransforms[node.name] = globalTransform;
+
+        // 🔥 final bone matrix
+        if (node.boneID >= 0 && node.boneID < animator.finalBoneMatrices.size())
+        {
+            glm::mat4 offset = glm::mat4(1.0f);
+            if (node.boneID < model.boneInfo.size())
+                offset = model.boneInfo[node.boneID].offset;
+
+            animator.finalBoneMatrices[node.boneID] = globalTransform * offset;
         }
     }
-
-    glm::mat4 globalTransform = parentTransform * nodeTransform;
-
-    animator.finalNodeTransforms[node.name] = globalTransform;
-
-    if (node.boneID >= 0 && node.boneID < animator.finalBoneMatrices.size())
-    {
-        // multiply by offset if you stored it in Model.boneInfo
-        auto offset = glm::mat4(1.0f);
-        if (node.boneID < model.boneInfo.size())
-            offset = model.boneInfo[node.boneID].offset;
-
-        animator.finalBoneMatrices[node.boneID] = globalTransform * offset;
-    }
-
-    // recurse children
-    for (int childIdx : node.children)
-    {
-        if (childIdx >= 0 && childIdx < model.skeleton.size())
-            Calculate(model.skeleton[childIdx], globalTransform, model, clip, animator);
-    }
-
-
 }
 
 } // namespace CalculateBoneTransform

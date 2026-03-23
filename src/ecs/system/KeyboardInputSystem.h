@@ -35,10 +35,19 @@ public:
                         case SDLK_D:
                             v.direction.x = 1;
                             break;
-                        case SDLK_SPACE:
+                        case SDLK_RIGHT:
                             a.currentClip++;
                             if (a.currentClip >= anim.clips->size())
                                 a.currentClip = 0;
+                            a.currentTime = 0.0f;
+                            std::cout << "Switched to animation: "
+                                << anim.clips->at(a.currentClip).name
+                                << " (" << a.currentClip << ")\n";
+                            break;
+                        case SDLK_LEFT:
+                            a.currentClip--;
+                            if (a.currentClip <= 0)
+                                a.currentClip = anim.clips->size()-1;
                             a.currentTime = 0.0f;
                             std::cout << "Switched to animation: "
                                 << anim.clips->at(a.currentClip).name

@@ -7,7 +7,7 @@
 
 #include "assimp/scene.h"
 #include "glm/detail/type_quat.hpp"
-#include "Animation3DClips.h"
+#include "AnimationSystem.h"
 
 class AnimationManager
 {

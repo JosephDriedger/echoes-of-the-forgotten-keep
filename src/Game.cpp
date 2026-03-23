@@ -124,6 +124,16 @@ void Game::handleEvents() {
 
 void Game::update(float dt) {
     sceneManager.update(dt, event);
+
+    timeAccumulator += dt;
+    frameCount++;
+
+    if (timeAccumulator >= 1.0f)
+    {
+        std::cout << "FPS: " << frameCount << std::endl;
+        frameCount = 0;
+        timeAccumulator = 0.0f;
+    }
 }
 
 void Game::render(Uint64 ticks)

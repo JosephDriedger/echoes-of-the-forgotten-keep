@@ -7,6 +7,7 @@
 #include <cmath>
 #include <memory>
 #include <vector>
+#include <iostream>
 
 #include "CalculateBoneTransform.h"
 #include "Component.h"
@@ -27,6 +28,8 @@ public:
             auto& anim3D = entity->getComponent<Animation3D>();
             auto& animator = entity->getComponent<Animator>();
 
+            animator.finalNodeTransforms.clear();
+
             if (!anim3D.clips || anim3D.clips->empty()) {
                 std::cout << "Entity " << " has no animation clips\n";
                 continue;
@@ -36,7 +39,13 @@ public:
 
             // Update animation time
             animator.currentTime += deltaTime * clip.ticksPerSecond;
-            animator.currentTime = std::fmod(animator.currentTime, clip.duration);
+            if (animator.currentTime >= clip.duration)
+            {
+                animator.currentTime -= clip.duration;
+            }
+
+            // std::cout << "Time: " << animator.currentTime
+                // << " / " << clip.duration << "\n";
 
             // get root node index
             int rootIndex = model.rootBoneIndex;
@@ -45,10 +54,7 @@ public:
 
             BoneNode& rootNode = model.skeleton[rootIndex];
 
-            // recursively calculate bones
             CalculateBoneTransform::Calculate(
-                rootNode,
-                glm::mat4(1.0f),
                 model,
                 clip,
                 animator

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "../ecs/system/AnimationKey.h"
+#include "Animation3DSystem.h"
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "glm/fwd.hpp"
