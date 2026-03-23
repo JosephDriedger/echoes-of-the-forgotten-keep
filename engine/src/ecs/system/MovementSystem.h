@@ -14,6 +14,12 @@ class MovementSystem {
     public:
     void update(const std::vector<std::unique_ptr<Entity>>& entities, const float dt) {
         for (auto& entity : entities) {
+            if (entity->hasComponent<Animator>()) {
+                auto& a = entity->getComponent<Animator>();
+                if (a.isAttacking) {
+                    continue;
+                }
+            }
             if (entity->hasComponent<Transform3D>() && entity->hasComponent<Velocity3D>()) {
                 auto& t = entity->getComponent<Transform3D>();
                 auto& v = entity->getComponent<Velocity3D>();

@@ -53,4 +53,18 @@ struct Animation3DClip {
     std::unordered_map<std::string, AnimationBone> bones;
 };
 
+enum class AnimState {
+    Idle,
+    Run,
+    Attack1,
+    Attack2,
+    Attack3
+};
+
+struct Pose {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::quat> rotations;
+    std::vector<glm::vec3> scales;
+};
+
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_ANIMATIONKEY_H

@@ -101,17 +101,17 @@ struct Camera3D {
 
 // Model tested
 struct Model {
-    std::vector<Mesh>* meshes;
+    std::vector<Mesh>* meshes {};
 
     std::unordered_map<std::string, int> boneMap;
     std::vector<BoneInfo> boneInfo;
     int boneCounter = 0;
 
     std::vector<BoneNode> skeleton;
-    int rootBoneIndex;
+    int rootBoneIndex = 0;
 
     Model() = default;
-    Model(Model* model) :
+    Model(const Model* model) :
         meshes(model->meshes),
         boneMap(model->boneMap),
         boneInfo(model->boneInfo),
@@ -138,8 +138,27 @@ struct Animation3D
 
 struct Animator
 {
-    double currentTime = 0.0f;
     int currentClip = 0;
+    int nextClip = -1;
+
+    double currentTime = 0.0f;
+    double nextTime = 0.0f;
+
+    double blendTime = 0.0f;
+    double blendDuration = 0.2f;
+
+    bool isBlending = false;
+
+    bool isAttacking = false;
+    bool attackQueued = false;
+    bool comboWindowOpen = false;
+
+    int comboIndex = 0;
+    float comboWindow = 0.5f;
+    float comboTimer = 0.0f;
+
+    AnimState currentState = AnimState::Idle;
+    AnimState previousState = AnimState::Idle;
 
     std::vector<glm::mat4> finalBoneMatrices;
     std::unordered_map<std::string, glm::mat4> finalNodeTransforms;

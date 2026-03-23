@@ -22,7 +22,6 @@ Model* ModelManager::load(const std::string& modelPath) {
 
     auto it = models.find(modelPath);
     if (it != models.end()) {
-        std::cout << "Model loaded successfully from modelMeshes: " << modelPath << "\n";
         return it->second;
     }
 
@@ -41,10 +40,6 @@ Model* ModelManager::load(const std::string& modelPath) {
         std::cerr << "Error loading model: " << importer.GetErrorString() << std::endl;
         return nullptr;
     }
-
-    std::cout << "Model loaded successfully: " << modelPath << "\n";
-    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
-        std::cout << "Mesh " << i << ": " << scene->mMeshes[i]->mName.C_Str() << std::endl;
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
@@ -136,81 +131,10 @@ Model* ModelManager::load(const std::string& modelPath) {
                 }
             }
         }
-        else {
-            std::cout << "Mesh " << i << " has no bones\n";
-        }
-
         model->meshes->emplace_back(vertices, indices);
     }
 
-
-    std::cout << "Scene animations: " << scene->mNumAnimations << "\n";
-
-    for (unsigned int a = 0; a < scene->mNumAnimations; a++) {
-
-        aiAnimation* anim = scene->mAnimations[a];
-
-        std::cout << "\nAnimation " << a << "\n";
-        std::cout << "--------------------------------\n";
-        std::cout << "Name: " << anim->mName.C_Str() << "\n";
-        std::cout << "Duration: " << anim->mDuration << "\n";
-        std::cout << "Ticks per second: " << anim->mTicksPerSecond << "\n";
-        std::cout << "Channels (bones): " << anim->mNumChannels << "\n";
-
-        // for (unsigned int c = 0; c < anim->mNumChannels; c++) {
-        //
-        //     aiNodeAnim* channel = anim->mChannels[c];
-        //
-        //     std::string boneName = channel->mNodeName.C_Str();
-        //
-        //     std::cout << "\n  Bone " << c << ": " << boneName << "\n";
-        //
-        //     std::cout << "    Position keys: " << channel->mNumPositionKeys << "\n";
-        //     std::cout << "    Rotation keys: " << channel->mNumRotationKeys << "\n";
-        //     std::cout << "    Scale keys: " << channel->mNumScalingKeys << "\n";
-        //
-        //     if (channel->mNumPositionKeys > 0) {
-        //         std::cout << "    First position key time: "
-        //                   << channel->mPositionKeys[0].mTime << "\n";
-        //     }
-        //
-        //     if (channel->mNumRotationKeys > 0) {
-        //         std::cout << "    First rotation key time: "
-        //                   << channel->mRotationKeys[0].mTime << "\n";
-        //     }
-        // }
-    }
-
-    std::cout << "\n========== SKELETON HIERARCHY ==========\n";
-
-    // model->rootBoneName = scene->mRootNode->mName.C_Str();
     int index = BuildRuntimeSkeleton(scene->mRootNode, *model, -1);
-
-    // Find hips node in skeleton
-    for (int i = 0; i < model->skeleton.size(); i++) {
-        if (model->skeleton[i].name == "hips") {
-            model->rootBoneIndex = i;
-            break;
-        }
-    }
-
-
-
-    std::cout << "Skeleton index: " << model->rootBoneIndex << "\n";
-    // If not found, fallback to first node
-    if (model->rootBoneIndex == -1)
-        model->rootBoneIndex = 0;
-
-    PrintSkeletonHierarchy(scene->mRootNode, model->boneMap, 0);
-
-
-    PrintAllNodes(scene->mRootNode);
-
-    for (int i = 0; i < model->skeleton.size(); i++)
-    {
-        std::cout << i << ": " << model->skeleton[i].name
-                  << " parent: " << model->skeleton[i].parentIndex << "\n";
-    }
 
     models[modelPath] = model;
 
@@ -227,43 +151,6 @@ void ModelManager::SetVertexBoneData(Vertex& vertex, int boneID, float weight)
             vertex.Weights[i] = weight;
             return;
         }
-    }
-}
-
-void ModelManager::PrintSkeletonHierarchy(aiNode* node,
-                            const std::unordered_map<std::string, int>& boneMap,
-                            int depth = 0)
-{
-    std::string nodeName = node->mName.C_Str();
-
-    bool isBone = boneMap.find(nodeName) != boneMap.end();
-
-    if (isBone)
-    {
-        for (int i = 0; i < depth; i++)
-            std::cout << "  ";
-
-        std::cout << nodeName
-                  << " (Bone ID: " << boneMap.at(nodeName) << ")"
-                  << std::endl;
-    }
-
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
-    {
-        PrintSkeletonHierarchy(node->mChildren[i], boneMap, depth + 1);
-    }
-}
-
-void ModelManager::PrintAllNodes(aiNode* node, int depth)
-{
-    for (int i = 0; i < depth; i++)
-        std::cout << "  ";
-
-    std::cout << node->mName.C_Str() << "\n";
-
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
-    {
-        PrintAllNodes(node->mChildren[i], depth + 1);
     }
 }
 

@@ -102,15 +102,10 @@ std::vector<Animation3DClip>* AnimationManager::load(const std::string& path)
 
                 bone.scales.push_back(ks);
             }
-
             clip.bones[bone.name] = bone;
         }
-
         clips->push_back(clip);
-
-        std::cout << "Loaded animation: " << clip.name << "\n";
     }
-
     animations[path] = clips;
 
     return clips;
@@ -130,10 +125,7 @@ void AnimationManager::appendClips(
 
     for (auto& clip : *newClips)
     {
+        //std::cout << clip.name << " " << clip.duration << " " << targetClips.size() << "\n";
         targetClips.push_back(clip);
-
-        std::cout << "Appended animation: "
-                  << clip.name
-                  << " from " << path << "\n";
     }
 }

@@ -15,10 +15,6 @@ public:
     static std::unordered_map<std::string, Model*> models;
     static Model* load(const std::string& modelPath);
     static void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
-    static void PrintSkeletonHierarchy(aiNode* node,
-                            const std::unordered_map<std::string, int>& boneMap,
-                            int depth);
-    static void PrintAllNodes(aiNode* node, int depth = 0);
     static int BuildRuntimeSkeleton(aiNode* node,
                                        Model& model,
                                        int parentIndex = -1);

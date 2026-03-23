@@ -98,9 +98,114 @@ inline glm::vec3 InterpolateScale(const std::vector<KeyScale>& scales, float tim
     return glm::mix(s0.scale, s1.scale, factor);
 }
 
-inline void Calculate(
+// inline void Calculate(
+//         Model& model,
+//         const Animation3DClip& clip,
+//         Animator& animator
+//     )
+// {
+//     std::vector<glm::mat4> globalTransforms(model.skeleton.size());
+//
+//     for (int i = 0; i < model.skeleton.size(); i++)
+//     {
+//         BoneNode& node = model.skeleton[i];
+//
+//         glm::mat4 nodeTransform = node.localTransform;
+//
+//         // 🔥 animation lookup
+//         auto it = clip.bones.find(node.name);
+//         if (it != clip.bones.end())
+//         {
+//             const auto& animBone = it->second;
+//
+//             glm::vec3 pos = InterpolatePosition(animBone.positions, animator.currentTime);
+//             glm::quat rot = InterpolateRotation(animBone.rotations, animator.currentTime);
+//             glm::vec3 scale = InterpolateScale(animBone.scales, animator.currentTime);
+//
+//             nodeTransform =
+//                 glm::translate(glm::mat4(1.0f), pos) *
+//                 glm::toMat4(rot) *
+//                 glm::scale(glm::mat4(1.0f), scale);
+//         }
+//
+//         // 🔥 parent transform
+//         glm::mat4 parentTransform = glm::mat4(1.0f);
+//
+//         if (node.parentIndex != -1)
+//             parentTransform = globalTransforms[node.parentIndex];
+//
+//         glm::mat4 globalTransform = parentTransform * nodeTransform;
+//
+//         globalTransforms[i] = globalTransform;
+//
+//         // 🔥 store for attachments
+//         animator.finalNodeTransforms[node.name] = globalTransform;
+//
+//         // 🔥 final bone matrix
+//         if (node.boneID >= 0 && node.boneID < animator.finalBoneMatrices.size())
+//         {
+//             glm::mat4 offset = glm::mat4(1.0f);
+//             if (node.boneID < model.boneInfo.size())
+//                 offset = model.boneInfo[node.boneID].offset;
+//
+//             animator.finalBoneMatrices[node.boneID] = globalTransform * offset;
+//         }
+//     }
+// }
+
+inline Pose SamplePose(Model& model, const Animation3DClip& clip, float time)
+{
+    Pose pose;
+    pose.positions.resize(model.skeleton.size());
+    pose.rotations.resize(model.skeleton.size());
+    pose.scales.resize(model.skeleton.size());
+
+    for (int i = 0; i < model.skeleton.size(); i++)
+    {
+        BoneNode& node = model.skeleton[i];
+
+        glm::vec3 pos(0.0f);
+        glm::quat rot(1, 0, 0, 0);
+        glm::vec3 scale(1.0f);
+
+        auto it = clip.bones.find(node.name);
+        if (it != clip.bones.end())
+        {
+            const auto& animBone = it->second;
+
+            pos = InterpolatePosition(animBone.positions, time);
+            rot = InterpolateRotation(animBone.rotations, time);
+            scale = InterpolateScale(animBone.scales, time);
+        }
+
+        pose.positions[i] = pos;
+        pose.rotations[i] = rot;
+        pose.scales[i] = scale;
+    }
+
+    return pose;
+}
+
+inline Pose BlendPoses(const Pose& a, const Pose& b, float t)
+{
+    Pose result;
+    result.positions.resize(a.positions.size());
+    result.rotations.resize(a.rotations.size());
+    result.scales.resize(a.scales.size());
+
+    for (int i = 0; i < a.positions.size(); i++)
+    {
+        result.positions[i] = glm::mix(a.positions[i], b.positions[i], t);
+        result.rotations[i] = glm::normalize(glm::slerp(a.rotations[i], b.rotations[i], t));
+        result.scales[i] = glm::mix(a.scales[i], b.scales[i], t);
+    }
+
+    return result;
+}
+
+inline void ApplyPose(
         Model& model,
-        const Animation3DClip& clip,
+        const Pose& pose,
         Animator& animator
     )
 {
@@ -110,45 +215,29 @@ inline void Calculate(
     {
         BoneNode& node = model.skeleton[i];
 
-        glm::mat4 nodeTransform = node.localTransform;
+        glm::mat4 nodeTransform =
+            glm::translate(glm::mat4(1.0f), pose.positions[i]) *
+            glm::toMat4(pose.rotations[i]) *
+            glm::scale(glm::mat4(1.0f), pose.scales[i]);
 
-        // 🔥 animation lookup
-        auto it = clip.bones.find(node.name);
-        if (it != clip.bones.end())
-        {
-            const auto& animBone = it->second;
-
-            glm::vec3 pos = InterpolatePosition(animBone.positions, animator.currentTime);
-            glm::quat rot = InterpolateRotation(animBone.rotations, animator.currentTime);
-            glm::vec3 scale = InterpolateScale(animBone.scales, animator.currentTime);
-
-            nodeTransform =
-                glm::translate(glm::mat4(1.0f), pos) *
-                glm::toMat4(rot) *
-                glm::scale(glm::mat4(1.0f), scale);
-        }
-
-        // 🔥 parent transform
         glm::mat4 parentTransform = glm::mat4(1.0f);
 
         if (node.parentIndex != -1)
             parentTransform = globalTransforms[node.parentIndex];
 
-        glm::mat4 globalTransform = parentTransform * nodeTransform;
+        glm::mat4 global = parentTransform * nodeTransform;
 
-        globalTransforms[i] = globalTransform;
+        globalTransforms[i] = global;
 
-        // 🔥 store for attachments
-        animator.finalNodeTransforms[node.name] = globalTransform;
+        animator.finalNodeTransforms[node.name] = global;
 
-        // 🔥 final bone matrix
         if (node.boneID >= 0 && node.boneID < animator.finalBoneMatrices.size())
         {
             glm::mat4 offset = glm::mat4(1.0f);
             if (node.boneID < model.boneInfo.size())
                 offset = model.boneInfo[node.boneID].offset;
 
-            animator.finalBoneMatrices[node.boneID] = globalTransform * offset;
+            animator.finalBoneMatrices[node.boneID] = global * offset;
         }
     }
 }

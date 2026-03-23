@@ -45,6 +45,18 @@ public:
                         // case SDLK_D:
                         //     v.direction.x = 1;
                         //     break;
+                        case SDLK_SPACE:
+                            if (a.isAttacking) {
+                                // queue combo if timing is right
+                                if (a.comboTimer > 0.0f && a.comboTimer <= a.comboWindow) {
+                                    a.attackQueued = true;
+                                }
+                            } else {
+                                a.isAttacking = true;
+                                a.comboIndex = 0;
+                                a.currentTime = 0.0f;
+                            }
+                            break;
                         case SDLK_RIGHT:
                             a.currentClip++;
                             if (a.currentClip >= anim.clips->size())
