@@ -1,8 +1,33 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+#include "game/systems/RoomTransitionSystem.h"
 
-#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ROOMTRANSITIONSYSTEM_H
-#define ECHOES_OF_THE_FORGOTTEN_KEEP_ROOMTRANSITIONSYSTEM_H
+#include "game/components/Player.h"
+#include "game/components/Transform.h"
+#include "game/components/Collider.h"
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_ROOMTRANSITIONSYSTEM_H
+namespace game
+{
+    void RoomTransitionSystem::Update(engine::Registry& registry,
+                                      engine::RoomManager& roomManager) const
+    {
+        if (!roomManager.HasTransitionTarget())
+            return;
+
+        const auto& entities = registry.GetActiveEntities();
+
+        for (auto entity : entities)
+        {
+            if (!registry.HasComponent<Player>(entity))
+                continue;
+
+            auto& transform = registry.GetComponent<Transform>(entity);
+
+            roomManager.SetCurrentRoom(roomManager.GetTransitionTarget());
+            roomManager.ClearTransitionTarget();
+
+            transform.X = 0.0f;
+            transform.Y = 0.0f;
+            transform.Z = 0.0f;
+            return;
+        }
+    }
+}

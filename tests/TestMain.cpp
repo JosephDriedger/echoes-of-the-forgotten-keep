@@ -6,11 +6,17 @@
 
 int RunECSTests();
 int RunSceneManagerTests();
+int RunCollisionTests();
+int RunRoomTransitionTests();
+int RunEnemyAITests();
 
 int main()
 {
     RunECSTests();
     RunSceneManagerTests();
+    RunCollisionTests();
+    RunRoomTransitionTests();
+    RunEnemyAITests();
 
     std::cout << "All tests passed.\n";
     return 0;
