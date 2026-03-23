@@ -23,6 +23,9 @@ public:
                 auto& a = e->getComponent<Animator>();
                 auto& anim = e->getComponent<Animation3D>();
 
+                if (a.isDead)
+                    continue;
+
                 v.direction = glm::vec3(0.0f);
 
                 if (keyState[SDL_SCANCODE_W]) v.direction.z -= 1;
@@ -45,6 +48,33 @@ public:
                         // case SDLK_D:
                         //     v.direction.x = 1;
                         //     break;
+                        case SDLK_LCTRL:
+                            if (a.isDead)
+                                break;
+
+                            a.health -= 1;
+
+                            // 🔥 INTERRUPT EVERYTHING
+                            a.isAttacking = false;
+                            a.attackQueued = false;
+                            a.comboIndex = 0;
+
+                            if (a.health <= 0)
+                            {
+                                std::cout << "Died" << std::endl;
+                                v.direction = glm::vec3(0.0f);
+                                a.isDead = true;
+                                a.currentTime = 0.0f;
+                            }
+                            else
+                            {
+                                std::cout << "health: " << a.health << std::endl;
+                                v.direction = glm::vec3(0.0f);
+                                a.isHit = true;
+                                a.hitTimer = 0.0f;
+                                a.currentTime = 0.0f;
+                            }
+                            break;
                         case SDLK_SPACE:
                             if (a.isAttacking) {
                                 // queue combo if timing is right

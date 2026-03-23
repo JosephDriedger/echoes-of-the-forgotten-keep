@@ -157,6 +157,12 @@ struct Animator
     float comboWindow = 0.5f;
     float comboTimer = 0.0f;
 
+    bool isHit = false;
+    bool isDead = false;
+    int health = 3;
+
+    float hitTimer = 0.0f;
+
     AnimState currentState = AnimState::Idle;
     AnimState previousState = AnimState::Idle;
 

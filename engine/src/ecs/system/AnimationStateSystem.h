@@ -23,7 +23,13 @@ public:
 
                 a.previousState = a.currentState;
 
-                if (a.isAttacking) {
+                if (a.isDead) {
+                    a.currentState = AnimState::Death;
+                }
+                else if (a.isHit) {
+                    a.currentState = AnimState::HitReact;
+                }
+                else if (a.isAttacking) {
                     a.currentState = static_cast<AnimState>(
                         static_cast<int>(AnimState::Attack1) + a.comboIndex
                     );
@@ -58,6 +64,12 @@ public:
                             break;
                         case AnimState::Attack3:
                             a.nextClip = 98;
+                            break;
+                        case AnimState::HitReact:
+                            a.nextClip = 5;
+                            break;
+                        case AnimState::Death:
+                            a.nextClip = 1;
                             break;
                         default: ;
                     }

@@ -58,7 +58,9 @@ enum class AnimState {
     Run,
     Attack1,
     Attack2,
-    Attack3
+    Attack3,
+    HitReact,
+    Death
 };
 
 struct Pose {

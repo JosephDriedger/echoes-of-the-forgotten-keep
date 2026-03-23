@@ -31,13 +31,27 @@ public:
 
             Animation3DClip& clip = (*anim3D.clips)[animator.currentClip];
             animator.currentTime += deltaTime * clip.ticksPerSecond;
+            float duration = clip.duration;
+            if (animator.isDead)
+            {
+                if (animator.currentTime >= duration)
+                {
+                    animator.currentTime = duration;
+                }
+            }
+            if (animator.isHit)
+            {
+                if (animator.currentTime >= duration)
+                {
+                    animator.isHit = false;
+                }
+            }
 
             if (animator.isAttacking) {
 
                 if (animator.comboTimer > 0.0f) {
                     animator.comboTimer -= deltaTime;
                 }
-
                 float clipDuration = clip.duration;
 
                 float comboStart = clipDuration * 0.5f;
@@ -49,12 +63,9 @@ public:
                 if (animator.comboWindowOpen && !(animator.currentTime >= comboStart && animator.currentTime < clipDuration * 0.9f)) {
                     animator.comboWindowOpen = false;
                 }
-
-                // 🎯 End of attack
                 if (animator.currentTime >= clipDuration) {
 
                     if (animator.attackQueued) {
-                        // 🔥 chain combo
                         animator.comboIndex++;
 
                         animator.attackQueued = false;
@@ -64,14 +75,12 @@ public:
                             animator.comboIndex = 0;
 
                     } else {
-                        // end attack
                         animator.isAttacking = false;
                         animator.comboIndex = 0;
                         animator.comboTimer = 0.0f;
                     }
                 }
             }
-
             animator.finalNodeTransforms.clear();
 
             if (!anim3D.clips || anim3D.clips->empty()) {
@@ -80,7 +89,6 @@ public:
             }
 
             // Update animation time
-
             if (animator.currentTime >= clip.duration)
             {
                 animator.currentTime -= clip.duration;
@@ -89,8 +97,7 @@ public:
             if (animator.isBlending) {
                 animator.nextTime += deltaTime;
                 animator.blendTime += deltaTime;
-
-
+                
                 if (animator.blendTime / animator.blendDuration >= 1.0f) {
                     animator.currentClip = animator.nextClip;
                     animator.currentTime = animator.nextTime;
