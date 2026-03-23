@@ -2,11 +2,10 @@
 // Created by adamd on 2026-01-07.
 //
 
-#include "Game.h"
-#include "Map.h"
+#include "../../src/Game.h"
+#include "../../src/Map.h"
 #include <iostream>
 #include <ostream>
-#include "manager/AssetManager.h"
 #include <assimp/postprocess.h>
 
 int updateColor = 1000;
@@ -73,10 +72,6 @@ void Game::init(const char *title, int width, int height, bool fullscreen) {
         isRunning = false;
     }
 
-    // load assets
-    AssetManager::loadAnimation("player", "../asset/animations/Swordsman_animations.xml");
-    AssetManager::loadAnimation("enemy", "../asset/animations/bird_animations.xml");
-
     //load scenes
     sceneManager.loadScene("level1", "../asset/map.tmx", width, height);
     sceneManager.loadScene("level2", "../asset/map2.tmx", width, height);
@@ -125,15 +120,15 @@ void Game::handleEvents() {
 void Game::update(float dt) {
     sceneManager.update(dt, event);
 
-    timeAccumulator += dt;
-    frameCount++;
-
-    if (timeAccumulator >= 1.0f)
-    {
-        std::cout << "FPS: " << frameCount << std::endl;
-        frameCount = 0;
-        timeAccumulator = 0.0f;
-    }
+    // timeAccumulator += dt;
+    // frameCount++;
+    //
+    // if (timeAccumulator >= 1.0f)
+    // {
+    //     std::cout << "FPS: " << frameCount << std::endl;
+    //     frameCount = 0;
+    //     timeAccumulator = 0.0f;
+    // }
 }
 
 void Game::render(Uint64 ticks)

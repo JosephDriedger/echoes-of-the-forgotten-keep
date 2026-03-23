@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "Collision.h"
-#include "World.h"
+#include "../World.h"
 
 // has two important functions, but they are related
 // 1. first is positions the collider with the transform

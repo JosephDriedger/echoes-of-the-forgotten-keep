@@ -2,14 +2,14 @@
 // Created by adamd on 2026-01-28.
 //
 
-#ifndef ASSIGNMENT1_KEYBOARDINPUTSYSTEM_H
-#define ASSIGNMENT1_KEYBOARDINPUTSYSTEM_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_KEYBOARDINPUTSYSTEM_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_KEYBOARDINPUTSYSTEM_H
 #include <memory>
 #include <vector>
 #include <SDL3/SDL_events.h>
 
-#include "Component.h"
-#include "Entity.h"
+#include "../Component.h"
+#include "../Entity.h"
 
 class KeyboardInputSystem {
 public:
@@ -82,4 +82,4 @@ public:
     }
 };
 
-#endif //ASSIGNMENT1_KEYBOARDINPUTSYSTEM_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_KEYBOARDINPUTSYSTEM_H

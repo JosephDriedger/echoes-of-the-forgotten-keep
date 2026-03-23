@@ -2,13 +2,13 @@
 // Created by adamd on 2026-01-21.
 //
 
-#ifndef ASSIGNMENT1_MOVEMENTSYSTEM_H
-#define ASSIGNMENT1_MOVEMENTSYSTEM_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_MOVEMENTSYSTEM_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_MOVEMENTSYSTEM_H
 #include <memory>
 #include <vector>
 
-#include "Component.h"
-#include "Entity.h"
+#include "../Component.h"
+#include "../Entity.h"
 
 class MovementSystem {
     public:
@@ -33,11 +33,9 @@ class MovementSystem {
 
                 // t.position = t.position + velocityVector * dt
                 t.position += velocityVector * dt;
-
-
             }
         }
     }
 };
 
-#endif //ASSIGNMENT1_MOVEMENTSYSTEM_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_MOVEMENTSYSTEM_H

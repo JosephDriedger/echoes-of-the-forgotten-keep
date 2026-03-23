@@ -11,8 +11,8 @@
 #include <SDL3/SDL.h>
 #include <glad/glad.h>
 #include "World.h"
-#include "manager/Scene.h"
-#include "manager/SceneManager.h"
+#include "Scene.h"
+#include "SceneManager.h"
 #include "Shader.h"
 
 class Game {

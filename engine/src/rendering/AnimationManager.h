@@ -6,8 +6,7 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_ANIMATIONMANAGER_H
 
 #include "assimp/scene.h"
-#include "glm/detail/type_quat.hpp"
-#include "AnimationSystem.h"
+#include "Animation3DSystem.h"
 
 class AnimationManager
 {

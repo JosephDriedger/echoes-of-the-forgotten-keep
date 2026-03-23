@@ -2,11 +2,11 @@
 // Created by adamd on 2026-02-04.
 //
 
-#include "World.h"
+#include "../../../src/ecs/World.h"
 
 #include <iostream>
 
-#include "Game.h"
+#include "../Game.h"
 
 World::World() {
 

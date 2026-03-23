@@ -6,7 +6,7 @@
 #define ECHOESOFTHEFORGOTTENKEEP_MODELMANAGER_H
 
 #include "Mesh.h"
-#include "Component.h"
+#include "../ecs/Component.h"
 #include "assimp/scene.h"
 
 

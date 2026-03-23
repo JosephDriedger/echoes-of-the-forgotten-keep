@@ -8,8 +8,8 @@
 #include <memory>
 #include <vector>
 
-#include "Component.h"
-#include "Entity.h"
+#include "../Component.h"
+#include "../Entity.h"
 
 class AttachmentSystem {
 public:

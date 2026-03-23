@@ -4,14 +4,13 @@
 
 #include "Scene.h"
 
-#include "AnimationManager.h"
-#include "AssetManager.h"
-#include "ModelManager.h"
+#include "../rendering/AnimationManager.h"
+#include "../rendering/ModelManager.h"
 
 Scene::Scene (const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName) {
 
     // load our map
-    world.getMap().load(mapPath, TextureManager::load("../asset/tileset.png"));
+    // world.getMap().load(mapPath, TextureManager::load("../asset/tileset.png"));
 
     //createMapColliders();
 

@@ -11,7 +11,6 @@
 #include <vendor/glm/gtc/matrix_transform.hpp>
 #include <vendor/glm/gtc/type_ptr.hpp>
 #include "Mesh.h"
-#include "AinmationClip.h"
 #include "AnimationKey.h"
 #include "BoneInfo.h"
 #include "Entity.h"
@@ -40,15 +39,6 @@ struct Sprite {
 struct Collider {
     std::string tag;
     SDL_FRect rect{};
-};
-
-struct Animation {
-    std::unordered_map<std::string, AnimationClip> clips{};
-    std::string currentClip{};
-    float time{}; // time accumulated for the current frame in the clip
-    int currentFrame{}; // index of the current frame in the clip
-    float speed = 0.1f; // time per frame
-    int lastDirection = 2;
 };
 
 struct Camera {

@@ -7,7 +7,6 @@
 #include <memory>
 #include <vector>
 
-#include "AnimationSystem.h"
 #include "Animation3DSystem.h"
 #include "AttachmentSystem.h"
 #include "CameraSystem.h"
@@ -16,10 +15,9 @@
 #include "Entity.h"
 #include "EventManager.h"
 #include "KeyboardInputSystem.h"
-#include "Map.h"
+#include "../Map.h"
 #include "MovementSystem.h"
 #include "RenderSystem.h"
-#include "SpawnTimerSystem.h"
 
 class World {
 private:
@@ -30,10 +28,8 @@ private:
     RenderSystem renderSystem;
     KeyboardInputSystem keyboardInputSystem;
     CollisionSystem collisionSystem;
-    AnimationSystem animationSystem;
     CameraSystem cameraSystem;
     EventManager eventManager;
-    SpawnTimerSystem spawnTimerSystem;
     DestructionSystem destructionSystem;
     Animation3DSystem animation3DSystem;
     AttachmentSystem attachmentSystem;
@@ -43,9 +39,7 @@ public:
         keyboardInputSystem.update(entities, event);
         movementSystem.update(entities, dt);
         collisionSystem.update(*this);
-        animationSystem.update(entities, dt);
         cameraSystem.update(entities);
-        spawnTimerSystem.update(entities, dt);
         destructionSystem.update(entities);
         animation3DSystem.update(entities, dt);
         attachmentSystem.update(entities);

@@ -2,12 +2,12 @@
 // Created by adamd on 2026-02-18.
 //
 
-#ifndef ASSIGNMENT1_CAMERASYSTEM_H
-#define ASSIGNMENT1_CAMERASYSTEM_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_CAMERASYSTEM_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_CAMERASYSTEM_H
 #include <memory>
 
-#include "Component.h"
-#include "Entity.h"
+#include "../Component.h"
+#include "../Entity.h"
 
 class CameraSystem {
     public:
@@ -41,15 +41,9 @@ class CameraSystem {
                 // look at player
                 glm::vec3 direction = playerTransform.position - transform.position;
                 cam.forward = glm::normalize(direction);
-
-                // the camera is position itself so player is centered, but the player could walk off the screen
-                // so clamp the camera so it stays within the window
-
-
-
             }
         }
     }
 };
 
-#endif //ASSIGNMENT1_CAMERASYSTEM_H
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_CAMERASYSTEM_H
