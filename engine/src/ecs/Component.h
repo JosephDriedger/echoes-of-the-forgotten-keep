@@ -97,6 +97,8 @@ struct AI {
     float maxChaseTime = 5.0f;
     float loseTargetCooldown = 2.0f;
     float loseTargetTimer = 0.0f;
+
+    bool isAttacking = false;
 };
 
 struct Patrol {
@@ -120,7 +122,7 @@ struct AttackRequest {
 
 struct Combat {
     Attack attack;
-    float attackRange = 3.0f;
+    float attackRange = 1.0f;
 };
 
 struct Damage {

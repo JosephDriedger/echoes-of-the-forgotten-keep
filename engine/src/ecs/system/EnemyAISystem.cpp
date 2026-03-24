@@ -33,25 +33,26 @@ void EnemyAISystem::update(std::vector<std::unique_ptr<Entity> > &entities, floa
     for (auto enemy : enemies)
     {
         auto& ai = enemy->getComponent<AI>();
+        auto& animState = enemy->getComponent<Animator>();
 
         ai.stateTimer += dt;
 
         switch (ai.state)
         {
             case AIState::Idle:
-                UpdateIdle(enemy, ai, dt);
+                UpdateIdle(enemy, ai, animState, dt);
                 break;
 
             case AIState::Patrol:
-                UpdatePatrol(enemy, ai, dt);
+                UpdatePatrol(enemy, ai, animState, dt);
                 break;
 
             case AIState::Chase:
-                UpdateChase(enemy, ai, dt);
+                UpdateChase(enemy, ai, animState, dt);
                 break;
 
             case AIState::Attack:
-                UpdateAttack(enemy, ai, dt);
+                UpdateAttack(enemy, ai, animState, dt);
                 break;
         }
 
@@ -71,7 +72,8 @@ void EnemyAISystem::update(std::vector<std::unique_ptr<Entity> > &entities, floa
                 ai.target = nullptr;
             } else if (dist < ai.visionRange &&
                 ai.loseTargetTimer <= 0 &&
-                (ai.state == AIState::Idle || ai.state == AIState::Patrol))
+                (ai.state == AIState::Idle || ai.state == AIState::Patrol) &&
+                !animState.isAttacking)
             {
                 ai.state = AIState::Chase;
                 ai.target = player;
@@ -80,7 +82,7 @@ void EnemyAISystem::update(std::vector<std::unique_ptr<Entity> > &entities, floa
     }
 }
 
-void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, float dt) {
+void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, Animator& animator, float dt) {
     auto& velocity = enemy->getComponent<Velocity3D>();
     velocity.direction = glm::vec3(0.0f);
     velocity.speed = 0;
@@ -101,6 +103,10 @@ void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, float dt) {
 
         // For now we just print
         std::cout << "Enemy attacks player!" << std::endl;
+        // animator.currentState = AnimState::Attack1;
+        std::cout << animator.isAttacking << std::endl;
+        animator.isAttacking = true;
+        std::cout << animator.isAttacking << std::endl;
         // spawnProjectile(enemy, ai.target);
         if (!ai.target || !ai.target->hasComponent<Transform3D>()) {
             return;
@@ -114,7 +120,7 @@ void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, float dt) {
     }
 
     // check distance to player
-    if (!ai.target || !ai.target->hasComponent<Transform3D>()) {
+    if (!ai.target || !ai.target->hasComponent<Transform3D>() && !animator.isAttacking) {
         ai.state = AIState::Idle;
         ai.stateTimer = 0;
         ai.target = nullptr;
@@ -125,22 +131,23 @@ void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, float dt) {
     auto& transform = enemy->getComponent<Transform3D>();
     float dist = glm::distance(targetTransform.position, transform.position);
 
-    if (dist > combat.attackRange) {
+    float attackExitRange  = combat.attackRange + 1.0f;
+    if (dist > attackExitRange && !animator.isAttacking) {
         // player moved away → chase again
         ai.state = AIState::Chase;
         ai.stateTimer = 0;
     }
 }
 
-void EnemyAISystem::UpdateChase(Entity* enemy, AI &ai, float dt) {
-    if (!ai.target) {
+void EnemyAISystem::UpdateChase(Entity* enemy, AI &ai, Animator& animator, float dt) {
+    if (!ai.target && !animator.isAttacking) {
         // lost target, go idle
         ai.state = AIState::Idle;
         ai.stateTimer = 0;
         return;
     }
 
-    if (ai.stateTimer > ai.maxChaseTime)
+    if (ai.stateTimer > ai.maxChaseTime && !animator.isAttacking)
     {
         ai.state = AIState::Idle;
         ai.stateTimer = 0;
@@ -163,14 +170,14 @@ void EnemyAISystem::UpdateChase(Entity* enemy, AI &ai, float dt) {
     glm::vec3 dir = targetTransform.position - transform.position;
     float dist = glm::length(dir);
 
-    if (dist <= combat.attackRange) {
+    if (dist <= combat.attackRange && !animator.isAttacking) {
         ai.state = AIState::Attack;
         ai.stateTimer = 0;
         return;
     }
 
     // optionally, lose target if player is far away
-    if (dist > ai.visionRange * 1.5f) {
+    if (dist > ai.visionRange * 1.5f && !animator.isAttacking) {
         ai.state = AIState::Idle;
         ai.stateTimer = 0;
         ai.target = nullptr;
@@ -179,24 +186,24 @@ void EnemyAISystem::UpdateChase(Entity* enemy, AI &ai, float dt) {
 
     // move toward player
     velocity.direction = safeNormalize(dir);
-    velocity.speed = 3.0f; // chase speed
+    velocity.speed = 2.5f; // chase speed
 }
 
-void EnemyAISystem::UpdateIdle(Entity* enemy, AI &ai, float dt) {
+void EnemyAISystem::UpdateIdle(Entity* enemy, AI &ai, Animator& animator, float dt) {
     auto& velocity = enemy->getComponent<Velocity3D>();
 
     velocity.direction = glm::vec3(0.0f);
     velocity.speed = 0;
 
     // after a short time start patrol
-    if (ai.stateTimer > 2.0f && enemy->hasComponent<Patrol>())
+    if (ai.stateTimer > 2.0f && enemy->hasComponent<Patrol>() && !animator.isAttacking)
     {
         ai.state = AIState::Patrol;
         ai.stateTimer = 0;
     }
 }
 
-void EnemyAISystem::UpdatePatrol(Entity* enemy, AI &ai, float dt) {
+void EnemyAISystem::UpdatePatrol(Entity* enemy, AI &ai, Animator& animator, float dt) {
     if (!enemy->hasComponent<Patrol>())
         return;
 

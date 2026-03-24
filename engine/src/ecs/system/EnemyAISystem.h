@@ -22,10 +22,10 @@ private:
     std::vector<Entity*> queryEnemies(const std::vector<std::unique_ptr<Entity>>& entities);
 
     // state handlers
-    void UpdateIdle(Entity* enemy, AI& ai, float dt);
-    void UpdatePatrol(Entity* enemy, AI& ai, float dt);
-    void UpdateChase(Entity* enemy, AI& ai, float dt);
-    void UpdateAttack(Entity* enemy, AI& ai, float dt);
+    void UpdateIdle(Entity* enemy, AI& ai, Animator& animator, float dt);
+    void UpdatePatrol(Entity* enemy, AI& ai, Animator& animator, float dt);
+    void UpdateChase(Entity* enemy, AI& ai, Animator& animator, float dt);
+    void UpdateAttack(Entity* enemy, AI& ai, Animator& animator, float dt);
 
     // helper functions
     Entity* findPlayer(const std::vector<std::unique_ptr<Entity>>& entities);

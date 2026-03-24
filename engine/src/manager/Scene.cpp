@@ -88,9 +88,9 @@ void Scene::createPlayer() {
 
 void Scene::createEnemy() {
     auto& enemy(world.createEntity());
-    auto& enemyTransform = enemy.addComponent<Transform3D>(glm::vec3(4,0,-4));
+    auto& enemyTransform = enemy.addComponent<Transform3D>(glm::vec3(6,0,2));
 
-    enemy.addComponent<Velocity3D>(glm::vec3(0,0,0), 3.0f);
+    enemy.addComponent<Velocity3D>(glm::vec3(0,0,0), 2.5f);
 
     enemy.addComponent<AI>(AI{
         AIState::Idle,     // start idle
@@ -100,8 +100,8 @@ void Scene::createEnemy() {
     });
 
     enemy.addComponent<Patrol>(Patrol{
-        glm::vec3{4, 0, -4},  // point A
-        glm::vec3{20, 0, -40},  // point B
+        glm::vec3{6, 0, 2},  // point A
+        glm::vec3{40, 0, 2},  // point B
         true                  // movingToB
     });
 
@@ -112,6 +112,12 @@ void Scene::createEnemy() {
     auto& animator2 = enemy.addComponent<Animator>();
     animator2.currentClip = 7;
 
-    enemy.addComponent<Combat>(Attack{2.0f, 0.0f}, 4.0f);
+    enemy.addComponent<Combat>(Attack{2.0f, 0.0f}, 2.0f);
     enemy.addComponent<Health>(3);
+
+    auto& sword(world.createEntity());
+    auto& swordTransform = sword.addComponent<Transform3D>(glm::vec3(-2,0,0));
+    sword.addComponent<Model>(ModelManager::load("../asset/sword_1handed.gltf"));
+    sword.addComponent<Texture3D>(*TextureManager::load3D("../asset/knight_texture.png"));
+    sword.addComponent<BoneAttachment>(&enemy, "handslot.r", glm::mat4(1.0f));
 }
