@@ -16,7 +16,7 @@ class MovementSystem {
         for (auto& entity : entities) {
             if (entity->hasComponent<Animator>()) {
                 auto& a = entity->getComponent<Animator>();
-                if (a.isAttacking) {
+                if (a.isAttacking || a.isHit) {
                     continue;
                 }
             }

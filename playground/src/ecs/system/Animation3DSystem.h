@@ -97,7 +97,7 @@ public:
             if (animator.isBlending) {
                 animator.nextTime += deltaTime;
                 animator.blendTime += deltaTime;
-                
+
                 if (animator.blendTime / animator.blendDuration >= 1.0f) {
                     animator.currentClip = animator.nextClip;
                     animator.currentTime = animator.nextTime;

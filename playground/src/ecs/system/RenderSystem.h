@@ -18,8 +18,8 @@ public:
     RenderSystem() {
         // Initialize 3D shader once
         shader3D = new Shader(
-            "../engine/src/rendering/shaders/vertex.glsl",
-            "../engine/src/rendering/shaders/fragment.glsl"
+            "../playground/src/rendering/shaders/vertex.glsl",
+            "../playground/src/rendering/shaders/fragment.glsl"
         );
         std::cout << "3D shader initialized in RenderSystem.\n";
         shader3D->use();

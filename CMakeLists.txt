@@ -12,17 +12,14 @@ if (WIN32)
     include_directories(
             ${PROJECT_SOURCE_DIR}${SDL3_PATH}/include
             ${PROJECT_SOURCE_DIR}${SDL3_IMAGE_PATH}/include
-            ${PROJECT_SOURCE_DIR}/src
-            ${PROJECT_SOURCE_DIR}/engine/src
-            ${PROJECT_SOURCE_DIR}/engine/src/utils
-            ${PROJECT_SOURCE_DIR}/src/ecs
-            ${PROJECT_SOURCE_DIR}/engine/src/ecs/system
-            ${PROJECT_SOURCE_DIR}/engine/src/ecs
-            ${PROJECT_SOURCE_DIR}/engine/src/manager
-            ${PROJECT_SOURCE_DIR}/engine/src/rendering
-            ${PROJECT_SOURCE_DIR}/engine/src/vendor
-            ${PROJECT_SOURCE_DIR}/engine/src/vendor/glad/include
-            ${PROJECT_SOURCE_DIR}/src/renderer
+            ${PROJECT_SOURCE_DIR}/playground/src
+            ${PROJECT_SOURCE_DIR}/playground/src/utils
+            ${PROJECT_SOURCE_DIR}/playground/src/ecs/system
+            ${PROJECT_SOURCE_DIR}/playground/src/ecs
+            ${PROJECT_SOURCE_DIR}/playground/src/manager
+            ${PROJECT_SOURCE_DIR}/playground/src/rendering
+            ${PROJECT_SOURCE_DIR}/playground/src/vendor
+            ${PROJECT_SOURCE_DIR}/playground/src/vendor/glad/include
             ${PROJECT_SOURCE_DIR}${ASSIMP_PATH}/include
             ${PROJECT_SOURCE_DIR}${ASSIMP_PATH}/build/include
     )
@@ -33,22 +30,22 @@ if (WIN32)
     )
 endif ()
 
-add_executable(echoes_of_the_forgotten_keep engine/src/main.cpp
-        engine/src/Game.cpp
-        engine/src/manager/TextureManager.cpp
-        engine/src/Map.cpp
-        engine/src/GameObject.cpp
-        engine/src/utils/Vector2D.cpp
-        engine/src/utils/Collision.cpp
-        engine/src/ecs/system/CollisionSystem.cpp
-        engine/src/ecs/World.cpp
-        engine/src/vendor/tinyxml2.cpp
-        engine/src/manager/Scene.cpp
-        engine/src/vendor/glad/glad.c
-        engine/src/rendering/Shader.cpp
-        engine/src/rendering/Animation3D.cpp
-        engine/src/rendering/ModelManager.cpp
-        engine/src/rendering/AnimationManager.cpp
+add_executable(echoes_of_the_forgotten_keep playground/src/main.cpp
+        playground/src/Game.cpp
+        playground/src/manager/TextureManager.cpp
+        playground/src/Map.cpp
+        playground/src/GameObject.cpp
+        playground/src/utils/Vector2D.cpp
+        playground/src/utils/Collision.cpp
+        playground/src/ecs/system/CollisionSystem.cpp
+        playground/src/ecs/World.cpp
+        playground/src/vendor/tinyxml2.cpp
+        playground/src/manager/Scene.cpp
+        playground/src/vendor/glad/glad.c
+        playground/src/rendering/Shader.cpp
+        playground/src/rendering/Animation3D.cpp
+        playground/src/rendering/ModelManager.cpp
+        playground/src/rendering/AnimationManager.cpp
 )
 
 target_link_libraries(echoes_of_the_forgotten_keep
