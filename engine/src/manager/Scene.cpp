@@ -7,13 +7,14 @@
 #include "AnimationManager.h"
 #include "ModelManager.h"
 
-Scene::Scene (const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName) {
+Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName) {
 
     auto& camera = world.createEntity();
     camera.addComponent<Transform3D>(glm::vec3(0,1,5)); // back a bit
     camera.addComponent<Camera3D>();
 
     createPlayer();
+    createEnemy();
 
     // add scene state
     auto& state (world.createEntity());
@@ -51,13 +52,13 @@ void Scene::createPlayer() {
     player.addComponent<PlayerTag>();
     player.addComponent<Velocity3D>(glm::vec3(0,0,0),3.0f);
 
-    auto& player2(world.createEntity());
-    auto& playerTransform2 = player2.addComponent<Transform3D>(glm::vec3(2,0,2));
-    player2.addComponent<Model>(ModelManager::load("../asset/Rogue_Hooded.glb"));
-    player2.addComponent<Texture3D>(*TextureManager::load3D("../asset/rogue_texture.png"));
-    auto& anim3D2 = player2.addComponent<Animation3D>(AnimationManager::load("../asset/animations/Rig_Medium_General.glb"));
-    auto& animator2 = player2.addComponent<Animator>();
-    animator2.currentClip = 7;
+    // auto& player2(world.createEntity());
+    // auto& playerTransform2 = player2.addComponent<Transform3D>(glm::vec3(2,0,2));
+    // player2.addComponent<Model>(ModelManager::load("../asset/Rogue_Hooded.glb"));
+    // player2.addComponent<Texture3D>(*TextureManager::load3D("../asset/rogue_texture.png"));
+    // auto& anim3D2 = player2.addComponent<Animation3D>(AnimationManager::load("../asset/animations/Rig_Medium_General.glb"));
+    // auto& animator2 = player2.addComponent<Animator>();
+    // animator2.currentClip = 7;
 
     auto& wall(world.createEntity());
     auto& wallTransform = wall.addComponent<Transform3D>(glm::vec3(-2,0,-1));
@@ -83,4 +84,34 @@ void Scene::createPlayer() {
     auto& tileTransform2 = tile2.addComponent<Transform3D>(glm::vec3(2,-.1,1));
     tile2.addComponent<Model>(ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
     tile2.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
+}
+
+void Scene::createEnemy() {
+    auto& enemy(world.createEntity());
+    auto& enemyTransform = enemy.addComponent<Transform3D>(glm::vec3(4,0,-4));
+
+    enemy.addComponent<Velocity3D>(glm::vec3(0,0,0), 3.0f);
+
+    enemy.addComponent<AI>(AI{
+        AIState::Idle,     // start idle
+        0.0f,              // state timer
+        7.0f,            // vision range
+        nullptr            // target (Entity*)
+    });
+
+    enemy.addComponent<Patrol>(Patrol{
+        glm::vec3{4, 0, -4},  // point A
+        glm::vec3{20, 0, -40},  // point B
+        true                  // movingToB
+    });
+
+    enemy.addComponent<Model>(ModelManager::load("../asset/Rogue_Hooded.glb"));
+    enemy.addComponent<Texture3D>(*TextureManager::load3D("../asset/rogue_texture.png"));
+    enemy.addComponent<EnemyTag>();
+    auto& anim3D2 = enemy.addComponent<Animation3D>(AnimationManager::load("../asset/animations/Rig_Medium_General.glb"));
+    auto& animator2 = enemy.addComponent<Animator>();
+    animator2.currentClip = 7;
+
+    enemy.addComponent<Combat>(Attack{2.0f, 0.0f}, 4.0f);
+    enemy.addComponent<Health>(3);
 }
