@@ -29,7 +29,8 @@ private:
 
     // helper functions
     Entity* findPlayer(const std::vector<std::unique_ptr<Entity>>& entities);
-    float distance(const Transform& a, const Transform& b);
+    float distance(const Transform3D& a, const Transform3D& b);
+    glm::vec3 safeNormalize(const glm::vec3& v);
 
 };
 

@@ -19,21 +19,21 @@ void CombatSystem::update(std::vector<std::unique_ptr<Entity>>& entities)
     }
 }
 
-void CombatSystem::spawnProjectile(Entity* attacker, Vector2D direction, std::string tag)
+void CombatSystem::spawnProjectile(Entity* attacker, glm::vec3 direction, std::string tag)
 {
     if (direction.length() == 0)
         return;
 
-    auto& transform = attacker->getComponent<Transform>();
+    auto& transform = attacker->getComponent<Transform3D>();
 
     auto& projectile = world.createDeferredEntity();
 
-    auto& t = projectile.addComponent<Transform>();
+    auto& t = projectile.addComponent<Transform3D>();
     t.position = transform.position;
-    t.scale = 1;
+    t.scale = glm::vec3(1.0);
 
-    auto& v = projectile.addComponent<Velocity>();
-    v.direction = direction.normalized();
+    auto& v = projectile.addComponent<Velocity3D>();
+    v.direction = glm::normalize(direction);
     v.speed = 1000;
 
     auto& c = projectile.addComponent<Collider>();

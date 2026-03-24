@@ -14,8 +14,8 @@ std::vector<Entity*> EnemyAISystem::queryEnemies(const std::vector<std::unique_p
     for (auto& e : entities) {
 
         if (e->hasComponent<EnemyTag>() &&
-            e->hasComponent<Transform>() &&
-            e->hasComponent<Velocity>() &&
+            e->hasComponent<Transform3D>() &&
+            e->hasComponent<Velocity3D>() &&
             e->hasComponent<AI>())
         {
             enemies.push_back(e.get());
@@ -58,8 +58,10 @@ void EnemyAISystem::update(std::vector<std::unique_ptr<Entity> > &entities, floa
         // global detection check (can interrupt idle/patrol)
         if (player)
         {
-            auto& enemyTransform = enemy->getComponent<Transform>();
-            auto& playerTransform = player->getComponent<Transform>();
+            // auto& enemyTransform = enemy->getComponent<Transform>();
+            // auto& playerTransform = player->getComponent<Transform>();
+            auto& enemyTransform = enemy->getComponent<Transform3D>();
+            auto& playerTransform = player->getComponent<Transform3D>();
 
             float dist = distance(enemyTransform, playerTransform);
 
@@ -79,8 +81,8 @@ void EnemyAISystem::update(std::vector<std::unique_ptr<Entity> > &entities, floa
 }
 
 void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, float dt) {
-    auto& velocity = enemy->getComponent<Velocity>();
-    velocity.direction = {0, 0};
+    auto& velocity = enemy->getComponent<Velocity3D>();
+    velocity.direction = glm::vec3(0.0f);
     velocity.speed = 0;
 
     if (!enemy->hasComponent<Combat>()) {return;}
@@ -100,24 +102,28 @@ void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, float dt) {
         // For now we just print
         std::cout << "Enemy attacks player!" << std::endl;
         // spawnProjectile(enemy, ai.target);
-        auto& targetTransform = ai.target->getComponent<Transform>();
-        Vector2D dir = (targetTransform.position - enemy->getComponent<Transform>().position).normalized();
+        if (!ai.target || !ai.target->hasComponent<Transform3D>()) {
+            return;
+        }
+        auto& targetTransform = ai.target->getComponent<Transform3D>();
+        auto& transform = enemy->getComponent<Transform3D>();
+        glm::vec3 dir = safeNormalize(targetTransform.position - transform.position);
         auto& req = enemy->addComponent<AttackRequest>();
         req.direction = dir;
         req.tag = "projectile";
     }
 
     // check distance to player
-    if (!ai.target || !ai.target->hasComponent<Transform>()) {
+    if (!ai.target || !ai.target->hasComponent<Transform3D>()) {
         ai.state = AIState::Idle;
         ai.stateTimer = 0;
         ai.target = nullptr;
         return;
     }
 
-    auto& targetTransform = ai.target->getComponent<Transform>();
-    auto& transform = enemy->getComponent<Transform>();
-    float dist = (targetTransform.position - transform.position).length();
+    auto& targetTransform = ai.target->getComponent<Transform3D>();
+    auto& transform = enemy->getComponent<Transform3D>();
+    float dist = glm::distance(targetTransform.position, transform.position);
 
     if (dist > combat.attackRange) {
         // player moved away → chase again
@@ -143,16 +149,19 @@ void EnemyAISystem::UpdateChase(Entity* enemy, AI &ai, float dt) {
         return;
     }
 
-    auto& transform = enemy->getComponent<Transform>();
-    auto& velocity = enemy->getComponent<Velocity>();
+    auto& transform = enemy->getComponent<Transform3D>();
+    auto& velocity = enemy->getComponent<Velocity3D>();
+    if (!enemy->hasComponent<Combat>()) {return;}
     auto& combat = enemy->getComponent<Combat>();
 
     // make sure the target has a Transform
-    if (!ai.target->hasComponent<Transform>()) return;
-    auto& targetTransform = ai.target->getComponent<Transform>();
+    if (!ai.target->hasComponent<Transform3D>()) return;
+    auto& targetTransform = ai.target->getComponent<Transform3D>();
 
-    Vector2D dir = targetTransform.position - transform.position;
-    float dist = dir.length();
+    transform.position += velocity.direction * velocity.speed * dt;
+
+    glm::vec3 dir = targetTransform.position - transform.position;
+    float dist = glm::length(dir);
 
     if (dist <= combat.attackRange) {
         ai.state = AIState::Attack;
@@ -169,14 +178,14 @@ void EnemyAISystem::UpdateChase(Entity* enemy, AI &ai, float dt) {
     }
 
     // move toward player
-    velocity.direction = dir.normalized();
-    velocity.speed = 100; // chase speed
+    velocity.direction = safeNormalize(dir);
+    velocity.speed = 3.0f; // chase speed
 }
 
 void EnemyAISystem::UpdateIdle(Entity* enemy, AI &ai, float dt) {
-    auto& velocity = enemy->getComponent<Velocity>();
+    auto& velocity = enemy->getComponent<Velocity3D>();
 
-    velocity.direction = {0,0};
+    velocity.direction = glm::vec3(0.0f);
     velocity.speed = 0;
 
     // after a short time start patrol
@@ -192,14 +201,14 @@ void EnemyAISystem::UpdatePatrol(Entity* enemy, AI &ai, float dt) {
         return;
 
     auto& patrol = enemy->getComponent<Patrol>();
-    auto& transform = enemy->getComponent<Transform>();
-    auto& velocity = enemy->getComponent<Velocity>();
+    auto& transform = enemy->getComponent<Transform3D>();
+    auto& velocity = enemy->getComponent<Velocity3D>();
 
-    Vector2D target = patrol.movingToB ? patrol.pointB : patrol.pointA;
+    glm::vec3 target = patrol.movingToB ? patrol.pointB : patrol.pointA;
 
-    Vector2D dir = target - transform.position;
+    glm::vec3 dir = target - transform.position;
 
-    float dist = dir.length();
+    float dist = glm::length(dir);
 
     // reached patrol point
     if (dist < 5.0f)
@@ -208,8 +217,8 @@ void EnemyAISystem::UpdatePatrol(Entity* enemy, AI &ai, float dt) {
         return;
     }
 
-    velocity.direction = dir.normalized();
-    velocity.speed = 60;
+    velocity.direction = safeNormalize(dir);
+    velocity.speed = 3.0f;
 }
 
 Entity* EnemyAISystem::findPlayer(const std::vector<std::unique_ptr<Entity>>& entities) {
@@ -220,9 +229,19 @@ Entity* EnemyAISystem::findPlayer(const std::vector<std::unique_ptr<Entity>>& en
     return nullptr;
 }
 
-float EnemyAISystem::distance(const Transform& a, const Transform& b) {
-    float dx = a.position.x - b.position.x;
-    float dy = a.position.y - b.position.y;
-    return std::sqrt(dx * dx + dy * dy);
+// float EnemyAISystem::distance(const Transform& a, const Transform& b) {
+//     float dx = a.position.x - b.position.x;
+//     float dy = a.position.y - b.position.y;
+//     return std::sqrt(dx * dx + dy * dy);
+// }
+
+float EnemyAISystem::distance(const Transform3D& a, const Transform3D& b) {
+    return glm::distance(a.position, b.position);
 }
 
+glm::vec3 EnemyAISystem::safeNormalize(const glm::vec3& v) {
+    float len = glm::length(v);
+    if (len > 0.0001f)
+        return v / len;
+    return glm::vec3(0.0f);
+}

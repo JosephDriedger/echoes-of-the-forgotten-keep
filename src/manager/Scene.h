@@ -32,6 +32,7 @@ private:
     void createItems();
     void createSpawners();
     void createPlayer();
+    void createEnemy();
 };
 
 #endif //ASSIGNMENT1_SCENE_H

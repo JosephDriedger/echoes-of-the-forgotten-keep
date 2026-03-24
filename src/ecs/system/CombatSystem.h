@@ -9,6 +9,7 @@
 #include <memory>
 #include "Entity.h"
 #include "Vector2D.h"
+#include "glm/vec3.hpp"
 
 class World;
 
@@ -21,7 +22,7 @@ class CombatSystem {
     private:
     World& world;
 
-    void spawnProjectile(Entity* attacker, Vector2D direction, std::string tag);
+    void spawnProjectile(Entity* attacker, glm::vec3 direction, std::string tag);
 };
 
 #endif //INC_8051TUTORIAL_COMBATSYSTEM_H

@@ -111,8 +111,10 @@ struct AI {
 };
 
 struct Patrol {
-    Vector2D pointA{};
-    Vector2D pointB{};
+    // Vector2D pointA{};
+    // Vector2D pointB{};
+    glm::vec3 pointA{};
+    glm::vec3 pointB{};
     bool movingToB = true;
 };
 
@@ -122,13 +124,14 @@ struct Attack {
 };
 
 struct AttackRequest {
-    Vector2D direction{};
+    // Vector2D direction{};
+    glm::vec3 direction{};
     std::string tag;
 };
 
 struct Combat {
     Attack attack;
-    float attackRange = 40.0f;
+    float attackRange = 3.0f;
 };
 
 struct Damage {

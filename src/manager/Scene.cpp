@@ -32,7 +32,7 @@ Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, i
     camera.addComponent<Camera3D>();
 
     createPlayer();
-
+    createEnemy();
     createSpawners();
 
     // add scene state
@@ -107,11 +107,6 @@ void Scene::createPlayer() {
     player.addComponent<PlayerTag>();
     player.addComponent<Velocity3D>(glm::vec3(0,0,0),3.0f);
 
-    auto& player2(world.createEntity());
-    auto& playerTransform2 = player2.addComponent<Transform3D>(glm::vec3(2,0,-4));
-    player2.addComponent<Model>(ModelManager::load("../asset/animations/Rig_Medium_General.glb"));
-    player2.addComponent<Texture3D>(*TextureManager::load3D("../asset/rogue_texture.png"));
-
     auto& wall(world.createEntity());
     auto& wallTransform = wall.addComponent<Transform3D>(glm::vec3(-2,0,-1));
     wall.addComponent<Model>(ModelManager::load("../asset/dungeon/wall.gltf"));
@@ -136,6 +131,33 @@ void Scene::createPlayer() {
     auto& tileTransform2 = tile2.addComponent<Transform3D>(glm::vec3(2,-.1,1));
     tile2.addComponent<Model>(ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
     tile2.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
+}
+
+void Scene::createEnemy() {
+    auto& enemy(world.createEntity());
+    auto& enemyTransform = enemy.addComponent<Transform3D>(glm::vec3(4,0,-4));
+
+    enemy.addComponent<Velocity3D>(glm::vec3(0,0,0), 3.0f);
+
+    enemy.addComponent<AI>(AI{
+        AIState::Idle,     // start idle
+        0.0f,              // state timer
+        7.0f,            // vision range
+        nullptr            // target (Entity*)
+    });
+
+    enemy.addComponent<Patrol>(Patrol{
+        glm::vec3{4, 0, -4},  // point A
+        glm::vec3{20, 0, -40},  // point B
+        true                  // movingToB
+    });
+
+    enemy.addComponent<Model>(ModelManager::load("../asset/Rogue_Hooded.glb"));
+    enemy.addComponent<Texture3D>(*TextureManager::load3D("../asset/rogue_texture.png"));
+    enemy.addComponent<EnemyTag>();
+
+    enemy.addComponent<Combat>(Attack{2.0f, 0.0f}, 4.0f);
+    enemy.addComponent<Health>(3);
 }
 
 void Scene::createSpawners() {
