@@ -49,6 +49,35 @@ add_executable(echoes_of_the_forgotten_keep engine/src/main.cpp
         engine/src/rendering/Animation3D.cpp
         engine/src/rendering/ModelManager.cpp
         engine/src/rendering/AnimationManager.cpp
+        engine/src/ecs/system/EventResponseSystem.cpp
+        engine/src/ecs/system/MainMenuSystem.cpp
+        engine/src/ecs/system/EnemyAISystem.cpp
+        engine/src/ecs/system/DamageSystem.cpp
+        engine/src/ecs/system/CombatSystem.cpp
+        engine/src/ecs/system/MouseInputSystem.cpp
+#add_executable(echoes_of_the_forgotten_keep src/main.cpp
+#        src/Game.cpp
+#        src/TextureManager.cpp
+#        src/Map.cpp
+#        src/GameObject.cpp
+#        src/utils/Vector2D.cpp
+#        src/utils/Collision.cpp
+#        src/ecs/system/CollisionSystem.cpp
+#        src/ecs/World.cpp
+#        src/vendor/tinyxml2.cpp
+#        src/manager/AssetManager.cpp
+#        src/manager/Scene.cpp
+#        src/vendor/glad/glad.c
+#        src/renderer/Shader.cpp
+#        src/renderer/Animation3D.cpp
+#        src/renderer/modelManager.cpp
+#        src/renderer/AnimationManager.cpp
+#        src/ecs/system/EventResponseSystem.cpp
+#        src/ecs/system/MainMenuSystem.cpp
+#        src/ecs/system/EnemyAISystem.cpp
+#        src/ecs/system/DamageSystem.cpp
+#        src/ecs/system/CombatSystem.cpp
+#        src/ecs/system/MouseInputSystem.cpp
 )
 
 target_link_libraries(echoes_of_the_forgotten_keep

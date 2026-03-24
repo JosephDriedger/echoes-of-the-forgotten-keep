@@ -86,3 +86,20 @@ Vector2D& Vector2D::normalize() {
     }
     return *this;
 }
+
+Vector2D Vector2D::normalized() const {
+    float len = std::sqrt(x * x + y * y);
+
+    if (len == 0)
+        return Vector2D(0,0);
+
+    return Vector2D(x / len, y / len);
+}
+
+float Vector2D::length() const {
+    return std::sqrt(x * x + y * y);
+}
+
+float Vector2D::lengthSquared() const {
+    return x * x + y * y;
+}
