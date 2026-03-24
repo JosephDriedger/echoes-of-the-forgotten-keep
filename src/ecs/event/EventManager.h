@@ -6,7 +6,7 @@
 #define ASSIGNMENT1_EVENTMANAGER_H
 #include <functional>
 
-#include "../Entity.h"
+#include "BaseEvent.h"
 
 
 // struct CollisionEvent {

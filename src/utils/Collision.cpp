@@ -30,32 +30,13 @@ bool Collision::AABB(const Collider& colA, const Collider& colB) {
     return false;
 }
 
-glm::vec3 getMin(const Transform3D& t, const Collider3D& c) {
-    return t.position + c.offset - (c.size * 0.5f) * t.scale;
-}
+bool Collision::AABB3D(const Transform3D& transformA, const Collider3D& colliderA,
+                       const Transform3D& transformB, const Collider3D& colliderB) {
 
-glm::vec3 getMax(const Transform3D& t, const Collider3D& c) {
-    return t.position + c.offset + (c.size * 0.5f) * t.scale;
-}
-
-bool Collision::AABB3D(const Transform3D& tA, const Collider3D& cA,
-                       const Transform3D& tB, const Collider3D& cB) {
-
-    if (!cA.enabled || !cB.enabled) return false;
-
-    glm::vec3 minA = getMin(tA, cA);
-    glm::vec3 maxA = getMax(tA, cA);
-
-    glm::vec3 minB = getMin(tB, cB);
-    glm::vec3 maxB = getMax(tB, cB);
-
-    if (
-        maxA.x >= minB.x && minA.x <= maxB.x &&
-        maxA.y >= minB.y && minA.y <= maxB.y &&
-        maxA.z >= minB.z && minA.z <= maxB.z
-    ) {
-        return true;
-    }
-
-    return false;
+    return transformA.position.x < transformB.position.x + colliderB.Width &&
+               transformA.position.x + colliderA.Width > transformB.position.x &&
+               transformA.position.y < transformB.position.y + colliderB.Height &&
+               transformA.position.y + colliderA.Height > transformB.position.y &&
+               transformA.position.z < transformB.position.z + colliderB.Depth &&
+               transformA.position.z + colliderA.Depth > transformB.position.z;
 }

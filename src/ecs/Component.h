@@ -160,11 +160,27 @@ struct Velocity3D {
     float speed{0.0f};
 };
 
-struct Collider3D {
-    std::string tag;
-    glm::vec3 size{1.0f, 1.0f, 1.0f};
-    glm::vec3 offset{0.0f};
-    bool enabled = true;
+struct Collider3D
+{
+    float Width;
+    float Height;
+    float Depth;
+    bool IsTrigger;
+
+    Collider3D()
+        : Width(1.0f), Height(1.0f), Depth(1.0f), IsTrigger(false)
+    {
+    }
+
+    Collider3D(const float width, const float height, const float depth, const bool isTrigger = false)
+        : Width(width), Height(height), Depth(depth), IsTrigger(isTrigger)
+    {
+    }
+
+    Collider3D(const float width, const float height)
+        : Width(width), Height(height), Depth(1.0f), IsTrigger(false)
+    {
+    }
 };
 
 // Transform3D tested
