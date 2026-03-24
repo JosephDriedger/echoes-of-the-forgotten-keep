@@ -2,7 +2,4 @@
 // Created by Joseph Driedger on 3/8/2026.
 //
 
-#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ROOM_H
-#define ECHOES_OF_THE_FORGOTTEN_KEEP_ROOM_H
-
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_ROOM_H
+#include "game/components/Room.h"
