@@ -2,7 +2,4 @@
 // Created by Joseph Driedger on 3/8/2026.
 //
 
-#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ENEMYAI_H
-#define ECHOES_OF_THE_FORGOTTEN_KEEP_ENEMYAI_H
-
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_ENEMYAI_H
+#include "game/components/EnemyAI.h"

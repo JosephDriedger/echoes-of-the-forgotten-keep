@@ -5,26 +5,15 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_APPLICATION_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_APPLICATION_H
 
-#include "engine/core/Time.h"
+#include "engine/core/ApplicationSpecification.h"
+#include "engine/core/Timestep.h"
 #include "engine/input/Input.h"
+#include "engine/rendering/Renderer.h"
 
-#include <SDL3/SDL.h>
-
-#include <memory>
+#include <SDL3/SDL_events.h>
 
 namespace engine
 {
-    class Renderer;
-    class Window;
-
-    struct ApplicationSpecification
-    {
-        const char* Title = "Engine Application";
-        int Width = 1280;
-        int Height = 720;
-        double TargetFrameTimeMs = 1000.0 / 60.0;
-    };
-
     class Application;
 
     class IApplicationListener
@@ -32,59 +21,42 @@ namespace engine
     public:
         virtual ~IApplicationListener() = default;
 
-        virtual bool OnInitialize(Application& application)
-        {
-            (void)application;
-            return true;
-        }
-
-        virtual void OnShutdown(Application& application)
-        {
-            (void)application;
-        }
-
-        virtual void OnEvent(Application& application, const SDL_Event& event)
-        {
-            (void)application;
-            (void)event;
-        }
-
+        virtual bool OnInitialize(Application& application) = 0;
+        virtual void OnShutdown(Application& application) = 0;
+        virtual void OnEvent(Application& application, const SDL_Event& event) = 0;
         virtual void OnUpdate(Application& application, Timestep timestep) = 0;
         virtual void OnRender(Application& application) = 0;
     };
 
+    class Window;
+
     class Application
     {
     public:
-        explicit Application(const ApplicationSpecification& specification = ApplicationSpecification());
+        explicit Application(const ApplicationSpecification& specification);
         ~Application();
 
-        bool Initialize();
-        void Shutdown();
+        Application(const Application&) = delete;
+        Application& operator=(const Application&) = delete;
 
         int Run(IApplicationListener& listener);
 
         void RequestQuit();
-        bool IsRunning() const;
 
-        Timestep Tick();
-
-        const Input& GetInput() const;
+        Renderer& GetRenderer();
         Input& GetInput();
-
         const ApplicationSpecification& GetSpecification() const;
 
     private:
-        bool PumpEvents(IApplicationListener& listener);
-        void RenderFrame(IApplicationListener& listener);
+        bool Initialize();
+        void Shutdown();
+        void ProcessEvents(IApplicationListener& listener);
 
     private:
         ApplicationSpecification m_Specification;
-        std::unique_ptr<Window> m_Window;
-        std::unique_ptr<Renderer> m_Renderer;
+        Window* m_Window;
+        Renderer m_Renderer;
         Input m_Input;
-        Time m_Time;
-        bool m_IsInitialized;
         bool m_IsRunning;
     };
 }
