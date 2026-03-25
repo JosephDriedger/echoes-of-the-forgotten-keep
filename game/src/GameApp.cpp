@@ -46,6 +46,12 @@ namespace game
         std::cout << "[EFK] Shutdown complete.\n";
     }
 
+    void GameApp::OnEvent(engine::Application& application, const SDL_Event& event)
+    {
+        (void)application;
+        (void)event;
+    }
+
     void GameApp::OnUpdate(engine::Application& application, const engine::Timestep timestep)
     {
         (void)application;

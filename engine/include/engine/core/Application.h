@@ -5,6 +5,7 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_APPLICATION_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_APPLICATION_H
 
+#include "engine/rendering/Renderer.h"
 #include "engine/core/Time.h"
 #include "engine/input/Input.h"
 
@@ -31,6 +32,9 @@ namespace engine
     {
     public:
         virtual ~IApplicationListener() = default;
+        Renderer& GetRenderer();
+        Input& GetInput();
+        const ApplicationSpecification& GetSpecification() const;
 
         virtual bool OnInitialize(Application& application)
         {

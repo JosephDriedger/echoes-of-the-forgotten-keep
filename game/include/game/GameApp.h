@@ -20,6 +20,7 @@ namespace game
 
         bool OnInitialize(engine::Application& application) override;
         void OnShutdown(engine::Application& application) override;
+        void OnEvent(engine::Application& application, const SDL_Event& event) override;
         void OnUpdate(engine::Application& application, engine::Timestep timestep) override;
         void OnRender(engine::Application& application) override;
 

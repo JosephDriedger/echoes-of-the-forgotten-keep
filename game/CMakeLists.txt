@@ -23,7 +23,7 @@ target_link_libraries(efk_game
         efk_engine
 )
 
-target_compile_features(efk_game PUBLIC cxx_std_17)
+target_compile_features(efk_game PUBLIC cxx_std_20)
 
 target_compile_definitions(efk_game
         PRIVATE

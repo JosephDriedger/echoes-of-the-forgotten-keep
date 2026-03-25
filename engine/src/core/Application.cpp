@@ -213,4 +213,19 @@ namespace engine
     {
         return m_Specification;
     }
+
+    Renderer& Application::GetRenderer()
+    {
+        return m_Renderer;
+    }
+
+    Input& Application::GetInput()
+    {
+        return m_Input;
+    }
+
+    const ApplicationSpecification& Application::GetSpecification() const
+    {
+        return m_Specification;
+    }
 }

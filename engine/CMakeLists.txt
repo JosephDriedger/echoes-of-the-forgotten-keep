@@ -24,7 +24,7 @@ target_link_libraries(efk_engine
         glad
 )
 
-target_compile_features(efk_engine PUBLIC cxx_std_17)
+target_compile_features(efk_engine PUBLIC cxx_std_20)
 
 target_compile_definitions(efk_engine
         PRIVATE
