@@ -28,7 +28,7 @@ private:
     std::string name;
     SceneType type;
     void createProjectile(Vector2D pos, Vector2D dir, int speed);
-    void createMapColliders();
+    void createDungeon();
     void createItems();
     void createSpawners();
     void createPlayer();
