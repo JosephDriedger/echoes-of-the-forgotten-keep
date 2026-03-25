@@ -17,7 +17,7 @@ int main() {
     float deltaTime = 0.0f;
 
     game = new Game();
-    game->init("echoes_of_the_forgotten_keep Engine", 800, 600, true);
+    game->init("echoes_of_the_forgotten_keep Engine", 1600, 1200, true);
 
     // game loop
     while (game->running()) {

@@ -46,6 +46,7 @@ add_executable(echoes_of_the_forgotten_keep playground/src/main.cpp
         playground/src/rendering/Animation3D.cpp
         playground/src/rendering/ModelManager.cpp
         playground/src/rendering/AnimationManager.cpp
+        playground/src/ecs/system/SpawnSystem.cpp
 )
 
 target_link_libraries(echoes_of_the_forgotten_keep

@@ -6,6 +6,7 @@
 
 #include "AnimationManager.h"
 #include "ModelManager.h"
+#include "SpawnSystem.h"
 
 Scene::Scene (const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName) {
 
@@ -83,4 +84,9 @@ void Scene::createPlayer() {
     auto& tileTransform2 = tile2.addComponent<Transform3D>(glm::vec3(2,-.1,1));
     tile2.addComponent<Model>(ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
     tile2.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
+
+    SpawnSystem::RegisterAsset("wall", "../asset/dungeon/wall.gltf", "../asset/dungeon/dungeon_texture.png");
+
+    SpawnSystem::CreateEntity(world, "wall",glm::vec3(5,0,2), glm::vec3(0,90,0));
+    SpawnSystem::CreateEntity(world, "wall",glm::vec3(5,0,6), glm::vec3(0,90,0));
 }
