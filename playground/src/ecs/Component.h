@@ -30,15 +30,30 @@ struct Velocity {
     float speed{};
 };
 
+enum class RenderLayer {
+    World,
+    UI
+};
+
 struct Sprite {
     SDL_Texture *texture = nullptr;
     SDL_FRect src{};
     SDL_FRect dst{};
+    RenderLayer renderLayer = RenderLayer::World;
+    bool visible = true;
+};
+
+struct Clickable {
+    std::function<void()> onPressed{};
+    std::function<void()> onReleased{};
+    std::function<void()> onCancel{};
+    bool pressed = false;
 };
 
 struct Collider {
     std::string tag;
     SDL_FRect rect{};
+    bool enabled = true;
 };
 
 struct Camera {
@@ -58,17 +73,105 @@ struct SceneState {
     int coinsCollected = 0;
 };
 
+// Combat
+
+struct Health {
+    int currentHealth{};
+};
+
+enum class AIState {
+    Idle,
+    Patrol,
+    Chase,
+    Attack
+};
+
+struct AI {
+    AIState state = AIState::Idle;
+    float stateTimer = 0.0f;
+
+    float visionRange = 200.0f;
+
+    Entity* target = nullptr;
+
+    float maxChaseTime = 5.0f;
+    float loseTargetCooldown = 2.0f;
+    float loseTargetTimer = 0.0f;
+};
+
+struct Patrol {
+    // Vector2D pointA{};
+    // Vector2D pointB{};
+    glm::vec3 pointA{};
+    glm::vec3 pointB{};
+    bool movingToB = true;
+};
+
+struct Attack {
+    float cooldown = 3.0f;
+    float timer = 0.0f;
+};
+
+struct AttackRequest {
+    // Vector2D direction{};
+    glm::vec3 direction{};
+    std::string tag;
+};
+
+struct Combat {
+    Attack attack;
+    float attackRange = 1.0f;
+    Entity* weapon = nullptr;
+};
+
+struct Damage {
+    int amount = 1;
+};
+
+struct DamageEvent {
+    Entity* target = nullptr;
+    int amount = 1;
+};
+
+struct Parent {
+    Entity* entity = nullptr;
+};
+
+struct Children {
+    std::vector<Entity*> children{};
+};
+
+struct EnemyTag{};
+
 // 3D Components
 
 struct Velocity3D {
     glm::vec3 direction{0.0f};
     float speed{0.0f};
+    float chase{0.0f};
 };
 
 struct Collider3D {
     std::string tag;
-    glm::vec3 size{1.0f, 1.0f, 1.0f};
-    glm::vec3 offset{0.0f};
+    float Width;
+    float Height;
+    float Depth;
+    bool IsTrigger;
+
+    Collider3D()
+        : Width(1.0f), Height(1.0f), Depth(1.0f), IsTrigger(false)
+    {
+    }
+
+    Collider3D(const float width, const float height, const float depth, const bool isTrigger = false)
+        : Width(width), Height(height), Depth(depth), IsTrigger(isTrigger)
+    {
+    }
+
+    Collider3D(const float width, const float height)
+        : Width(width), Height(height), Depth(1.0f), IsTrigger(false)
+    {
+    }
 };
 
 // Transform3D tested
@@ -162,6 +265,7 @@ struct Animator
     int health = 3;
 
     float hitTimer = 0.0f;
+    float corpseTimer = 3.0f;
 
     AnimState currentState = AnimState::Idle;
     AnimState previousState = AnimState::Idle;
@@ -179,7 +283,15 @@ struct BoneAttachment
     glm::mat4 offset = glm::mat4(1.0f);
 };
 
-struct PlayerTag{};
-struct ProjectileTag {};
+struct PlayerTag {};
+struct ProjectileTag
+{
+    float duration = 5.0;
+};
+
+struct Switch {
+    Entity* door = nullptr;
+    bool pressed = false;
+};
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H

@@ -12,7 +12,7 @@
 
 class AnimationStateSystem {
 public:
-    void update(const std::vector<std::unique_ptr<Entity>>& entities) {
+    void update(const std::vector<std::unique_ptr<Entity>>& entities, float dt) {
         for (auto& e : entities) {
             if (e->hasComponent<Velocity3D>() && e->hasComponent<Animator>()) {
 
@@ -25,6 +25,10 @@ public:
 
                 if (a.isDead) {
                     a.currentState = AnimState::Death;
+                    a.corpseTimer -= dt;
+                    if (a.corpseTimer <= 0.0f) {
+                        e->destory();
+                    }
                 }
                 else if (a.isHit) {
                     a.currentState = AnimState::HitReact;

@@ -14,6 +14,7 @@ public:
     // axis-aligned bounding box
     static bool AABB(const SDL_FRect& rectA, const SDL_FRect& rectB);
     static bool AABB(const Collider& colA, const Collider& colB);
+    static bool AABB3D(const Transform3D& tA, const Collider3D& cA, const Transform3D& tB, const Collider3D& cB);
 };
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COLLISION_H
