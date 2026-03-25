@@ -55,7 +55,7 @@ void CombatSystem::spawnProjectile(Entity* attacker, glm::vec3 direction, std::s
     auto& t = projectile.addComponent<Transform3D>();
     t.scale = glm::vec3(1.0);
 
-    float spawnDistance = 1.5f; // tweak this
+    float spawnDistance = 1.3f; // tweak this
 
     glm::vec3 forward = glm::normalize(direction);
     t.position = transform.position + forward * spawnDistance;
@@ -64,7 +64,7 @@ void CombatSystem::spawnProjectile(Entity* attacker, glm::vec3 direction, std::s
     v.direction = glm::normalize(direction);
     v.speed = 0;
 
-    auto& c = projectile.addComponent<Collider3D>();
+    auto& c = projectile.addComponent<Collider3D>(0.5, 0.5, 0.5);
     c.tag = tag;
     // c.rect = {t.position.x, t.position.y, 16, 16};
 

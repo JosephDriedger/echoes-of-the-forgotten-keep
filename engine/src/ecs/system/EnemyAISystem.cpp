@@ -108,12 +108,16 @@ void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, Animator& animator, floa
         animator.isAttacking = true;
         // std::cout << animator.isAttacking << std::endl;
         // spawnProjectile(enemy, ai.target);
-        if (!ai.target || !ai.target->hasComponent<Transform3D>()) {
+        if (!ai.target) {
             return;
         }
-        auto& targetTransform = ai.target->getComponent<Transform3D>();
         auto& transform = enemy->getComponent<Transform3D>();
-        glm::vec3 dir = safeNormalize(targetTransform.position - transform.position);
+        glm::vec3 forward;
+        forward.x = sin(glm::radians(transform.rotation.y));
+        forward.z = cos(glm::radians(transform.rotation.y));
+        forward.y = 0.0f;
+        forward = glm::normalize(forward);
+        glm::vec3 dir = forward;
         auto& req = enemy->addComponent<AttackRequest>();
         req.direction = dir;
         req.tag = "projectile";
