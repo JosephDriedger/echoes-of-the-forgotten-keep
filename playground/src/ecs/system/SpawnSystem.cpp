@@ -6,50 +6,55 @@
 
 #include "ModelManager.h"
 
-std::unordered_map<std::string, SpawnDefinition*> SpawnSystem::definitions;
+std::unordered_map<std::string, SpawnDefinition> SpawnSystem::definitions;
 
 Entity& SpawnSystem::CreateEntity(World& world,
-                            const std::string& name,
-                            const glm::vec3& position,
-                            const glm::vec3& rotation) {
+                                  const std::string& name,
+                                  const glm::vec3& position,
+                                  const glm::vec3& rotation) {
 
     auto it = definitions.find(name);
 
     if (it == definitions.end()) {
-        std::cerr << "SpawnSystem: Unknown entity type: " << name << std::endl;
+        throw std::runtime_error("Unknown entity type: " + name);
     }
 
-    const SpawnDefinition* def = it->second;
+    const SpawnDefinition& def = it->second;
 
     auto& entity = world.createEntity();
 
-    // Transform
     entity.addComponent<Transform3D>(position, rotation);
 
-    // Model
-    if (!def->modelPath.empty()) {
-        entity.addComponent<Model>(*ModelManager::load(def->modelPath));
-    }
+    if (def.model)
+        entity.addComponent<Model>(*def.model);
 
-    // Texture
-    if (def->texturePath) {
-        entity.addComponent<Texture3D>(*TextureManager::load3D(def->texturePath));
-    }
-
-    // Collider
-    //entity.addComponent<Collider3D>();
+    if (def.texture)
+        entity.addComponent<Texture3D>(*def.texture);
 
     return entity;
 }
 
-bool SpawnSystem::RegisterAsset(const std::string name, const std::string &modelPath, const char *texturePath) {
-    auto it = definitions.find(name);
+bool SpawnSystem::RegisterAsset(const std::string& name,
+                                const std::string& modelPath,
+                                const std::string& texturePath) {
 
-    if (it != definitions.end()) {
+    if (definitions.find(name) != definitions.end()) {
         std::cerr << "SpawnSystem: entity already registered: " << name << std::endl;
         return false;
     }
-    auto* definition = new SpawnDefinition(modelPath, texturePath);
 
-    return definitions[name] = definition;
+    SpawnDefinition def(modelPath, texturePath);
+
+    def.model = ModelManager::load(modelPath);
+
+    if (!texturePath.empty()) {
+        def.texture = new Texture3D(*TextureManager::load3D(texturePath.c_str()));
+    }
+    if (def.model != nullptr && def.texture != nullptr) {
+        definitions.insert(std::make_pair(name, def));
+    }
+
+    std::cout << "Registered: " << name << std::endl;
+
+    return true;
 }

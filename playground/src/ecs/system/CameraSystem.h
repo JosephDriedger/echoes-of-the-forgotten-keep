@@ -35,8 +35,8 @@ class CameraSystem {
                 // this position the camera so the player is at the center of its view
                 // follow player
                 transform.position.x = playerTransform.position.x;
-                transform.position.y = playerTransform.position.y + 8.0f;
-                transform.position.z = playerTransform.position.z + 8.0f;
+                transform.position.y = playerTransform.position.y + 12.0f;
+                transform.position.z = playerTransform.position.z + 4.0f;
 
                 // look at player
                 glm::vec3 direction = playerTransform.position - transform.position;
