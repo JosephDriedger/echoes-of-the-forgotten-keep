@@ -265,6 +265,7 @@ struct Animator
     int health = 3;
 
     float hitTimer = 0.0f;
+    float corpseTimer = 3.0f;
 
     AnimState currentState = AnimState::Idle;
     AnimState previousState = AnimState::Idle;

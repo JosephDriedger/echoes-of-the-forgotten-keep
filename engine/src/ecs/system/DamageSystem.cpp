@@ -33,7 +33,10 @@ void DamageSystem::update(std::vector<std::unique_ptr<Entity>>& entities)
 
             if (health.currentHealth <= 0)
             {
-                dmg.target->destory();
+                if (dmg.target->hasComponent<Animator>()) {
+                    auto& anim = dmg.target->getComponent<Animator>();
+                    anim.isDead = true;
+                }
                 if (dmg.target->hasComponent<PlayerTag>()) {
                     Game::onSceneChangeRequest("gameover");
                 }

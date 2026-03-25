@@ -65,7 +65,7 @@ public:
         cameraSystem.update(entities);
         animation3DSystem.update(entities, dt);
         attachmentSystem.update(entities);
-        animationStateSystem.update(entities);
+        animationStateSystem.update(entities, dt);
         enemyAISystem.update(entities, dt);
         combatSystem.update(entities, dt);
         damageSystem.update(entities);

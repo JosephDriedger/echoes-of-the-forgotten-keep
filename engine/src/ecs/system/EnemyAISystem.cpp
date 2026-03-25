@@ -32,6 +32,12 @@ void EnemyAISystem::update(std::vector<std::unique_ptr<Entity> > &entities, floa
 
     for (auto enemy : enemies)
     {
+        if (enemy->hasComponent<Health>()) {
+            auto& health = enemy->getComponent<Health>();
+            if (health.currentHealth <= 0) {
+                return;
+            }
+        }
         auto& ai = enemy->getComponent<AI>();
         auto& animState = enemy->getComponent<Animator>();
 
