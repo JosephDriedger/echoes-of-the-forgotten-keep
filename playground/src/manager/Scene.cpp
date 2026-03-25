@@ -14,9 +14,20 @@ Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, i
     camera.addComponent<Transform3D>(glm::vec3(0,1,5)); // back a bit
     camera.addComponent<Camera3D>();
 
+    // Preload Assets
+    TextureManager::load3D("../asset/dungeon/dungeon_texture.png");
+    ModelManager::load("../asset/dungeon/wall.gltf");
+    ModelManager::load("../asset/dungeon/wall_corner.gltf");
+    ModelManager::load("../asset/dungeon/wall_crossing.gltf");
+    ModelManager::load("../asset/dungeon/wall_Tsplit.gltf");
+    ModelManager::load("../asset/dungeon/wall_doorway_scaffold.gltf");
+    ModelManager::load("../asset/dungeon/door.gltf");
+    ModelManager::load("../asset/dungeon/floor_tile_large.gltf");
+    ModelManager::load("../asset/dungeon/floor_tile_small.gltf");
+
     createPlayer();
     createEnemy();
-    //createDungeon();
+    createDungeon();
 
     // add scene state
     auto& state (world.createEntity());

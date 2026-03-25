@@ -16,13 +16,13 @@
 
 #include "assimp/Importer.hpp"
 
-std::unordered_map<std::string, Model*> ModelManager::models;
+std::unordered_map<std::string, Model> ModelManager::models;
 
 Model* ModelManager::load(const std::string& modelPath) {
 
     auto it = models.find(modelPath);
     if (it != models.end()) {
-        return it->second;
+        return &it->second;
     }
 
     Assimp::Importer importer;

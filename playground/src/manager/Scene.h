@@ -30,7 +30,7 @@ private:
     void createProjectile(Vector2D pos, Vector2D dir, int speed);
     void createDungeon();
     void createItems();
-    void createSpawners();
+    void preloadAssets();
     void createPlayer();
     void createEnemy();
 };
