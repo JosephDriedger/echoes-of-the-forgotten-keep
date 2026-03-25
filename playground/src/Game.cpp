@@ -36,7 +36,7 @@ void Game::init(const char *title, int width, int height, bool fullscreen) {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 
-        window = SDL_CreateWindow(title, width, height, SDL_WINDOW_OPENGL);
+        window = SDL_CreateWindow(title, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
         if (window) {
             std::cout << "Window created..." << std::endl;
         }
