@@ -7,10 +7,11 @@
 
 #include <string>
 
+#include "engine/core/Timestep.h"
+
 namespace engine
 {
     class Application;
-    class Timestep;
 
     class Scene
     {

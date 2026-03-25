@@ -4,6 +4,7 @@
 
 #include "engine/rendering/Texture.h"
 
+#include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <glad/gl.h>
 
@@ -12,24 +13,6 @@
 
 namespace engine
 {
-    namespace
-    {
-        GLenum ResolveTextureFormat(const int channels)
-        {
-            switch (channels)
-            {
-            case 1:
-                return GL_RED;
-            case 3:
-                return GL_RGB;
-            case 4:
-                return GL_RGBA;
-            default:
-                return GL_RGBA;
-            }
-        }
-    }
-
     Texture::Texture()
         : m_Id(0),
           m_Width(0),
@@ -81,20 +64,34 @@ namespace engine
     {
         Destroy();
 
-        SDL_Surface* surface = IMG_Load(path.c_str());
+        SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 
-        if (!surface)
+        if (loadedSurface == nullptr)
         {
-            std::cerr << "[Texture] Failed to load image: " << path
-                      << " (" << SDL_GetError() << ")\n";
+            std::cerr << "[Texture] Failed to load image: "
+                      << path
+                      << " ("
+                      << SDL_GetError()
+                      << ")\n";
             return false;
         }
 
-        m_Width = surface->w;
-        m_Height = surface->h;
+        SDL_Surface* convertedSurface = SDL_ConvertSurface(loadedSurface, SDL_PIXELFORMAT_RGBA32);
+        SDL_DestroySurface(loadedSurface);
+        loadedSurface = nullptr;
 
-        const int channelCount = surface->format->bytes_per_pixel;
-        const GLenum format = ResolveTextureFormat(channelCount);
+        if (convertedSurface == nullptr)
+        {
+            std::cerr << "[Texture] Failed to convert image to RGBA32: "
+                      << path
+                      << " ("
+                      << SDL_GetError()
+                      << ")\n";
+            return false;
+        }
+
+        m_Width = convertedSurface->w;
+        m_Height = convertedSurface->h;
 
         glGenTextures(1, &m_Id);
         glBindTexture(GL_TEXTURE_2D, m_Id);
@@ -104,22 +101,24 @@ namespace engine
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
-            static_cast<int>(format),
+            GL_RGBA,
             m_Width,
             m_Height,
             0,
-            format,
+            GL_RGBA,
             GL_UNSIGNED_BYTE,
-            surface->pixels
+            convertedSurface->pixels
         );
 
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        SDL_DestroySurface(surface);
+        SDL_DestroySurface(convertedSurface);
 
         m_IsLoaded = true;
         return true;

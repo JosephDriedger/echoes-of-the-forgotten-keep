@@ -11,7 +11,8 @@
 namespace game
 {
     GameApp::GameApp()
-        : m_SceneManager()
+        : m_Specification(),
+          m_SceneManager()
     {
         m_Specification.Title = "Echoes of the Forgotten Keep";
         m_Specification.Width = 1280;
@@ -27,14 +28,25 @@ namespace game
 
     bool GameApp::OnInitialize(engine::Application& application)
     {
-        std::cout << "[EFK] Entering main loop.\n";
+        std::cout << "[GameApp] OnInitialize started.\n";
 
         if (!m_SceneManager.Initialize(application))
         {
+            std::cerr << "[GameApp] SceneManager initialization failed.\n";
             return false;
         }
 
-        m_SceneManager.ChangeScene<GameplayScene>();
+        std::cout << "[GameApp] SceneManager initialized.\n";
+        std::cout << "[GameApp] Changing to GameplayScene.\n";
+
+        if (!m_SceneManager.ChangeScene<GameplayScene>())
+        {
+            std::cerr << "[GameApp] Failed to activate GameplayScene.\n";
+            return false;
+        }
+
+        std::cout << "[GameApp] GameplayScene activated.\n";
+        std::cout << "[EFK] Entering main loop.\n";
         return true;
     }
 

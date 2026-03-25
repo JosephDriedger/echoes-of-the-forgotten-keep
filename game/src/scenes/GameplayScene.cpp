@@ -40,11 +40,11 @@ namespace game
             "default",
             "asset/shaders/vertex.glsl",
             "asset/shaders/fragment.glsl");
-        m_Texture = m_AssetManager.GetTextureManager().Load("asset/textures/debug.png");
+        m_Texture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
 
         application.GetRenderer().SetActiveCamera(&m_Camera);
 
-        return m_Mesh != nullptr && m_Shader != nullptr;
+        return m_Mesh != nullptr && m_Shader != nullptr && m_Texture != nullptr;
     }
 
     void GameplayScene::OnDestroy()
@@ -69,7 +69,7 @@ namespace game
     {
         (void)application;
 
-        if (!m_Mesh || !m_Shader)
+        if (!m_Mesh || !m_Shader || !m_Texture)
         {
             return;
         }
@@ -87,14 +87,8 @@ namespace game
         };
 
         m_Shader->SetMat4("model", identity);
+        m_Shader->SetInt("texture_diffuse1", 0);
 
-        if (m_Texture)
-        {
-            m_Shader->SetInt("texture_diffuse1", 0);
-            m_RenderSystem.Draw(*m_Mesh, *m_Shader, *m_Texture);
-            return;
-        }
-
-        m_RenderSystem.Draw(*m_Mesh, *m_Shader);
+        m_RenderSystem.Draw(*m_Mesh, *m_Shader, *m_Texture);
     }
 }

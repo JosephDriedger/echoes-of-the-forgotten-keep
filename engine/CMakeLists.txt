@@ -16,12 +16,26 @@ add_library(efk_engine STATIC
 target_include_directories(efk_engine
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/third_party/glad/include
+        ${EFK_SDL3_DIR}/include
+        ${EFK_SDL3_IMAGE_DIR}/include
+        ${EFK_ASSIMP_DIR}/include
+        ${EFK_ASSIMP_DIR}/build/include
+)
+
+target_link_directories(efk_engine
+        PUBLIC
+        ${EFK_SDL3_DIR}/lib
+        ${EFK_SDL3_IMAGE_DIR}/lib
+        ${EFK_ASSIMP_DIR}/build/lib
 )
 
 target_link_libraries(efk_engine
         PUBLIC
-        efk::dependencies
         glad
+        SDL3
+        SDL3_image
+        assimp
 )
 
 target_compile_features(efk_engine PUBLIC cxx_std_20)

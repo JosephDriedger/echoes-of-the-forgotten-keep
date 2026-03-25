@@ -3,10 +3,13 @@
 #include "engine/scene/Scene.h"
 #include "engine/core/Application.h"
 
+#include <iostream>
+#include <memory>
+
 namespace engine
 {
     template<typename TScene>
-    void SceneManager::ChangeScene()
+    bool SceneManager::ChangeScene()
     {
         if (m_ActiveScene)
         {
@@ -15,9 +18,19 @@ namespace engine
 
         m_ActiveScene = std::make_shared<TScene>();
 
-        if (m_ActiveScene)
+        if (!m_ActiveScene)
         {
-            m_ActiveScene->OnCreate(*m_Application);
+            return false;
         }
+
+        if (!m_ActiveScene->OnCreate(*m_Application))
+        {
+            std::cerr << "[SceneManager] Scene OnCreate() failed: "
+                      << m_ActiveScene->GetName() << '\n';
+            m_ActiveScene.reset();
+            return false;
+        }
+
+        return true;
     }
 }

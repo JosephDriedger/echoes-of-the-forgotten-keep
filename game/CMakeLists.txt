@@ -16,6 +16,7 @@ add_library(efk_game STATIC
 target_include_directories(efk_game
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/engine/include
 )
 
 target_link_libraries(efk_game

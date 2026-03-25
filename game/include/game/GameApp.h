@@ -6,6 +6,7 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEAPP_H
 
 #include "engine/core/Application.h"
+#include "engine/core/ApplicationSpecification.h"
 #include "engine/core/Timestep.h"
 #include "engine/scene/SceneManager.h"
 

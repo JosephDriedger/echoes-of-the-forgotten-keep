@@ -3,19 +3,22 @@
 //
 
 #include "engine/core/Application.h"
-#include "engine/platform/Window.h"
-#include "engine/rendering/Renderer.h"
 
+#include "engine/platform/Window.h"
+
+#define SDL_MAIN_HANDLED
+#include <SDL3/SDL_main.h>
 #include <SDL3/SDL.h>
 
-#include <cmath>
 #include <iostream>
 
 namespace engine
 {
     Application::Application(const ApplicationSpecification& specification)
         : m_Specification(specification),
-          m_IsInitialized(false),
+          m_Window(nullptr),
+          m_Renderer(),
+          m_Input(),
           m_IsRunning(false)
     {
     }
@@ -25,193 +28,60 @@ namespace engine
         Shutdown();
     }
 
-    bool Application::Initialize()
-    {
-        if (m_IsInitialized)
-        {
-            return true;
-        }
-
-        if (!SDL_Init(SDL_INIT_VIDEO))
-        {
-            std::cerr << "SDL Init failed: " << SDL_GetError() << std::endl;
-            return false;
-        }
-
-        m_Window = std::make_unique<Window>();
-
-        if (!m_Window->Create(
-                m_Specification.Title,
-                m_Specification.Width,
-                m_Specification.Height))
-        {
-            m_Window.reset();
-            m_Input.Reset();
-            SDL_Quit();
-            return false;
-        }
-
-        m_Renderer = std::make_unique<Renderer>();
-
-        if (!m_Renderer->Initialize(*m_Window))
-        {
-            m_Renderer.reset();
-            m_Window.reset();
-            m_Input.Reset();
-            SDL_Quit();
-            return false;
-        }
-
-        m_Input.Reset();
-        m_Time.Reset();
-        m_IsInitialized = true;
-        return true;
-    }
-
-    void Application::Shutdown()
-    {
-        if (!m_IsInitialized)
-        {
-            return;
-        }
-
-        m_IsRunning = false;
-        m_Input.Reset();
-
-        if (m_Renderer)
-        {
-            m_Renderer->Shutdown();
-            m_Renderer.reset();
-        }
-
-        m_Window.reset();
-        SDL_Quit();
-        m_IsInitialized = false;
-    }
-
     int Application::Run(IApplicationListener& listener)
     {
+        std::cout << "[Application] Run started.\n";
+
         if (!Initialize())
         {
+            std::cerr << "[Application] Initialize() failed.\n";
             return -1;
         }
 
+        std::cout << "[Application] Initialize() succeeded.\n";
+
         if (!listener.OnInitialize(*this))
         {
-            std::cerr << "[Engine] Listener initialization failed.\n";
+            std::cerr << "[Application] Listener OnInitialize() failed.\n";
             Shutdown();
             return -1;
         }
 
+        std::cout << "[Application] Listener OnInitialize() succeeded.\n";
+
         m_IsRunning = true;
+
+        Uint64 previousCounter = SDL_GetPerformanceCounter();
+        const double performanceFrequency = static_cast<double>(SDL_GetPerformanceFrequency());
 
         while (m_IsRunning)
         {
-            const Uint64 frameStart = SDL_GetTicks();
+            const Uint64 currentCounter = SDL_GetPerformanceCounter();
+            const double deltaSeconds =
+                static_cast<double>(currentCounter - previousCounter) / performanceFrequency;
+            previousCounter = currentCounter;
 
-            if (!PumpEvents(listener))
-            {
-                break;
-            }
+            ProcessEvents(listener);
 
-            const Timestep timestep = Tick();
+            const Timestep timestep(deltaSeconds);
 
             listener.OnUpdate(*this, timestep);
 
-            if (!m_IsRunning)
-            {
-                break;
-            }
-
-            RenderFrame(listener);
-
-            const Uint64 frameEnd = SDL_GetTicks();
-            const double frameTimeMs = static_cast<double>(frameEnd - frameStart);
-
-            if (m_Specification.TargetFrameTimeMs > 0.0 &&
-                frameTimeMs < m_Specification.TargetFrameTimeMs)
-            {
-                const double remainingMs = m_Specification.TargetFrameTimeMs - frameTimeMs;
-                SDL_Delay(static_cast<Uint32>(std::ceil(remainingMs)));
-            }
+            m_Renderer.BeginFrame();
+            listener.OnRender(*this);
+            m_Renderer.EndFrame();
         }
 
         listener.OnShutdown(*this);
         Shutdown();
 
+        std::cout << "[Application] Shutdown complete.\n";
         return 0;
     }
 
     void Application::RequestQuit()
     {
         m_IsRunning = false;
-    }
-
-    bool Application::IsRunning() const
-    {
-        return m_IsRunning;
-    }
-
-    bool Application::PumpEvents(IApplicationListener& listener)
-    {
-        if (!m_IsInitialized)
-        {
-            return false;
-        }
-
-        m_Input.BeginFrame();
-
-        SDL_Event event;
-
-        while (SDL_PollEvent(&event))
-        {
-            m_Input.ProcessEvent(event);
-            listener.OnEvent(*this, event);
-        }
-
-        if (m_Input.IsQuitRequested())
-        {
-            RequestQuit();
-        }
-
-        return m_IsRunning;
-    }
-
-    void Application::RenderFrame(IApplicationListener& listener)
-    {
-        if (!m_IsInitialized || !m_Renderer || !m_Renderer->IsInitialized())
-        {
-            return;
-        }
-
-        m_Renderer->BeginFrame();
-        listener.OnRender(*this);
-        m_Renderer->EndFrame();
-    }
-
-    Timestep Application::Tick()
-    {
-        if (!m_IsInitialized)
-        {
-            return Timestep(0.0);
-        }
-
-        return m_Time.Tick();
-    }
-
-    const Input& Application::GetInput() const
-    {
-        return m_Input;
-    }
-
-    Input& Application::GetInput()
-    {
-        return m_Input;
-    }
-
-    const ApplicationSpecification& Application::GetSpecification() const
-    {
-        return m_Specification;
     }
 
     Renderer& Application::GetRenderer()
@@ -227,5 +97,79 @@ namespace engine
     const ApplicationSpecification& Application::GetSpecification() const
     {
         return m_Specification;
+    }
+
+    bool Application::Initialize()
+    {
+        std::cout << "[Application] Initializing SDL.\n";
+
+        SDL_SetMainReady();
+
+        if (!SDL_Init(SDL_INIT_VIDEO))
+        {
+            std::cerr << "[Application] SDL_Init failed: " << SDL_GetError() << '\n';
+            return false;
+        }
+
+        std::cout << "[Application] SDL initialized.\n";
+
+        m_Window = new Window();
+
+        std::cout << "[Application] Creating window.\n";
+
+        if (!m_Window->Create(
+            m_Specification.Title.c_str(),
+            m_Specification.Width,
+            m_Specification.Height))
+        {
+            std::cerr << "[Application] Window creation failed.\n";
+            delete m_Window;
+            m_Window = nullptr;
+            SDL_Quit();
+            return false;
+        }
+
+        std::cout << "[Application] Window created.\n";
+        std::cout << "[Application] Initializing renderer.\n";
+
+        if (!m_Renderer.Initialize(*m_Window))
+        {
+            std::cerr << "[Application] Renderer initialization failed.\n";
+            Shutdown();
+            return false;
+        }
+
+        std::cout << "[Application] Renderer initialized.\n";
+        return true;
+    }
+
+    void Application::Shutdown()
+    {
+        m_Renderer.Shutdown();
+
+        if (m_Window)
+        {
+            m_Window->Destroy();
+            delete m_Window;
+            m_Window = nullptr;
+        }
+
+        SDL_Quit();
+    }
+
+    void Application::ProcessEvents(IApplicationListener& listener)
+    {
+        SDL_Event event;
+
+        while (SDL_PollEvent(&event))
+        {
+            m_Input.ProcessEvent(event);
+            listener.OnEvent(*this, event);
+
+            if (event.type == SDL_EVENT_QUIT)
+            {
+                RequestQuit();
+            }
+        }
     }
 }

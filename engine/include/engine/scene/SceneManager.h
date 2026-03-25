@@ -18,7 +18,7 @@ namespace engine
         void Shutdown();
 
         template<typename TScene>
-        void ChangeScene();
+        bool ChangeScene();
 
         void Update(Timestep timestep);
         void Render();
