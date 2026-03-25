@@ -42,6 +42,10 @@ void Scene::createPlayer() {
     sword.addComponent<Model>(ModelManager::load("../asset/sword_1handed.gltf"));
     sword.addComponent<Texture3D>(*TextureManager::load3D("../asset/knight_texture.png"));
     sword.addComponent<BoneAttachment>(&player, "handslot.r", glm::mat4(1.0f));
+    // sword.addComponent<ProjectileTag>(true, false);
+    // sword.addComponent<Parent>().entity = &player;
+    // sword.addComponent<Collider3D>(0.5f, 0.5f, 0.5f);
+    // sword.addComponent<Damage>(1);
 
     auto& shield(world.createEntity());
     auto& shieldTransform = shield.addComponent<Transform3D>(glm::vec3(-2,0,0));
@@ -51,6 +55,11 @@ void Scene::createPlayer() {
 
     player.addComponent<PlayerTag>();
     player.addComponent<Velocity3D>(glm::vec3(0,0,0),3.0f);
+
+    auto& playerCombat = player.addComponent<Combat>(Attack{0.0f, 0.0f}, 2.0f);
+    player.addComponent<Health>(5);
+    player.addComponent<Collider3D>(1, 7, 0.5);
+    // playerCombat.weapon = &sword;
 
     // auto& player2(world.createEntity());
     // auto& playerTransform2 = player2.addComponent<Transform3D>(glm::vec3(2,0,2));
@@ -112,12 +121,19 @@ void Scene::createEnemy() {
     auto& animator2 = enemy.addComponent<Animator>();
     animator2.currentClip = 7;
 
-    enemy.addComponent<Combat>(Attack{2.0f, 0.0f}, 2.0f);
+    auto& enemyCombat = enemy.addComponent<Combat>(Attack{2.0f, 0.0f}, 2.0f);
     enemy.addComponent<Health>(3);
+    enemy.addComponent<Collider3D>(1, 7, 0.5);
 
     auto& sword(world.createEntity());
     auto& swordTransform = sword.addComponent<Transform3D>(glm::vec3(-2,0,0));
     sword.addComponent<Model>(ModelManager::load("../asset/sword_1handed.gltf"));
     sword.addComponent<Texture3D>(*TextureManager::load3D("../asset/knight_texture.png"));
     sword.addComponent<BoneAttachment>(&enemy, "handslot.r", glm::mat4(1.0f));
+    // sword.addComponent<ProjectileTag>(true, false);
+    // sword.addComponent<Parent>().entity = &enemy;
+    // sword.addComponent<Collider3D>(0.5f, 0.5f, 0.5f);
+    // sword.addComponent<Damage>(1);
+    // enemyCombat.weapon = &sword;
+
 }

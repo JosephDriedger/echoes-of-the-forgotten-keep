@@ -33,10 +33,15 @@ bool Collision::AABB(const Collider& colA, const Collider& colB) {
 bool Collision::AABB3D(const Transform3D& transformA, const Collider3D& colliderA,
                        const Transform3D& transformB, const Collider3D& colliderB) {
 
-    return transformA.position.x < transformB.position.x + colliderB.Width &&
-               transformA.position.x + colliderA.Width > transformB.position.x &&
-               transformA.position.y < transformB.position.y + colliderB.Height &&
-               transformA.position.y + colliderA.Height > transformB.position.y &&
-               transformA.position.z < transformB.position.z + colliderB.Depth &&
-               transformA.position.z + colliderA.Depth > transformB.position.z;
+    // return transformA.position.x < transformB.position.x + colliderB.Width &&
+    //            transformA.position.x + colliderA.Width > transformB.position.x &&
+    //            transformA.position.y < transformB.position.y + colliderB.Height &&
+    //            transformA.position.y + colliderA.Height > transformB.position.y &&
+    //            transformA.position.z < transformB.position.z + colliderB.Depth &&
+    //            transformA.position.z + colliderA.Depth > transformB.position.z;
+
+    return
+    abs(transformA.position.x - transformB.position.x) < (colliderA.Width * 0.5f + colliderB.Width * 0.5f) &&
+    abs(transformA.position.y - transformB.position.y) < (colliderA.Height * 0.5f + colliderB.Height * 0.5f) &&
+    abs(transformA.position.z - transformB.position.z) < (colliderA.Depth * 0.5f + colliderB.Depth * 0.5f);
 }

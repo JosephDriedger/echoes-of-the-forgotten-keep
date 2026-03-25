@@ -55,7 +55,8 @@ add_executable(echoes_of_the_forgotten_keep engine/src/main.cpp
         engine/src/ecs/system/DamageSystem.cpp
         engine/src/ecs/system/CombatSystem.cpp
         engine/src/ecs/system/MouseInputSystem.cpp
-#add_executable(echoes_of_the_forgotten_keep src/main.cpp
+        engine/src/ecs/system/DebugRenderSystem.cpp
+        #add_executable(echoes_of_the_forgotten_keep src/main.cpp
 #        src/Game.cpp
 #        src/TextureManager.cpp
 #        src/Map.cpp

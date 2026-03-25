@@ -104,9 +104,9 @@ void EnemyAISystem::UpdateAttack(Entity* enemy, AI &ai, Animator& animator, floa
         // For now we just print
         std::cout << "Enemy attacks player!" << std::endl;
         // animator.currentState = AnimState::Attack1;
-        std::cout << animator.isAttacking << std::endl;
+        // std::cout << animator.isAttacking << std::endl;
         animator.isAttacking = true;
-        std::cout << animator.isAttacking << std::endl;
+        // std::cout << animator.isAttacking << std::endl;
         // spawnProjectile(enemy, ai.target);
         if (!ai.target || !ai.target->hasComponent<Transform3D>()) {
             return;
@@ -164,8 +164,6 @@ void EnemyAISystem::UpdateChase(Entity* enemy, AI &ai, Animator& animator, float
     // make sure the target has a Transform
     if (!ai.target->hasComponent<Transform3D>()) return;
     auto& targetTransform = ai.target->getComponent<Transform3D>();
-
-    transform.position += velocity.direction * velocity.speed * dt;
 
     glm::vec3 dir = targetTransform.position - transform.position;
     float dist = glm::length(dir);
@@ -225,7 +223,7 @@ void EnemyAISystem::UpdatePatrol(Entity* enemy, AI &ai, Animator& animator, floa
     }
 
     velocity.direction = safeNormalize(dir);
-    velocity.speed = 3.0f;
+    velocity.speed = 2.5f;
 }
 
 Entity* EnemyAISystem::findPlayer(const std::vector<std::unique_ptr<Entity>>& entities) {

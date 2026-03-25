@@ -27,6 +27,8 @@
 #include "MovementSystem.h"
 #include "RenderSystem.h"
 #include "UIRenderSystem.h"
+#include "DebugRenderSystem.h"
+#include "LifetimeSystem.h"
 
 
 class World {
@@ -49,8 +51,10 @@ private:
     EnemyAISystem enemyAISystem;
     DamageSystem damageSystem;
     CombatSystem combatSystem {*this};
+    LifetimeSystem lifetimeSystem;
     UIRenderSystem uiRenderSystem;
     MouseInputSystem mouseInputSystem;
+    DebugRenderSystem debugRenderSystem;
 
 public:
     World();
@@ -63,8 +67,9 @@ public:
         attachmentSystem.update(entities);
         animationStateSystem.update(entities);
         enemyAISystem.update(entities, dt);
+        combatSystem.update(entities, dt);
         damageSystem.update(entities);
-        combatSystem.update(entities);
+        lifetimeSystem.update(entities, dt);
         destructionSystem.update(entities);
         synchronizeEntities();
         cleanup();

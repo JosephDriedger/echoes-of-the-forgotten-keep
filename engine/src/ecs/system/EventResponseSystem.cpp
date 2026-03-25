@@ -149,19 +149,30 @@ bool EventResponseSystem::getCollisionEntities(
 void EventResponseSystem::applyDamageIfNeeded(const CollisionEvent& e, Entity* attacker, Entity* target, World& world)
 {
     if (e.state != CollisionState::Enter) return;
-    if (!attacker->hasComponent<Damage>() || attacker->getComponent<Parent>().entity == target)
+    if (!attacker->hasComponent<Damage>() || attacker->getComponent<Parent>().entity == target) {
         return;
+    }
 
-    if (!target->hasComponent<Health>())
+    if (!target->hasComponent<Health>()) {
         return;
+    }
 
     auto& dmg = attacker->getComponent<Damage>();
 
-    auto& event = world.createDeferredEntity();
-    event.addComponent<DamageEvent>(target, dmg.amount);
-
-    if (attacker->hasComponent<ProjectileTag>())
+    if (attacker->hasComponent<ProjectileTag>()) {
+        // auto& projectile = attacker->getComponent<ProjectileTag>();
+        // if (projectile.melee) {
+        //     if (projectile.active) {
+        //         projectile.active = false;
+        //         std::cout << "Hitbox Inactive" << std::endl;
+        //     }
+        //     return;
+        // }
+        std::cout << "Applying Damage" << std::endl;
+        auto& event = world.createDeferredEntity();
+        event.addComponent<DamageEvent>(target, dmg.amount);
         attacker->destory();
+    }
 }
 
 void EventResponseSystem::handleItemPickup(const CollisionEvent& e, World& world)

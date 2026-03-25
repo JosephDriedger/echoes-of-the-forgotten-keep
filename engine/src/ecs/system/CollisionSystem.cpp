@@ -74,6 +74,7 @@ void CollisionSystem::update(World &world) {
                 if (!activeCollisions.contains(key)) {
                     world.getEventManager().emit(
                         CollisionEvent{entityA3D, entityB3D, CollisionState::Enter});
+                    std::cout << "Collision Enter" << std::endl;
                 }
 
                 world.getEventManager().emit(

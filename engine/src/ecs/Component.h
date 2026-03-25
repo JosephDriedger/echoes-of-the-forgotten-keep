@@ -97,8 +97,6 @@ struct AI {
     float maxChaseTime = 5.0f;
     float loseTargetCooldown = 2.0f;
     float loseTargetTimer = 0.0f;
-
-    bool isAttacking = false;
 };
 
 struct Patrol {
@@ -123,6 +121,7 @@ struct AttackRequest {
 struct Combat {
     Attack attack;
     float attackRange = 1.0f;
+    Entity* weapon = nullptr;
 };
 
 struct Damage {
@@ -149,6 +148,7 @@ struct EnemyTag{};
 struct Velocity3D {
     glm::vec3 direction{0.0f};
     float speed{0.0f};
+    float chase{0.0f};
 };
 
 struct Collider3D {
@@ -282,7 +282,10 @@ struct BoneAttachment
     glm::mat4 offset = glm::mat4(1.0f);
 };
 
-struct PlayerTag{};
-struct ProjectileTag {};
+struct PlayerTag {};
+struct ProjectileTag
+{
+    float duration = 5.0;
+};
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H

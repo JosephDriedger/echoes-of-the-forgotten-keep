@@ -17,7 +17,7 @@ class CombatSystem {
     public:
     CombatSystem(World& world) : world(world) {}
 
-    void update(std::vector<std::unique_ptr<Entity>>& entities);
+    void update(std::vector<std::unique_ptr<Entity>>& entities, float dt);
 
     private:
     World& world;
