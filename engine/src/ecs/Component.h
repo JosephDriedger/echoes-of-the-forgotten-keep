@@ -288,4 +288,9 @@ struct ProjectileTag
     float duration = 5.0;
 };
 
+struct Switch {
+    Entity* door = nullptr;
+    bool pressed = false;
+};
+
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H

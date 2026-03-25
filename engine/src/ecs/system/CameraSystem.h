@@ -35,7 +35,7 @@ class CameraSystem {
                 // this position the camera so the player is at the center of its view
                 // follow player
                 transform.position.x = playerTransform.position.x;
-                transform.position.y = playerTransform.position.y + 1.0f;
+                transform.position.y = playerTransform.position.y + 10.0f;
                 transform.position.z = playerTransform.position.z + 8.0f;
 
                 // look at player
