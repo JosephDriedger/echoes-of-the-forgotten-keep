@@ -7,9 +7,11 @@
 #include "game/systems/EntitySpawnSystem.h"
 #include "game/systems/MovementSystem.h"
 #include "game/systems/AnimationSystem.h"
+#include "game/systems/BoneAttachmentSystem.h"
 #include "game/components/Transform.h"
 #include "game/components/Render.h"
 #include "game/components/AnimationState.h"
+#include "game/components/BoneAttachment.h"
 #include "game/components/Player.h"
 
 #include <glm/glm.hpp>
@@ -154,6 +156,37 @@ namespace game
 
         m_Registry.AddComponent(m_PlayerEntity, animState);
 
+        // Spawn sword (right hand)
+        {
+            engine::MeshLoader::Result swordResult = m_MeshManager.Load("asset/sword_1handed.gltf");
+            auto swordTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+
+            if (swordResult.MeshPtr && swordTexture)
+            {
+                engine::Entity swordEntity = m_Registry.CreateEntity();
+                m_Registry.AddComponent(swordEntity, Transform(0.0f, 0.0f, 0.0f));
+                m_Registry.AddComponent(swordEntity, Render(swordResult.MeshPtr, swordTexture));
+                m_Registry.AddComponent(swordEntity,
+                    BoneAttachment(m_PlayerEntity, "handslot.r", glm::mat4(1.0f)));
+            }
+        }
+
+        // Spawn shield (left hand)
+        {
+            engine::MeshLoader::Result shieldResult = m_MeshManager.Load("asset/shield_spikes.gltf");
+            auto shieldTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+
+            if (shieldResult.MeshPtr && shieldTexture)
+            {
+                engine::Entity shieldEntity = m_Registry.CreateEntity();
+                m_Registry.AddComponent(shieldEntity, Transform(0.0f, 0.0f, 0.0f));
+                m_Registry.AddComponent(shieldEntity, Render(shieldResult.MeshPtr, shieldTexture));
+                m_Registry.AddComponent(shieldEntity,
+                    BoneAttachment(m_PlayerEntity, "handslot.l",
+                        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.15f))));
+            }
+        }
+
         // Dungeon room
         const std::string dungeonTexPath = "asset/dungeon/dungeon_texture.png";
 
@@ -259,6 +292,7 @@ namespace game
 
         MovementSystem::Update(m_Registry, input, dt);
         AnimationSystem::Update(m_Registry, dt);
+        BoneAttachmentSystem::Update(m_Registry);
 
         UpdateCamera();
     }
@@ -299,11 +333,19 @@ namespace game
             if (!render.MeshPtr || !render.TexturePtr)
                 continue;
 
-            // Build model matrix: T * R * S
-            glm::mat4 modelMat = glm::mat4(1.0f);
-            modelMat = glm::translate(modelMat, glm::vec3(transform.X, transform.Y, transform.Z));
-            modelMat = glm::rotate(modelMat, transform.RotationY, glm::vec3(0.0f, 1.0f, 0.0f));
-            modelMat = glm::scale(modelMat, glm::vec3(transform.ScaleX, transform.ScaleY, transform.ScaleZ));
+            // Build model matrix
+            glm::mat4 modelMat;
+            if (transform.UseModelMatrix)
+            {
+                modelMat = transform.ModelMatrix;
+            }
+            else
+            {
+                modelMat = glm::mat4(1.0f);
+                modelMat = glm::translate(modelMat, glm::vec3(transform.X, transform.Y, transform.Z));
+                modelMat = glm::rotate(modelMat, transform.RotationY, glm::vec3(0.0f, 1.0f, 0.0f));
+                modelMat = glm::scale(modelMat, glm::vec3(transform.ScaleX, transform.ScaleY, transform.ScaleZ));
+            }
 
             m_Shader->SetMat4("model", glm::value_ptr(modelMat));
 

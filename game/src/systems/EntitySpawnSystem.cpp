@@ -6,6 +6,7 @@
 #include "game/components/Transform.h"
 #include "game/components/Render.h"
 #include "game/components/AnimationState.h"
+#include "game/components/BoneAttachment.h"
 
 namespace game
 {
@@ -17,6 +18,7 @@ namespace game
         registry.RegisterComponent<EnemyAI>();
         registry.RegisterComponent<Render>();
         registry.RegisterComponent<AnimationState>();
+        registry.RegisterComponent<BoneAttachment>();
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

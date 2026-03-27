@@ -1,6 +1,8 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_COMPONENTS_TRANSFORM_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_COMPONENTS_TRANSFORM_H
 
+#include <glm/glm.hpp>
+
 namespace game
 {
     struct Transform
@@ -14,6 +16,9 @@ namespace game
         float ScaleX = 1.0f;
         float ScaleY = 1.0f;
         float ScaleZ = 1.0f;
+
+        glm::mat4 ModelMatrix = glm::mat4(1.0f);
+        bool UseModelMatrix = false;
 
         Transform() = default;
 
