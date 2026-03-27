@@ -10,7 +10,7 @@
 // doesn't create any extra memory, just grabs the reference of the object
 extern Game* game;
 std::unordered_map<std::string, SDL_Texture*> TextureManager::textures;
-std::unordered_map<std::string, GLuint*> TextureManager::textures3D;
+std::unordered_map<std::string, GLuint> TextureManager::textures3D;
 
 // load our texture with a path
 SDL_Texture* TextureManager::load(const char* path) {
@@ -48,20 +48,20 @@ SDL_Texture* TextureManager::load(const char* path) {
     return texture;
 }
 
-GLuint* TextureManager::load3D(const char* path) {
+GLuint* TextureManager::load3D(const std::string& path) {
     // check cache
     auto it = textures3D.find(path);
-    if (it != textures3D.end()) return it->second;
+    if (it != textures3D.end()) return &it->second;
 
-    SDL_Surface* surface = IMG_Load(path);
+    SDL_Surface* surface = IMG_Load(path.c_str());
     if(!surface) {
         std::cout << "Failed to load image " << path << std::endl;
-        return 0;
+        return nullptr;
     }
 
-    GLuint* id;
-    glGenTextures(1, id);
-    glBindTexture(GL_TEXTURE_2D, *id);
+    GLuint id;
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
@@ -75,7 +75,7 @@ GLuint* TextureManager::load3D(const char* path) {
     SDL_DestroySurface(surface);
 
     textures3D[path] = id;
-    return id;
+    return &textures3D[path];
 }
 
 void TextureManager::draw(SDL_Texture* texture, SDL_FRect src, SDL_FRect dst) {
@@ -91,7 +91,7 @@ void TextureManager::clean() {
     }
     textures.clear();
     for (auto& tex : textures3D) {
-        glDeleteTextures(1, tex.second);
+        glDeleteTextures(1, &tex.second);
     }
     textures3D.clear();
 }

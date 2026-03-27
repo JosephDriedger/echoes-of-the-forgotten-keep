@@ -6,19 +6,30 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_WORLD_H
 #include <memory>
 #include <vector>
+#include <manager/SceneType.h>
 
 #include "Animation3DSystem.h"
 #include "AnimationStateSystem.h"
 #include "AttachmentSystem.h"
 #include "CameraSystem.h"
 #include "CollisionSystem.h"
+#include "CombatSystem.h"
+#include "DamageSystem.h"
 #include "DestructionSystem.h"
+#include "EnemyAISystem.h"
 #include "Entity.h"
-#include "EventManager.h"
+#include "EventResponseSystem.h"
+#include "event/EventManager.h"
 #include "KeyboardInputSystem.h"
+#include "MainMenuSystem.h"
 #include "Map.h"
+#include "MouseInputSystem.h"
 #include "MovementSystem.h"
 #include "RenderSystem.h"
+#include "UIRenderSystem.h"
+#include "DebugRenderSystem.h"
+#include "LifetimeSystem.h"
+
 
 class World {
 private:
@@ -35,17 +46,31 @@ private:
     Animation3DSystem animation3DSystem;
     AttachmentSystem attachmentSystem;
     AnimationStateSystem animationStateSystem;
+    EventResponseSystem eventResponseSystem{*this};
+    MainMenuSystem mainMenuSystem;
+    EnemyAISystem enemyAISystem;
+    DamageSystem damageSystem;
+    CombatSystem combatSystem {*this};
+    LifetimeSystem lifetimeSystem;
+    UIRenderSystem uiRenderSystem;
+    MouseInputSystem mouseInputSystem;
+    DebugRenderSystem debugRenderSystem;
+
 public:
     World();
-    void update(const float dt, const SDL_Event& event) {
+    void update(const float dt, const SDL_Event& event, const SceneType sceneType) {
         keyboardInputSystem.update(entities, event);
         movementSystem.update(entities, dt);
         collisionSystem.update(*this);
         cameraSystem.update(entities);
-        destructionSystem.update(entities);
         animation3DSystem.update(entities, dt);
         attachmentSystem.update(entities);
-        animationStateSystem.update(entities);
+        animationStateSystem.update(entities, dt);
+        enemyAISystem.update(entities, dt);
+        combatSystem.update(entities, dt);
+        damageSystem.update(entities);
+        lifetimeSystem.update(entities, dt);
+        destructionSystem.update(entities);
         synchronizeEntities();
         cleanup();
     }
@@ -107,5 +132,5 @@ public:
     Map& getMap() {return map;}
 };
 
-static void onCollision(const CollisionEvent& collision);
+// static void onCollision(const CollisionEvent& collision);
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_WORLD_H

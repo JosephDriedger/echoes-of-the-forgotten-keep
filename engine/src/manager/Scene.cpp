@@ -5,9 +5,7 @@
 #include "Scene.h"
 
 #include "AnimationManager.h"
-#include "BuildRoomSystem.h"
 #include "ModelManager.h"
-#include "SpawnSystem.h"
 
 Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, int windowWidth, int windowHeight) : name(sceneName) {
 
@@ -15,15 +13,8 @@ Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, i
     camera.addComponent<Transform3D>(glm::vec3(0,1,5)); // back a bit
     camera.addComponent<Camera3D>();
 
-    RegisterDungeonAsset();
     createPlayer();
     createEnemy();
-    //createDungeon();
-
-    MapGrid map;
-
-    map = BuildRoomSystem::GenerateRoom(5,5);
-    BuildRoomSystem::Build(world, map);
 
     // add scene state
     auto& state (world.createEntity());
@@ -31,7 +22,6 @@ Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, i
 }
 
 void Scene::createPlayer() {
-
     auto& player(world.createEntity());
     auto& playerTransform = player.addComponent<Transform3D>(glm::vec3(-2,0,0));
     player.addComponent<Model>(ModelManager::load("../asset/Knight.glb"));
@@ -69,6 +59,7 @@ void Scene::createPlayer() {
     auto& playerCombat = player.addComponent<Combat>(Attack{0.0f, 0.0f}, 2.0f);
     player.addComponent<Health>(5);
     player.addComponent<Collider3D>(1, 7, 0.5);
+    // playerCombat.weapon = &sword;
 
     // auto& player2(world.createEntity());
     // auto& playerTransform2 = player2.addComponent<Transform3D>(glm::vec3(2,0,2));
@@ -78,16 +69,30 @@ void Scene::createPlayer() {
     // auto& animator2 = player2.addComponent<Animator>();
     // animator2.currentClip = 7;
 
-    // TextureManager::load3D("../asset/dungeon/dungeon_texture.png");
-    // ModelManager::load("../asset/dungeon/wall.gltf");
-    // ModelManager::load("../asset/dungeon/wall_corner.gltf");
-    // ModelManager::load("../asset/dungeon/wall_crossing.gltf");
-    // ModelManager::load("../asset/dungeon/wall_Tsplit.gltf");
-    // ModelManager::load("../asset/dungeon/wall_doorway_scaffold.gltf");
-    // ModelManager::load("../asset/dungeon/door.gltf");
-    // ModelManager::load("../asset/dungeon/floor_tile_large.gltf");
-    // ModelManager::load("../asset/dungeon/floor_tile_small.gltf");
+    auto& wall(world.createEntity());
+    auto& wallTransform = wall.addComponent<Transform3D>(glm::vec3(-2,0,-1));
+    wall.addComponent<Model>(ModelManager::load("../asset/dungeon/wall.gltf"));
+    wall.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
 
+    auto& doorway(world.createEntity());
+    auto& doorwayTransform = doorway.addComponent<Transform3D>(glm::vec3(2,0,-1));
+    doorway.addComponent<Model>(ModelManager::load("../asset/dungeon/wall_doorway_scaffold.gltf"));
+    doorway.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
+
+    auto& door(world.createEntity());
+    auto& doorTransform = door.addComponent<Transform3D>(glm::vec3(1.18,0,-1),glm::vec3(0,60,0));
+    door.addComponent<Model>(ModelManager::load("../asset/dungeon/door.gltf"));
+    door.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
+
+    auto& tile(world.createEntity());
+    auto& tileTransform = tile.addComponent<Transform3D>(glm::vec3(0,-.1,1));
+    tile.addComponent<Model>(ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
+    tile.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
+
+    auto& tile2(world.createEntity());
+    auto& tileTransform2 = tile2.addComponent<Transform3D>(glm::vec3(2,-.1,1));
+    tile2.addComponent<Model>(ModelManager::load("../asset/dungeon/floor_tile_large.gltf"));
+    tile2.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/dungeon_texture.png"));
 }
 
 void Scene::createEnemy() {
@@ -131,56 +136,4 @@ void Scene::createEnemy() {
     // sword.addComponent<Damage>(1);
     // enemyCombat.weapon = &sword;
 
-}
-
-void Scene::createDungeon() {
-
-    // North walls
-    SpawnSystem::CreateEntity(world, AssetType::WallCorner,glm::vec3(-6,0,0), glm::vec3(0,90,0));
-    SpawnSystem::CreateEntity(world, AssetType::Wall,glm::vec3(-2,0,0), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::WallDoorwayScaffold,glm::vec3(2,0,0), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::Door,glm::vec3(1.18,0,0), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::WallCorner,glm::vec3(6,0,0), glm::vec3(0,0,0));
-
-    // East walls
-    SpawnSystem::CreateEntity(world, AssetType::Wall,glm::vec3(6,0,2), glm::vec3(0,90,0));
-    SpawnSystem::CreateEntity(world, AssetType::Wall,glm::vec3(6,0,6), glm::vec3(0,90,0));
-
-    // West walls
-    SpawnSystem::CreateEntity(world, AssetType::Wall,glm::vec3(-6,0,2), glm::vec3(0,90,0));
-    SpawnSystem::CreateEntity(world, AssetType::Wall,glm::vec3(-6,0,6), glm::vec3(0,90,0));
-
-    // South walls
-    SpawnSystem::CreateEntity(world, AssetType::WallCorner,glm::vec3(-6,0,10), glm::vec3(0,180,0));
-    SpawnSystem::CreateEntity(world, AssetType::Wall,glm::vec3(-2,0,10), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::WallDoorwayScaffold,glm::vec3(2,0,10), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::Door,glm::vec3(1.18,0,10), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::WallCorner,glm::vec3(6,0,10), glm::vec3(0,-90,0));
-
-    // Floor tiles
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileLarge,glm::vec3(-4,-0.1,2), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileLarge,glm::vec3(0,-0.1,2), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileLarge,glm::vec3(4,-0.1,2), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileLarge,glm::vec3(-4,-0.1,6), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileLarge,glm::vec3(0,-0.1,6), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileLarge,glm::vec3(4,-0.1,6), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileSmall,glm::vec3(-5,-0.1,9), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileSmall,glm::vec3(-3,-0.1,9), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileSmall,glm::vec3(-1,-0.1,9), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileSmall,glm::vec3(1,-0.1,9), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileSmall,glm::vec3(3,-0.1,9), glm::vec3(0,0,0));
-    SpawnSystem::CreateEntity(world, AssetType::FloorTileSmall,glm::vec3(5,-0.1,9), glm::vec3(0,0,0));
-
-
-}
-
-void Scene::RegisterDungeonAsset() {
-    SpawnSystem::RegisterAsset(AssetType::Wall, "../asset/dungeon/wall.gltf", "../asset/dungeon/dungeon_texture.png");
-    SpawnSystem::RegisterAsset(AssetType::WallCorner, "../asset/dungeon/wall_corner.gltf", "../asset/dungeon/dungeon_texture.png");
-    SpawnSystem::RegisterAsset(AssetType::WallCrossing, "../asset/dungeon/wall_crossing.gltf", "../asset/dungeon/dungeon_texture.png");
-    SpawnSystem::RegisterAsset(AssetType::WallTsplit, "../asset/dungeon/wall_Tsplit.gltf", "../asset/dungeon/dungeon_texture.png");
-    SpawnSystem::RegisterAsset(AssetType::WallDoorwayScaffold, "../asset/dungeon/wall_doorway_scaffold.gltf", "../asset/dungeon/dungeon_texture.png");
-    SpawnSystem::RegisterAsset(AssetType::Door, "../asset/dungeon/door.gltf", "../asset/dungeon/dungeon_texture.png");
-    SpawnSystem::RegisterAsset(AssetType::FloorTileLarge, "../asset/dungeon/floor_tile_large.gltf", "../asset/dungeon/dungeon_texture.png");
-    SpawnSystem::RegisterAsset(AssetType::FloorTileSmall, "../asset/dungeon/floor_tile_small.gltf", "../asset/dungeon/dungeon_texture.png");
 }

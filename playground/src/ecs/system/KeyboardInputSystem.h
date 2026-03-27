@@ -86,6 +86,18 @@ public:
                                 a.comboIndex = 0;
                                 a.currentTime = 0.0f;
                             }
+                        {
+                            auto& transform = e->getComponent<Transform3D>();
+                            glm::vec3 forward;
+                            forward.x = sin(glm::radians(transform.rotation.y));
+                            forward.z = cos(glm::radians(transform.rotation.y));
+                            forward.y = 0.0f;
+                            forward = glm::normalize(forward);
+                            glm::vec3 dir = forward;
+                            auto& req = e->addComponent<AttackRequest>();
+                            req.direction = dir;
+                            req.tag = "projectile";
+                        }
                             break;
                         case SDLK_RIGHT:
                             a.currentClip++;

@@ -13,10 +13,10 @@
 
 class TextureManager {
     static std::unordered_map<std::string, SDL_Texture*> textures;
-    static std::unordered_map<std::string, GLuint*> textures3D;
+    static std::unordered_map<std::string, GLuint> textures3D;
 public:
     static SDL_Texture* load(const char* path);
-    static GLuint* load3D(const char* path);
+    static GLuint* load3D(const std::string& path);
 
     // floating point Rect = FRect
     static void draw(SDL_Texture* texture, SDL_FRect src, SDL_FRect dst);
