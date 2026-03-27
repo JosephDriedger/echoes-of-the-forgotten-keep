@@ -1,8 +1,16 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
-
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_MOVEMENTSYSTEM_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_MOVEMENTSYSTEM_H
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_MOVEMENTSYSTEM_H
+#include "engine/ecs/Registry.h"
+#include "engine/input/Input.h"
+
+namespace game
+{
+    class MovementSystem
+    {
+    public:
+        static void Update(engine::Registry& registry, const engine::Input& input, float deltaTime);
+    };
+}
+
+#endif

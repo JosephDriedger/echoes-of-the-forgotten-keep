@@ -1,9 +1,7 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
-
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_MESH_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_MESH_H
+
+#include "engine/rendering/AnimationData.h"
 
 #include <vector>
 
@@ -11,16 +9,19 @@ namespace engine
 {
     struct Vertex
     {
-        float PositionX;
-        float PositionY;
-        float PositionZ;
+        float PositionX = 0.0f;
+        float PositionY = 0.0f;
+        float PositionZ = 0.0f;
 
-        float NormalX;
-        float NormalY;
-        float NormalZ;
+        float NormalX = 0.0f;
+        float NormalY = 0.0f;
+        float NormalZ = 0.0f;
 
-        float TextureU;
-        float TextureV;
+        float TextureU = 0.0f;
+        float TextureV = 0.0f;
+
+        int BoneIDs[MAX_BONE_INFLUENCE] = {-1, -1, -1, -1};
+        float Weights[MAX_BONE_INFLUENCE] = {0.0f, 0.0f, 0.0f, 0.0f};
     };
 
     class Mesh
@@ -50,4 +51,4 @@ namespace engine
     };
 }
 
-#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_MESH_H
+#endif

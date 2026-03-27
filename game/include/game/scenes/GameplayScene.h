@@ -1,7 +1,3 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
-
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEPLAYSCENE_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEPLAYSCENE_H
 
@@ -9,7 +5,10 @@
 #include "engine/rendering/Camera.h"
 #include "engine/rendering/RenderSystem.h"
 #include "engine/resources/AssetManager.h"
-#include "engine/resources/MeshLoader.h"
+#include "engine/resources/MeshManager.h"
+#include "engine/resources/AnimationLoader.h"
+#include "engine/ecs/Registry.h"
+#include "engine/ecs/Entity.h"
 
 #include <memory>
 
@@ -33,15 +32,32 @@ namespace game
         void OnRender(engine::Application& application) override;
 
     private:
+        void LoadContent();
+        void InitializeScene();
+        void UpdateCamera();
+
+        engine::Entity SpawnDungeonPiece(
+            const std::string& meshPath,
+            const std::string& texturePath,
+            float x, float y, float z,
+            float rotationYDegrees = 0.0f);
+
+        int FindClipIndex(const std::string& name) const;
+
         engine::Camera m_Camera;
         engine::RenderSystem m_RenderSystem;
         engine::AssetManager m_AssetManager;
-        engine::MeshLoader m_MeshLoader;
+        engine::MeshManager m_MeshManager;
+        engine::AnimationLoader m_AnimationLoader;
+        engine::Registry m_Registry;
 
-        std::shared_ptr<engine::Mesh> m_Mesh;
         std::shared_ptr<engine::Shader> m_Shader;
-        std::shared_ptr<engine::Texture> m_Texture;
+
+        engine::Entity m_PlayerEntity;
+
+        std::shared_ptr<std::vector<engine::AnimationClip>> m_PlayerClips;
+        std::shared_ptr<engine::Skeleton> m_PlayerSkeleton;
     };
 }
 
-#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEPLAYSCENE_H
+#endif

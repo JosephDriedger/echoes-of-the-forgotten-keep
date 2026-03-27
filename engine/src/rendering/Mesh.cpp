@@ -1,13 +1,8 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
-
 #include "engine/rendering/Mesh.h"
 
 #include <glad/gl.h>
 
 #include <cstddef>
-#include <utility>
 
 namespace engine
 {
@@ -94,35 +89,30 @@ namespace engine
             GL_STATIC_DRAW
         );
 
+        // Position
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(Vertex),
-            reinterpret_cast<void*>(offsetof(Vertex, PositionX))
-        );
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, PositionX)));
 
+        // Normal
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(
-            1,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(Vertex),
-            reinterpret_cast<void*>(offsetof(Vertex, NormalX))
-        );
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, NormalX)));
 
+        // TexCoords
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(
-            2,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(Vertex),
-            reinterpret_cast<void*>(offsetof(Vertex, TextureU))
-        );
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, TextureU)));
+
+        // Bone IDs
+        glEnableVertexAttribArray(3);
+        glVertexAttribIPointer(3, 4, GL_INT, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, BoneIDs)));
+
+        // Bone Weights
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, Weights)));
 
         glBindVertexArray(0);
 

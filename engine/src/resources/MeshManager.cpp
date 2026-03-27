@@ -1,0 +1,40 @@
+#include "engine/resources/MeshManager.h"
+
+#include <iostream>
+
+namespace engine
+{
+    MeshLoader::Result MeshManager::Load(const std::string& path)
+    {
+        auto existing = m_Cache.find(path);
+        if (existing != m_Cache.end())
+        {
+            return existing->second;
+        }
+
+        MeshLoader::Result result = m_Loader.LoadFromFile(path);
+        if (!result.MeshPtr)
+        {
+            std::cerr << "[MeshManager] Failed to load: " << path << '\n';
+            return result;
+        }
+
+        m_Cache.emplace(path, result);
+        return result;
+    }
+
+    std::shared_ptr<Mesh> MeshManager::Get(const std::string& path) const
+    {
+        auto it = m_Cache.find(path);
+        if (it == m_Cache.end())
+        {
+            return nullptr;
+        }
+        return it->second.MeshPtr;
+    }
+
+    void MeshManager::Clear()
+    {
+        m_Cache.clear();
+    }
+}

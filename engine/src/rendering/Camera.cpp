@@ -1,7 +1,3 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
-
 #include "engine/rendering/Camera.h"
 
 #include <cmath>
@@ -62,10 +58,15 @@ namespace engine
           m_Up{0.0f, 1.0f, 0.0f},
           m_ViewMatrix{},
           m_ProjectionMatrix{},
+          m_IsOrthographic(false),
           m_FieldOfViewDegrees(45.0f),
           m_AspectRatio(16.0f / 9.0f),
           m_NearPlane(0.1f),
-          m_FarPlane(100.0f)
+          m_FarPlane(100.0f),
+          m_OrthoLeft(-8.0f),
+          m_OrthoRight(8.0f),
+          m_OrthoBottom(-4.5f),
+          m_OrthoTop(4.5f)
     {
         RecalculateViewMatrix();
         RecalculateProjectionMatrix();
@@ -93,8 +94,27 @@ namespace engine
         const float nearPlane,
         const float farPlane)
     {
+        m_IsOrthographic = false;
         m_FieldOfViewDegrees = fieldOfViewDegrees;
         m_AspectRatio = aspectRatio;
+        m_NearPlane = nearPlane;
+        m_FarPlane = farPlane;
+        RecalculateProjectionMatrix();
+    }
+
+    void Camera::SetOrthographic(
+        const float left,
+        const float right,
+        const float bottom,
+        const float top,
+        const float nearPlane,
+        const float farPlane)
+    {
+        m_IsOrthographic = true;
+        m_OrthoLeft = left;
+        m_OrthoRight = right;
+        m_OrthoBottom = bottom;
+        m_OrthoTop = top;
         m_NearPlane = nearPlane;
         m_FarPlane = farPlane;
         RecalculateProjectionMatrix();
@@ -148,18 +168,31 @@ namespace engine
 
     void Camera::RecalculateProjectionMatrix()
     {
-        const float radians = m_FieldOfViewDegrees * 3.14159265358979323846f / 180.0f;
-        const float tangent = std::tan(radians / 2.0f);
-
         for (float& value : m_ProjectionMatrix)
         {
             value = 0.0f;
         }
 
-        m_ProjectionMatrix[0] = 1.0f / (m_AspectRatio * tangent);
-        m_ProjectionMatrix[5] = 1.0f / tangent;
-        m_ProjectionMatrix[10] = -(m_FarPlane + m_NearPlane) / (m_FarPlane - m_NearPlane);
-        m_ProjectionMatrix[11] = -1.0f;
-        m_ProjectionMatrix[14] = -(2.0f * m_FarPlane * m_NearPlane) / (m_FarPlane - m_NearPlane);
+        if (m_IsOrthographic)
+        {
+            m_ProjectionMatrix[0] = 2.0f / (m_OrthoRight - m_OrthoLeft);
+            m_ProjectionMatrix[5] = 2.0f / (m_OrthoTop - m_OrthoBottom);
+            m_ProjectionMatrix[10] = -2.0f / (m_FarPlane - m_NearPlane);
+            m_ProjectionMatrix[12] = -(m_OrthoRight + m_OrthoLeft) / (m_OrthoRight - m_OrthoLeft);
+            m_ProjectionMatrix[13] = -(m_OrthoTop + m_OrthoBottom) / (m_OrthoTop - m_OrthoBottom);
+            m_ProjectionMatrix[14] = -(m_FarPlane + m_NearPlane) / (m_FarPlane - m_NearPlane);
+            m_ProjectionMatrix[15] = 1.0f;
+        }
+        else
+        {
+            const float radians = m_FieldOfViewDegrees * 3.14159265358979323846f / 180.0f;
+            const float tangent = std::tan(radians / 2.0f);
+
+            m_ProjectionMatrix[0] = 1.0f / (m_AspectRatio * tangent);
+            m_ProjectionMatrix[5] = 1.0f / tangent;
+            m_ProjectionMatrix[10] = -(m_FarPlane + m_NearPlane) / (m_FarPlane - m_NearPlane);
+            m_ProjectionMatrix[11] = -1.0f;
+            m_ProjectionMatrix[14] = -(2.0f * m_FarPlane * m_NearPlane) / (m_FarPlane - m_NearPlane);
+        }
     }
 }

@@ -4,6 +4,8 @@
 #include "game/components/EnemyAI.h"
 #include "game/components/Player.h"
 #include "game/components/Transform.h"
+#include "game/components/Render.h"
+#include "game/components/AnimationState.h"
 
 namespace game
 {
@@ -13,6 +15,8 @@ namespace game
         registry.RegisterComponent<Collider>();
         registry.RegisterComponent<Player>();
         registry.RegisterComponent<EnemyAI>();
+        registry.RegisterComponent<Render>();
+        registry.RegisterComponent<AnimationState>();
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

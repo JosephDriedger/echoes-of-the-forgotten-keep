@@ -21,6 +21,7 @@ target_include_directories(efk_engine
         ${EFK_SDL3_IMAGE_DIR}/include
         ${EFK_ASSIMP_DIR}/include
         ${EFK_ASSIMP_DIR}/build/include
+        ${CMAKE_SOURCE_DIR}/third_party
 )
 
 target_link_directories(efk_engine
