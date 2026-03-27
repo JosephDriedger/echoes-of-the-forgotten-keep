@@ -73,3 +73,23 @@ if(WIN32)
             opengl32
     )
 endif()
+
+# --------------------------------------------------
+# Post-build: copy DLLs and assets to output directory
+# --------------------------------------------------
+
+set(EFK_RUNTIME_DLLS
+        "${EFK_SDL3_DIR}/bin/SDL3.dll"
+        "${EFK_SDL3_IMAGE_DIR}/bin/SDL3_image.dll"
+        "${EFK_ASSIMP_DIR}/build/bin/libassimp-6.dll"
+)
+
+add_custom_command(TARGET echoes_of_the_forgotten_keep POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${EFK_RUNTIME_DLLS}
+        $<TARGET_FILE_DIR:echoes_of_the_forgotten_keep>
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/asset"
+        "$<TARGET_FILE_DIR:echoes_of_the_forgotten_keep>/asset"
+        COMMENT "Copying runtime DLLs and assets..."
+)
