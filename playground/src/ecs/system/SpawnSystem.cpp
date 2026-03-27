@@ -6,55 +6,66 @@
 
 #include "ModelManager.h"
 
-std::unordered_map<std::string, SpawnDefinition> SpawnSystem::definitions;
+std::unordered_map<AssetType, SpawnDefinition, EnumClassHash> SpawnSystem::definitions;
 
 Entity& SpawnSystem::CreateEntity(World& world,
-                                  const std::string& name,
+                                  AssetType type,
                                   const glm::vec3& position,
                                   const glm::vec3& rotation) {
 
-    auto it = definitions.find(name);
+    auto it = definitions.find(type);
 
     if (it == definitions.end()) {
-        throw std::runtime_error("Unknown entity type: " + name);
+        throw std::runtime_error("Unknown asset type");
     }
 
     const SpawnDefinition& def = it->second;
 
     auto& entity = world.createEntity();
 
-    entity.addComponent<Transform3D>(position, rotation);
+    glm::vec3 finalPos = position + def.offset;
+
+    entity.addComponent<Transform3D>(finalPos, rotation, def.scale);
 
     if (def.model)
         entity.addComponent<Model>(*def.model);
 
-    if (def.texture)
-        entity.addComponent<Texture3D>(*def.texture);
+    if (def.textureID != 0)
+        entity.addComponent<Texture3D>(def.textureID);
+
+    if (def.hasCollider)
+        entity.addComponent<Collider3D>();
+
+    if (def.customSetup)
+        def.customSetup(entity);
 
     return entity;
 }
 
-bool SpawnSystem::RegisterAsset(const std::string& name,
+bool SpawnSystem::RegisterAsset(AssetType type,
                                 const std::string& modelPath,
                                 const std::string& texturePath) {
 
-    if (definitions.find(name) != definitions.end()) {
-        std::cerr << "SpawnSystem: entity already registered: " << name << std::endl;
+    if (definitions.contains(type)) {
+        std::cerr << "Already registered\n";
         return false;
     }
 
-    SpawnDefinition def(modelPath, texturePath);
+    SpawnDefinition def;
 
     def.model = ModelManager::load(modelPath);
 
     if (!texturePath.empty()) {
-        def.texture = new Texture3D(*TextureManager::load3D(texturePath.c_str()));
-    }
-    if (def.model != nullptr && def.texture != nullptr) {
-        definitions.insert(std::make_pair(name, def));
+        GLuint* tex = TextureManager::load3D(texturePath);
+        if (tex) def.textureID = *tex;
     }
 
-    std::cout << "Registered: " << name << std::endl;
+    if (!def.model) {
+        std::cerr << "Failed to load model\n";
+        return false;
+    }
+
+    definitions[type] = def;
 
     return true;
 }

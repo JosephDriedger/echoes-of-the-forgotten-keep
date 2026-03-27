@@ -7,25 +7,48 @@
 #include "Entity.h"
 #include "World.h"
 
+enum class AssetType {
+    Player,
+    Enemy,
+    Wall,
+    WallCorner,
+    WallCrossing,
+    WallTsplit,
+    WallDoorwayScaffold,
+    Door,
+    FloorTileLarge,
+    FloorTileSmall,
+
+};
+
+struct EnumClassHash {
+    template <typename T>
+    std::size_t operator()(T t) const {
+        return static_cast<std::size_t>(t);
+    }
+};
+
 struct SpawnDefinition {
-    std::string modelPath;
-    std::string texturePath;
 
     Model* model = nullptr;
-    Texture3D* texture = nullptr;
+    GLuint textureID = 0;
 
-    SpawnDefinition(const std::string& m, const std::string& t)
-        : modelPath(m), texturePath(t) {}
+    glm::vec3 scale = {1,1,1};
+    glm::vec3 offset = {0,0,0};
+
+    bool hasCollider = false;
+
+    std::function<void(Entity&)> customSetup;
 };
 
 class SpawnSystem {
 public:
-    static std::unordered_map<std::string, SpawnDefinition> definitions;
+    static std::unordered_map<AssetType, SpawnDefinition, EnumClassHash> definitions;
     static Entity& CreateEntity(World& world,
-                  const std::string& name,
+                  AssetType type,
                   const glm::vec3& position,
                   const glm::vec3& rotation = {0,0,0});
-    static bool RegisterAsset(const std::string& name,const std::string& modelPath, const std::string& texturePath);
+    static bool RegisterAsset(AssetType type,const std::string& modelPath, const std::string& texturePath);
 
 };
 

@@ -12,7 +12,7 @@
 
 class ModelManager {
 public:
-    static std::unordered_map<std::string, Model> models;
+    static std::unordered_map<std::string, Model*> models;
     static Model* load(const std::string& modelPath);
     static void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
     static int BuildRuntimeSkeleton(aiNode* node,

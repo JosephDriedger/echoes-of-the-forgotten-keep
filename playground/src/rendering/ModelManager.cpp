@@ -16,15 +16,16 @@
 
 #include "assimp/Importer.hpp"
 
-std::unordered_map<std::string, Model> ModelManager::models;
+std::unordered_map<std::string, Model*> ModelManager::models;
 
 Model* ModelManager::load(const std::string& modelPath) {
 
     auto it = models.find(modelPath);
     if (it != models.end()) {
-        return &it->second;
+        return it->second;
     }
 
+    std::cout << "Loading model: " << modelPath << std::endl;
     Assimp::Importer importer;
     auto* model = new Model();
     model->meshes = new std::vector<Mesh>();
@@ -38,6 +39,7 @@ Model* ModelManager::load(const std::string& modelPath) {
 
     if (!scene || !scene->HasMeshes()) {
         std::cerr << "Error loading model: " << importer.GetErrorString() << std::endl;
+        delete model;
         return nullptr;
     }
 
@@ -134,7 +136,7 @@ Model* ModelManager::load(const std::string& modelPath) {
         model->meshes->emplace_back(vertices, indices);
     }
 
-    int index = BuildRuntimeSkeleton(scene->mRootNode, *model, -1);
+    BuildRuntimeSkeleton(scene->mRootNode, *model, -1);
 
     models[modelPath] = model;
 

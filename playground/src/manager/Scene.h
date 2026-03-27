@@ -27,10 +27,8 @@ class Scene {
 private:
     std::string name;
     SceneType type;
-    void createProjectile(Vector2D pos, Vector2D dir, int speed);
+    static void RegisterDungeonAsset();
     void createDungeon();
-    void createItems();
-    void preloadAssets();
     void createPlayer();
     void createEnemy();
 };
