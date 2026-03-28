@@ -1,0 +1,70 @@
+//
+// Created by adamd on 2026-03-28.
+//
+
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_BUILDROOMSYSTEM_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_BUILDROOMSYSTEM_H
+
+#pragma once
+
+#include <vector>
+#include <string>
+#include "engine/ecs/Registry.h"
+#include "engine/resources/MeshManager.h"
+#include "engine/resources/AssetManager.h"
+#include "engine/scene/Prefab.h"
+
+namespace engine {
+    enum class CellType {
+        Empty,
+        Floor,
+        Wall,
+        Door
+    };
+
+    struct MapGrid {
+        int width = 0;
+        int height = 0;
+        std::vector<CellType> cells;
+
+        CellType& get(int x, int y) {
+            return cells[y * width + x];
+        }
+    };
+
+    struct SpawnInstance {
+        PrefabType prefab;
+        glm::vec3 position;
+        float rotationY;
+    };
+
+    class BuildRoomSystem {
+    public:
+        static MapGrid GenerateRoom(int width, int height);
+
+        static std::vector<SpawnInstance> Build(const MapGrid& map);
+
+        static void Save(const MapGrid& map, const std::string& file);
+        static MapGrid Load(const std::string& file);
+
+    private:
+        static constexpr float TILE_SIZE = 4.0f;
+        static constexpr float FLOOR_OFFSET = 2.0f;
+
+        static bool RandomChance(float chance);
+        static bool isWall(const MapGrid& map, int x, int y);
+
+        static void getWallTypeAndRotation(
+            const MapGrid& map,
+            int x, int y,
+            PrefabType& type,
+            float& rotationY
+        );
+
+        static bool isInterior(int x, int y, const MapGrid& map);
+
+        static PrefabType ConvertToPrefab(PrefabType type);
+
+    };
+}
+#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_BUILDROOMSYSTEM_H

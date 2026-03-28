@@ -35,6 +35,7 @@ namespace engine
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
+        glDepthFunc(GL_LEQUAL);
 
         m_IsInitialized = true;
         return true;

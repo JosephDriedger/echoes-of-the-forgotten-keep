@@ -2,6 +2,7 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEPLAYSCENE_H
 
 #include "engine/scene/Scene.h"
+#include "engine/scene/Prefab.h"
 #include "engine/rendering/Camera.h"
 #include "engine/rendering/RenderSystem.h"
 #include "engine/resources/AssetManager.h"
@@ -31,10 +32,17 @@ namespace game
         void OnUpdate(engine::Application& application, engine::Timestep timestep) override;
         void OnRender(engine::Application& application) override;
 
+        static void RegisterPrefab();
+        engine::Entity SpawnPrefab(
+        engine::PrefabType type,
+        glm::vec3 position,
+        float rotY);
     private:
         void LoadContent();
         void InitializeScene();
         void UpdateCamera();
+
+
 
         engine::Entity SpawnDungeonPiece(
             const std::string& meshPath,

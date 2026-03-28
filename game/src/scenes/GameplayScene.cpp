@@ -23,6 +23,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "engine/scene/BuildRoomSystem.h"
+
 namespace game
 {
     GameplayScene::GameplayScene()
@@ -41,7 +43,9 @@ namespace game
     {
         m_Camera.SetPosition(0.0f, 10.0f, 13.0f);
         m_Camera.SetTarget(0.0f, 0.0f, 5.0f);
-        m_Camera.SetOrthographic(-8.0f, 8.0f, -4.5f, 4.5f, 0.1f, 100.0f);
+        // m_Camera.SetOrthographic(-8.0f, 8.0f, -4.5f, 4.5f, 0.1f, 100.0f);
+        m_Camera.SetPerspective(40.0f,16.0f / 9.0f,0.1f,100.0f
+);
 
         m_Shader = m_AssetManager.GetShaderManager().Load(
             "default",
@@ -108,6 +112,34 @@ namespace game
         {
             std::cout << "  [" << i << "] " << (*m_PlayerClips)[i].Name << "\n";
         }
+        RegisterPrefab();
+    }
+
+    void GameplayScene::RegisterPrefab() {
+        const std::string dungeonTexPath = "asset/dungeon/dungeon_texture.png";
+        engine::PrefabManager::Register(engine::PrefabType::Wall,
+            {"asset/dungeon/wall.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::WallCorner,
+            {"asset/dungeon/wall_corner.gltf",dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::WallCrossing,
+            {"asset/dungeon/wall_crossing.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::WallTsplit,
+            {"asset/dungeon/wall_Tsplit.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::WallDoorwayScaffold,
+            {"asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::Door,
+            {"asset/dungeon/door.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::FloorLarge,
+            {"asset/dungeon/floor_tile_large.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::FloorSmall,
+            {"asset/dungeon/floor_tile_small.gltf", dungeonTexPath});
     }
 
     int GameplayScene::FindClipIndex(const std::string& name) const
@@ -188,45 +220,88 @@ namespace game
         }
 
         // Dungeon room
-        const std::string dungeonTexPath = "asset/dungeon/dungeon_texture.png";
+        engine::MapGrid room = engine::BuildRoomSystem::GenerateRoom(3, 3);
 
-        // North walls
-        SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, -6, 0, 0, 90);
-        SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -2, 0, 0, 0);
-        SpawnDungeonPiece("asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath, 2, 0, 0, 0);
-        SpawnDungeonPiece("asset/dungeon/door.gltf", dungeonTexPath, 1.18f, 0, 0, 0);
-        SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, 6, 0, 0, 0);
+        auto instances = engine::BuildRoomSystem::Build(room);
 
-        // East walls
-        SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, 6, 0, 2, 90);
-        SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, 6, 0, 6, 90);
+        for (const auto& inst : instances)
+        {
+            const auto* def = engine::PrefabManager::Get(inst.prefab);
 
-        // West walls
-        SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -6, 0, 2, 90);
-        SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -6, 0, 6, 90);
+            if (!def) continue;
 
-        // South walls
-        SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, -6, 0, 10, 180);
-        SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -2, 0, 10, 0);
-        SpawnDungeonPiece("asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath, 2, 0, 10, 0);
-        SpawnDungeonPiece("asset/dungeon/door.gltf", dungeonTexPath, 1.18f, 0, 10, 0);
-        SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, 6, 0, 10, -90);
+            SpawnDungeonPiece(
+                def->meshPath,
+                def->texturePath,
+                inst.position.x,
+                inst.position.y,
+                inst.position.z,
+                inst.rotationY
+            );
+        }
 
-        // Floor tiles (large)
-        SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, -4, -0.1f, 2, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 0, -0.1f, 2, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 4, -0.1f, 2, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, -4, -0.1f, 6, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 0, -0.1f, 6, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 4, -0.1f, 6, 0);
+        // // North walls
+        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, -6, 0, 0, 90);
+        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -2, 0, 0, 0);
+        // SpawnDungeonPiece("asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath, 2, 0, 0, 0);
+        // SpawnDungeonPiece("asset/dungeon/door.gltf", dungeonTexPath, 1.18f, 0, 0, 0);
+        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, 6, 0, 0, 0);
+        //
+        // // East walls
+        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, 6, 0, 2, 90);
+        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, 6, 0, 6, 90);
+        //
+        // // West walls
+        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -6, 0, 2, 90);
+        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -6, 0, 6, 90);
+        //
+        // // South walls
+        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, -6, 0, 10, 180);
+        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -2, 0, 10, 0);
+        // SpawnDungeonPiece("asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath, 2, 0, 10, 0);
+        // SpawnDungeonPiece("asset/dungeon/door.gltf", dungeonTexPath, 1.18f, 0, 10, 0);
+        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, 6, 0, 10, -90);
+        //
+        // // Floor tiles (large)
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, -4, -0.1f, 2, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 0, -0.1f, 2, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 4, -0.1f, 2, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, -4, -0.1f, 6, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 0, -0.1f, 6, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 4, -0.1f, 6, 0);
+        //
+        // // Floor tiles (small)
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -5, -0.1f, 9, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -3, -0.1f, 9, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -1, -0.1f, 9, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 1, -0.1f, 9, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 3, -0.1f, 9, 0);
+        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 5, -0.1f, 9, 0);
+    }
 
-        // Floor tiles (small)
-        SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -5, -0.1f, 9, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -3, -0.1f, 9, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -1, -0.1f, 9, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 1, -0.1f, 9, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 3, -0.1f, 9, 0);
-        SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 5, -0.1f, 9, 0);
+    engine::Entity GameplayScene::SpawnPrefab(
+        engine::PrefabType type,
+        glm::vec3 position,
+        float rotY)
+    {
+        const auto* def = engine::PrefabManager::Get(type);
+        if (!def) return engine::Entity(0);
+
+        auto mesh = m_MeshManager.Load(def->meshPath);
+        auto texture = m_AssetManager.GetTextureManager().Load(def->texturePath);
+
+        if (!mesh.MeshPtr || !texture)
+            return engine::Entity(0);
+
+        engine::Entity e = m_Registry.CreateEntity();
+
+        Transform t(position.x,position.y,position.z);
+        t.RotationY = glm::radians(rotY);
+
+        m_Registry.AddComponent(e, t);
+        m_Registry.AddComponent(e, Render(mesh.MeshPtr, texture));
+
+        return e;
     }
 
     engine::Entity GameplayScene::SpawnDungeonPiece(
