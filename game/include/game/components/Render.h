@@ -1,26 +1,25 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
-
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_COMPONENTS_RENDER_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_COMPONENTS_RENDER_H
+
+#include "engine/rendering/Mesh.h"
+#include "engine/rendering/Texture.h"
+
+#include <memory>
 
 namespace game
 {
     struct Render
     {
-        char Symbol;
+        std::shared_ptr<engine::Mesh> MeshPtr;
+        std::shared_ptr<engine::Texture> TexturePtr;
 
-        Render()
-            : Symbol('?')
-        {
-        }
+        Render() = default;
 
-        explicit Render(const char symbol)
-            : Symbol(symbol)
+        Render(std::shared_ptr<engine::Mesh> mesh, std::shared_ptr<engine::Texture> texture)
+            : MeshPtr(std::move(mesh)), TexturePtr(std::move(texture))
         {
         }
     };
 }
 
-#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_GAME_COMPONENTS_RENDER_H
+#endif

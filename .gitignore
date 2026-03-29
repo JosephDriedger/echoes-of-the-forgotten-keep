@@ -20,7 +20,7 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+
 
 # Fortran module files
 *.mod
@@ -29,7 +29,7 @@
 # Compiled Static libraries
 *.lai
 *.la
-*.a
+
 *.lib
 
 # Executables
@@ -40,10 +40,11 @@
 # debug information files
 *.dwo
 
-build/
 cmake-build-debug/
 .deps/
 .vs/
 .vscode/
 .idea/
 CMakeUserPresets.json
+
+.claude

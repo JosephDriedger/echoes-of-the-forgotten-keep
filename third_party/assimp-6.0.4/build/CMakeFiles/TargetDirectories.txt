@@ -1,0 +1,8 @@
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/CMakeFiles/edit_cache.dir
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/CMakeFiles/rebuild_cache.dir
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/contrib/zlib/CMakeFiles/zlibstatic.dir
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/contrib/zlib/CMakeFiles/edit_cache.dir
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/contrib/zlib/CMakeFiles/rebuild_cache.dir
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/code/CMakeFiles/assimp.dir
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/code/CMakeFiles/edit_cache.dir
+C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/code/CMakeFiles/rebuild_cache.dir

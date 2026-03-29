@@ -4,19 +4,29 @@
 
 #include <iostream>
 
+// Engine tests
 int RunECSTests();
 int RunSceneManagerTests();
+int RunAnimatorTests();
+
+// Game tests
 int RunCollisionTests();
 int RunRoomTransitionTests();
-int RunEnemyAITests();
+int RunEntitySpawnSystemTests();
+int RunAnimationSystemTests();
+int RunBoneAttachmentTests();
 
 int main()
 {
     RunECSTests();
     RunSceneManagerTests();
+    RunAnimatorTests();
+
     RunCollisionTests();
     RunRoomTransitionTests();
-    RunEnemyAITests();
+    RunEntitySpawnSystemTests();
+    RunAnimationSystemTests();
+    RunBoneAttachmentTests();
 
     std::cout << "All tests passed.\n";
     return 0;

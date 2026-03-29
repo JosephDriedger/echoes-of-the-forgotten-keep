@@ -1,8 +1,52 @@
 //
-// Created by Joseph Driedger on 3/8/2026.
+// Created by Adam Van Woerden on 3/24/2026.
 //
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H
+#include <string>
+
+namespace engine
+{
+    class Shader
+    {
+    public:
+        Shader();
+        ~Shader();
+
+        Shader(const Shader&) = delete;
+        Shader& operator=(const Shader&) = delete;
+
+        Shader(Shader&& other) noexcept;
+        Shader& operator=(Shader&& other) noexcept;
+
+        bool LoadFromFiles(const std::string& vertexPath, const std::string& fragmentPath);
+        void Destroy();
+
+        void Bind() const;
+        void Unbind() const;
+
+        void SetBool(const std::string& name, bool value) const;
+        void SetInt(const std::string& name, int value) const;
+        void SetFloat(const std::string& name, float value) const;
+        void SetVec3(const std::string& name, float x, float y, float z) const;
+        void SetMat4(const std::string& name, const float* values) const;
+
+        [[nodiscard]] unsigned int GetProgramId() const;
+        [[nodiscard]] bool IsLoaded() const;
+
+    private:
+        static std::string ReadTextFile(const std::string& path);
+        static bool CompileStage(unsigned int shaderId, const char* source, const char* label);
+        static bool LinkProgram(unsigned int programId);
+
+        int GetUniformLocation(const std::string& name) const;
+
+    private:
+        unsigned int m_ProgramId;
+        bool m_IsLoaded;
+    };
+}
+
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H

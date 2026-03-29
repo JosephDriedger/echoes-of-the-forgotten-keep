@@ -1,3 +1,9 @@
+//
+// Created by adamd on 2026-03-11.
+//
+
+#define SDL_MAIN_HANDLED
+
 #include "game/GameApp.h"
 
 #include <exception>

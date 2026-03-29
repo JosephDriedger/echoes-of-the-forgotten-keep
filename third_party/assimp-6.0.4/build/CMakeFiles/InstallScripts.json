@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/cmake_install.cmake",
+		"C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/contrib/zlib/cmake_install.cmake",
+		"C:/Users/adamd/Downloads/assimp-6.0.4/assimp-6.0.4/build/code/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

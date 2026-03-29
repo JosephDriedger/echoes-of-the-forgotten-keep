@@ -8,6 +8,7 @@
 namespace engine
 {
     class Window;
+    class Camera;
 
     class Renderer
     {
@@ -21,10 +22,14 @@ namespace engine
         void BeginFrame();
         void EndFrame();
 
-        bool IsInitialized() const;
+        void SetActiveCamera(const Camera* camera);
+
+        [[nodiscard]] const Camera* GetActiveCamera() const;
+        [[nodiscard]] bool IsInitialized() const;
 
     private:
         Window* m_Window;
+        const Camera* m_ActiveCamera;
         bool m_IsInitialized;
     };
 }
