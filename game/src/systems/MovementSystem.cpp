@@ -12,7 +12,7 @@ namespace game
 {
     void MovementSystem::Update(engine::Registry& registry, const engine::Input& input, float deltaTime)
     {
-        const float speed = 3.0f;
+        const float speed = 6.0f;
         const float rotationSpeed = 10.0f;
 
         for (const engine::Entity entity : registry.GetActiveEntities())

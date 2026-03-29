@@ -6,6 +6,7 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_PREFAB_H
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace engine {
     enum class PrefabType {
@@ -13,21 +14,28 @@ namespace engine {
         WallCorner,
         WallCrossing,
         WallTsplit,
-        WallDoorwayScaffold,
+        WallDoorway,
         Door,
         FloorLarge,
-        FloorSmall
+        FloorSmall,
+        Stairs,
+        WallCornerSmall
+    };
+
+    struct PrefabVariant {
+        std::string meshPath;
+        std::string texturePath;
+        float probability = 1.0f; // weight, not %
     };
 
     struct PrefabDefinition {
-        std::string meshPath;
-        std::string texturePath;
+        std::vector<PrefabVariant> variants;
     };
 
     class PrefabManager {
     public:
-        static void Register(PrefabType type, const PrefabDefinition& def);
-        static const PrefabDefinition* Get(PrefabType type);
+        static void Register(PrefabType type, const PrefabVariant& variant);
+        static const PrefabVariant* GetRandom(PrefabType type);
 
     private:
         static std::unordered_map<PrefabType, PrefabDefinition> m_Definitions;

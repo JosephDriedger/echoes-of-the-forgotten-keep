@@ -2,7 +2,7 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEPLAYSCENE_H
 
 #include "engine/scene/Scene.h"
-#include "engine/scene/Prefab.h"
+#include "engine/scene/PrefabManager.h"
 #include "engine/rendering/Camera.h"
 #include "engine/rendering/RenderSystem.h"
 #include "engine/resources/AssetManager.h"
@@ -35,20 +35,12 @@ namespace game
         static void RegisterPrefab();
         engine::Entity SpawnPrefab(
         engine::PrefabType type,
-        glm::vec3 position,
+        const glm::vec3& position,
         float rotY);
     private:
         void LoadContent();
         void InitializeScene();
         void UpdateCamera();
-
-
-
-        engine::Entity SpawnDungeonPiece(
-            const std::string& meshPath,
-            const std::string& texturePath,
-            float x, float y, float z,
-            float rotationYDegrees = 0.0f);
 
         int FindClipIndex(const std::string& name) const;
 

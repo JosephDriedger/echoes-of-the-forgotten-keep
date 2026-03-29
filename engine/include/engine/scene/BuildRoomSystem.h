@@ -9,19 +9,12 @@
 
 #include <vector>
 #include <string>
-#include "engine/ecs/Registry.h"
+
+#include "FloorGenerator.h"
 #include "engine/resources/MeshManager.h"
-#include "engine/resources/AssetManager.h"
-#include "engine/scene/Prefab.h"
+#include "engine/scene/PrefabManager.h"
 
 namespace engine {
-    enum class CellType {
-        Empty,
-        Floor,
-        Wall,
-        Door
-    };
-
     struct MapGrid {
         int width = 0;
         int height = 0;
@@ -42,10 +35,11 @@ namespace engine {
     public:
         static MapGrid GenerateRoom(int width, int height);
 
-        static std::vector<SpawnInstance> Build(const MapGrid& map);
-
+        static std::vector<SpawnInstance> Build(const MapGrid& map, const BuildRoomConfig& config);
+        static MapGrid FromFloor(const FloorLayout& floor);
         static void Save(const MapGrid& map, const std::string& file);
         static MapGrid Load(const std::string& file);
+        static void DebugPrint(const MapGrid& map);
 
     private:
         static constexpr float TILE_SIZE = 4.0f;
@@ -53,7 +47,9 @@ namespace engine {
 
         static bool RandomChance(float chance);
         static bool isWall(const MapGrid& map, int x, int y);
-
+        static int CountAdjacentFloors(MapGrid& map, int x, int y);
+        static bool IsRoomTile(MapGrid& map, int x, int y);
+        static bool isFloorLike(CellType c);
         static void getWallTypeAndRotation(
             const MapGrid& map,
             int x, int y,

@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include "engine/scene/BuildRoomSystem.h"
+#include "engine/scene/FloorGenerator.h"
 
 namespace game
 {
@@ -129,7 +130,7 @@ namespace game
         engine::PrefabManager::Register(engine::PrefabType::WallTsplit,
             {"asset/dungeon/wall_Tsplit.gltf", dungeonTexPath});
 
-        engine::PrefabManager::Register(engine::PrefabType::WallDoorwayScaffold,
+        engine::PrefabManager::Register(engine::PrefabType::WallDoorway,
             {"asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath});
 
         engine::PrefabManager::Register(engine::PrefabType::Door,
@@ -140,6 +141,12 @@ namespace game
 
         engine::PrefabManager::Register(engine::PrefabType::FloorSmall,
             {"asset/dungeon/floor_tile_small.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::Stairs,
+{"asset/dungeon/stairs_walled.gltf", dungeonTexPath});
+
+        engine::PrefabManager::Register(engine::PrefabType::WallCornerSmall,
+{"asset/dungeon/wall_corner_small.gltf", dungeonTexPath});
     }
 
     int GameplayScene::FindClipIndex(const std::string& name) const
@@ -161,9 +168,9 @@ namespace game
         // Spawn player
         m_PlayerEntity = EntitySpawnSystem::SpawnPlayer(m_Registry);
         auto& playerTransform = m_Registry.GetComponent<Transform>(m_PlayerEntity);
-        playerTransform.X = 0.0f;
+        playerTransform.X = 32.0f;
         playerTransform.Y = 0.0f;
-        playerTransform.Z = 5.0f;
+        playerTransform.Z = 25.0f;
 
         // Add render component
         auto playerMesh = m_MeshManager.Get("asset/Knight.glb");
@@ -220,24 +227,26 @@ namespace game
         }
 
         // Dungeon room
-        engine::MapGrid room = engine::BuildRoomSystem::GenerateRoom(3, 3);
+        engine::FloorConfig config;
+        config.roomCount = 5;
+        config.seed = 42;
+        config.mazeFactor = 0.5f;
 
-        auto instances = engine::BuildRoomSystem::Build(room);
+        auto dungeon = engine::FloorGenerator::Generate(config);
 
-        for (const auto& inst : instances)
-        {
-            const auto* def = engine::PrefabManager::Get(inst.prefab);
+        // Convert to MapGrid (your existing system)
+        auto map = engine::BuildRoomSystem::FromFloor(dungeon);
 
-            if (!def) continue;
+        engine::BuildRoomSystem::DebugPrint(map);
+        auto instances = engine::BuildRoomSystem::Build(map, config.buildConfig);
 
-            SpawnDungeonPiece(
-                def->meshPath,
-                def->texturePath,
-                inst.position.x,
-                inst.position.y,
-                inst.position.z,
-                inst.rotationY
-            );
+        for (const auto& inst : instances) {
+            SpawnPrefab(inst.prefab, inst.position, inst.rotationY);
+            if (inst.prefab == engine::PrefabType::Stairs && inst.position.y < -1) {
+                SpawnPrefab(engine::PrefabType::WallCornerSmall, inst.position + glm::vec3 {2,0,4.5}, inst.rotationY-90);
+                SpawnPrefab(engine::PrefabType::Wall, inst.position + glm::vec3 {0,0,4.5}, inst.rotationY);
+                SpawnPrefab(engine::PrefabType::WallCornerSmall, inst.position + glm::vec3 {-2,0,4.5}, inst.rotationY+180);
+            }
         }
 
         // // North walls
@@ -280,52 +289,33 @@ namespace game
     }
 
     engine::Entity GameplayScene::SpawnPrefab(
-        engine::PrefabType type,
-        glm::vec3 position,
-        float rotY)
+    engine::PrefabType type,
+    const glm::vec3& position,
+    const float rotY)
     {
-        const auto* def = engine::PrefabManager::Get(type);
-        if (!def) return engine::Entity(0);
+        const auto* def = engine::PrefabManager::GetRandom(type);
+        if (!def) {
+            std::cerr << "[SpawnPrefab] Missing prefab\n";
+            return engine::Entity(0);
+        }
 
         auto mesh = m_MeshManager.Load(def->meshPath);
         auto texture = m_AssetManager.GetTextureManager().Load(def->texturePath);
 
-        if (!mesh.MeshPtr || !texture)
+        if (!mesh.MeshPtr || !texture) {
+            std::cerr << "[SpawnPrefab] Failed to load: " << def->meshPath << "\n";
             return engine::Entity(0);
+        }
 
         engine::Entity e = m_Registry.CreateEntity();
 
-        Transform t(position.x,position.y,position.z);
+        Transform t(position.x, position.y, position.z);
         t.RotationY = glm::radians(rotY);
 
         m_Registry.AddComponent(e, t);
         m_Registry.AddComponent(e, Render(mesh.MeshPtr, texture));
 
         return e;
-    }
-
-    engine::Entity GameplayScene::SpawnDungeonPiece(
-        const std::string& meshPath,
-        const std::string& texturePath,
-        float x, float y, float z,
-        float rotationYDegrees)
-    {
-        engine::MeshLoader::Result meshResult = m_MeshManager.Load(meshPath);
-        auto texture = m_AssetManager.GetTextureManager().Load(texturePath);
-
-        if (!meshResult.MeshPtr || !texture)
-        {
-            std::cerr << "[GameplayScene] Failed to load dungeon piece: " << meshPath << "\n";
-            return engine::Entity(0);
-        }
-
-        engine::Entity entity = m_Registry.CreateEntity();
-        Transform transform(x, y, z);
-        transform.RotationY = rotationYDegrees * 3.14159265f / 180.0f;
-        m_Registry.AddComponent(entity, transform);
-        m_Registry.AddComponent(entity, Render(meshResult.MeshPtr, texture));
-
-        return entity;
     }
 
     void GameplayScene::OnUpdate(engine::Application& application, const engine::Timestep timestep)
@@ -378,7 +368,7 @@ namespace game
             return;
 
         const auto& transform = m_Registry.GetComponent<Transform>(m_PlayerEntity);
-        m_Camera.SetPosition(transform.X, 10.0f, transform.Z + 8.0f);
+        m_Camera.SetPosition(transform.X, 20.0f, transform.Z + 8.0f);
         m_Camera.SetTarget(transform.X, 0.0f, transform.Z);
     }
 
