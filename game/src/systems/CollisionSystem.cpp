@@ -1,5 +1,7 @@
 #include "game/systems/CollisionSystem.h"
 
+#include <cmath>
+
 namespace game
 {
     void CollisionSystem::Update(engine::Registry& registry) const
@@ -11,9 +13,7 @@ namespace game
             const engine::Entity entityA = entities[i];
 
             if (!registry.HasComponent<Transform>(entityA) || !registry.HasComponent<Collider>(entityA))
-            {
                 continue;
-            }
 
             Transform& transformA = registry.GetComponent<Transform>(entityA);
             const Collider& colliderA = registry.GetComponent<Collider>(entityA);
@@ -23,17 +23,17 @@ namespace game
                 const engine::Entity entityB = entities[j];
 
                 if (!registry.HasComponent<Transform>(entityB) || !registry.HasComponent<Collider>(entityB))
-                {
                     continue;
-                }
+
+                // Skip if both are static
+                if (colliderA.IsStatic && registry.GetComponent<Collider>(entityB).IsStatic)
+                    continue;
 
                 Transform& transformB = registry.GetComponent<Transform>(entityB);
                 const Collider& colliderB = registry.GetComponent<Collider>(entityB);
 
                 if (!IsColliding(transformA, colliderA, transformB, colliderB))
-                {
                     continue;
-                }
 
                 if (!colliderA.IsTrigger && !colliderB.IsTrigger)
                 {
@@ -48,12 +48,32 @@ namespace game
                                       const Transform& transformB,
                                       const Collider& colliderB)
     {
-        return transformA.X < transformB.X + colliderB.Width &&
-               transformA.X + colliderA.Width > transformB.X &&
-               transformA.Y < transformB.Y + colliderB.Height &&
-               transformA.Y + colliderA.Height > transformB.Y &&
-               transformA.Z < transformB.Z + colliderB.Depth &&
-               transformA.Z + colliderA.Depth > transformB.Z;
+        // Center-based AABB with offsets
+        float aCenterX = transformA.X + colliderA.OffsetX;
+        float aCenterY = transformA.Y + colliderA.OffsetY;
+        float aCenterZ = transformA.Z + colliderA.OffsetZ;
+
+        float bCenterX = transformB.X + colliderB.OffsetX;
+        float bCenterY = transformB.Y + colliderB.OffsetY;
+        float bCenterZ = transformB.Z + colliderB.OffsetZ;
+
+        float aMinX = aCenterX - colliderA.Width * 0.5f;
+        float aMaxX = aCenterX + colliderA.Width * 0.5f;
+        float aMinY = aCenterY;
+        float aMaxY = aCenterY + colliderA.Height;
+        float aMinZ = aCenterZ - colliderA.Depth * 0.5f;
+        float aMaxZ = aCenterZ + colliderA.Depth * 0.5f;
+
+        float bMinX = bCenterX - colliderB.Width * 0.5f;
+        float bMaxX = bCenterX + colliderB.Width * 0.5f;
+        float bMinY = bCenterY;
+        float bMaxY = bCenterY + colliderB.Height;
+        float bMinZ = bCenterZ - colliderB.Depth * 0.5f;
+        float bMaxZ = bCenterZ + colliderB.Depth * 0.5f;
+
+        return aMinX < bMaxX && aMaxX > bMinX &&
+               aMinY < bMaxY && aMaxY > bMinY &&
+               aMinZ < bMaxZ && aMaxZ > bMinZ;
     }
 
     void CollisionSystem::ResolveCollision(Transform& transformA,
@@ -61,62 +81,68 @@ namespace game
                                            Transform& transformB,
                                            const Collider& colliderB)
     {
-        const float overlapLeft = (transformA.X + colliderA.Width) - transformB.X;
-        const float overlapRight = (transformB.X + colliderB.Width) - transformA.X;
-        const float overlapDown = (transformA.Y + colliderA.Height) - transformB.Y;
-        const float overlapUp = (transformB.Y + colliderB.Height) - transformA.Y;
+        float aCenterX = transformA.X + colliderA.OffsetX;
+        float aCenterZ = transformA.Z + colliderA.OffsetZ;
+        float bCenterX = transformB.X + colliderB.OffsetX;
+        float bCenterZ = transformB.Z + colliderB.OffsetZ;
 
-        float minimumOverlap = overlapLeft;
+        float overlapX = (colliderA.Width + colliderB.Width) * 0.5f -
+                         std::abs(aCenterX - bCenterX);
+        float overlapY = (colliderA.Height + colliderB.Height) * 0.5f -
+                         std::abs((transformA.Y + colliderA.OffsetY + colliderA.Height * 0.5f) -
+                                  (transformB.Y + colliderB.OffsetY + colliderB.Height * 0.5f));
+        float overlapZ = (colliderA.Depth + colliderB.Depth) * 0.5f -
+                         std::abs(aCenterZ - bCenterZ);
 
-        enum class ResolutionAxis
+        if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f)
+            return;
+
+        bool aStatic = colliderA.IsStatic;
+        bool bStatic = colliderB.IsStatic;
+
+        if (overlapX <= overlapY && overlapX <= overlapZ)
         {
-            Left,
-            Right,
-            Down,
-            Up
-        } resolutionAxis = ResolutionAxis::Left;
+            float sign = (aCenterX < bCenterX) ? -1.0f : 1.0f;
 
-        if (overlapRight < minimumOverlap)
-        {
-            minimumOverlap = overlapRight;
-            resolutionAxis = ResolutionAxis::Right;
+            if (aStatic && !bStatic)
+                transformB.X -= sign * overlapX;
+            else if (bStatic && !aStatic)
+                transformA.X += sign * overlapX;
+            else
+            {
+                transformA.X += sign * overlapX * 0.5f;
+                transformB.X -= sign * overlapX * 0.5f;
+            }
         }
-
-        if (overlapDown < minimumOverlap)
+        else if (overlapZ <= overlapY)
         {
-            minimumOverlap = overlapDown;
-            resolutionAxis = ResolutionAxis::Down;
+            float sign = (aCenterZ < bCenterZ) ? -1.0f : 1.0f;
+
+            if (aStatic && !bStatic)
+                transformB.Z -= sign * overlapZ;
+            else if (bStatic && !aStatic)
+                transformA.Z += sign * overlapZ;
+            else
+            {
+                transformA.Z += sign * overlapZ * 0.5f;
+                transformB.Z -= sign * overlapZ * 0.5f;
+            }
         }
-
-        if (overlapUp < minimumOverlap)
+        else
         {
-            minimumOverlap = overlapUp;
-            resolutionAxis = ResolutionAxis::Up;
-        }
+            float centerAY = transformA.Y + colliderA.OffsetY + colliderA.Height * 0.5f;
+            float centerBY = transformB.Y + colliderB.OffsetY + colliderB.Height * 0.5f;
+            float sign = (centerAY < centerBY) ? -1.0f : 1.0f;
 
-        const float halfOverlap = minimumOverlap * 0.5f;
-
-        switch (resolutionAxis)
-        {
-        case ResolutionAxis::Left:
-            transformA.X -= halfOverlap;
-            transformB.X += halfOverlap;
-            break;
-
-        case ResolutionAxis::Right:
-            transformA.X += halfOverlap;
-            transformB.X -= halfOverlap;
-            break;
-
-        case ResolutionAxis::Down:
-            transformA.Y -= halfOverlap;
-            transformB.Y += halfOverlap;
-            break;
-
-        case ResolutionAxis::Up:
-            transformA.Y += halfOverlap;
-            transformB.Y -= halfOverlap;
-            break;
+            if (aStatic && !bStatic)
+                transformB.Y -= sign * overlapY;
+            else if (bStatic && !aStatic)
+                transformA.Y += sign * overlapY;
+            else
+            {
+                transformA.Y += sign * overlapY * 0.5f;
+                transformB.Y -= sign * overlapY * 0.5f;
+            }
         }
     }
 }

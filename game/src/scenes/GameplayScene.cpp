@@ -1,6 +1,7 @@
 #include "game/scenes/GameplayScene.h"
 
 #include "engine/core/Application.h"
+#include "engine/platform/Window.h"
 #include "engine/rendering/Renderer.h"
 #include "engine/rendering/Shader.h"
 
@@ -13,12 +14,14 @@
 #include "game/components/AnimationState.h"
 #include "game/components/BoneAttachment.h"
 #include "game/components/Player.h"
+#include "game/components/Collider.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/gl.h>
 #include <SDL3/SDL_keycode.h>
+#include <SDL3/SDL.h>
 
 #include <cmath>
 #include <iostream>
@@ -31,7 +34,6 @@ namespace game
     GameplayScene::GameplayScene()
         : engine::Scene("GameplayScene"),
           m_Camera(),
-          m_RenderSystem(),
           m_AssetManager(),
           m_MeshManager(),
           m_AnimationLoader(),
@@ -44,9 +46,7 @@ namespace game
     {
         m_Camera.SetPosition(0.0f, 10.0f, 13.0f);
         m_Camera.SetTarget(0.0f, 0.0f, 5.0f);
-        // m_Camera.SetOrthographic(-8.0f, 8.0f, -4.5f, 4.5f, 0.1f, 100.0f);
-        m_Camera.SetPerspective(40.0f,16.0f / 9.0f,0.1f,100.0f
-);
+        m_Camera.SetPerspective(40.0f, 16.0f / 9.0f, 0.1f, 100.0f);
 
         m_Shader = m_AssetManager.GetShaderManager().Load(
             "default",
@@ -65,6 +65,12 @@ namespace game
 
         LoadContent();
         InitializeScene();
+
+        // Initialize debug collider renderer
+        if (!m_DebugColliderRenderer.Initialize())
+        {
+            std::cerr << "[GameplayScene] Failed to initialize debug collider renderer\n";
+        }
 
         return true;
     }
@@ -143,10 +149,10 @@ namespace game
             {"asset/dungeon/floor_tile_small.gltf", dungeonTexPath});
 
         engine::PrefabManager::Register(engine::PrefabType::Stairs,
-{"asset/dungeon/stairs_walled.gltf", dungeonTexPath});
+            {"asset/dungeon/stairs_walled.gltf", dungeonTexPath});
 
         engine::PrefabManager::Register(engine::PrefabType::WallCornerSmall,
-{"asset/dungeon/wall_corner_small.gltf", dungeonTexPath});
+            {"asset/dungeon/wall_corner_small.gltf", dungeonTexPath});
     }
 
     int GameplayScene::FindClipIndex(const std::string& name) const
@@ -163,6 +169,15 @@ namespace game
         return -1;
     }
 
+    bool GameplayScene::IsWallPrefab(engine::PrefabType type)
+    {
+        return type == engine::PrefabType::Wall ||
+               type == engine::PrefabType::WallCorner ||
+               type == engine::PrefabType::WallCrossing ||
+               type == engine::PrefabType::WallTsplit ||
+               type == engine::PrefabType::WallCornerSmall;
+    }
+
     void GameplayScene::InitializeScene()
     {
         // Spawn player
@@ -171,6 +186,13 @@ namespace game
         playerTransform.X = 32.0f;
         playerTransform.Y = 0.0f;
         playerTransform.Z = 25.0f;
+
+        // Set player collider size (centered on position, body only — excludes weapon)
+        auto& playerCollider = m_Registry.GetComponent<Collider>(m_PlayerEntity);
+        playerCollider.Width = 0.6f;
+        playerCollider.Height = 1.8f;
+        playerCollider.Depth = 0.6f;
+        playerCollider.IsStatic = false;
 
         // Add render component
         auto playerMesh = m_MeshManager.Get("asset/Knight.glb");
@@ -234,7 +256,7 @@ namespace game
 
         auto dungeon = engine::FloorGenerator::Generate(config);
 
-        // Convert to MapGrid (your existing system)
+        // Convert to MapGrid
         auto map = engine::BuildRoomSystem::FromFloor(dungeon);
 
         engine::BuildRoomSystem::DebugPrint(map);
@@ -248,50 +270,12 @@ namespace game
                 SpawnPrefab(engine::PrefabType::WallCornerSmall, inst.position + glm::vec3 {-2,0,4.5}, inst.rotationY+180);
             }
         }
-
-        // // North walls
-        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, -6, 0, 0, 90);
-        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -2, 0, 0, 0);
-        // SpawnDungeonPiece("asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath, 2, 0, 0, 0);
-        // SpawnDungeonPiece("asset/dungeon/door.gltf", dungeonTexPath, 1.18f, 0, 0, 0);
-        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, 6, 0, 0, 0);
-        //
-        // // East walls
-        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, 6, 0, 2, 90);
-        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, 6, 0, 6, 90);
-        //
-        // // West walls
-        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -6, 0, 2, 90);
-        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -6, 0, 6, 90);
-        //
-        // // South walls
-        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, -6, 0, 10, 180);
-        // SpawnDungeonPiece("asset/dungeon/wall.gltf", dungeonTexPath, -2, 0, 10, 0);
-        // SpawnDungeonPiece("asset/dungeon/wall_doorway_scaffold.gltf", dungeonTexPath, 2, 0, 10, 0);
-        // SpawnDungeonPiece("asset/dungeon/door.gltf", dungeonTexPath, 1.18f, 0, 10, 0);
-        // SpawnDungeonPiece("asset/dungeon/wall_corner.gltf", dungeonTexPath, 6, 0, 10, -90);
-        //
-        // // Floor tiles (large)
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, -4, -0.1f, 2, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 0, -0.1f, 2, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 4, -0.1f, 2, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, -4, -0.1f, 6, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 0, -0.1f, 6, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_large.gltf", dungeonTexPath, 4, -0.1f, 6, 0);
-        //
-        // // Floor tiles (small)
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -5, -0.1f, 9, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -3, -0.1f, 9, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, -1, -0.1f, 9, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 1, -0.1f, 9, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 3, -0.1f, 9, 0);
-        // SpawnDungeonPiece("asset/dungeon/floor_tile_small.gltf", dungeonTexPath, 5, -0.1f, 9, 0);
     }
 
     engine::Entity GameplayScene::SpawnPrefab(
-    engine::PrefabType type,
-    const glm::vec3& position,
-    const float rotY)
+        engine::PrefabType type,
+        const glm::vec3& position,
+        const float rotY)
     {
         const auto* def = engine::PrefabManager::GetRandom(type);
         if (!def) {
@@ -315,6 +299,64 @@ namespace game
         m_Registry.AddComponent(e, t);
         m_Registry.AddComponent(e, Render(mesh.MeshPtr, texture));
 
+        // Add static colliders to wall prefabs
+        if (IsWallPrefab(type))
+        {
+            // The wall mesh extends ~2 units along local +X from its origin,
+            // and is ~0.3 units thick along local +Z.
+            // We compute the world-space center offset by rotating the local
+            // mesh center by the wall's rotation.
+            float halfLength = 1.0f;   // half of ~2 unit wall length
+            float halfThick  = 0.15f;  // half of ~0.3 unit thickness
+
+            float radians = glm::radians(rotY);
+            float cosR = std::cos(radians);
+            float sinR = std::sin(radians);
+
+            // Local center of the wall mesh (in mesh-local coordinates)
+            // Wall runs along local X, thin along local Z
+            float localCenterX = halfLength;
+            float localCenterZ = halfThick;
+
+            // Rotate local center to world space offset
+            float worldOffsetX = localCenterX * cosR - localCenterZ * sinR;
+            float worldOffsetZ = localCenterX * sinR + localCenterZ * cosR;
+
+            // AABB dimensions: after rotation, the bounding box dimensions change
+            // A 2x0.3 rect rotated gives AABB of:
+            float absLength = 2.0f;
+            float absThick  = 0.3f;
+            float absCosR = std::abs(cosR);
+            float absSinR = std::abs(sinR);
+
+            float aabbWidth = absLength * absCosR + absThick * absSinR;
+            float aabbDepth = absLength * absSinR + absThick * absCosR;
+
+            Collider wallCollider;
+            wallCollider.Width  = aabbWidth;
+            wallCollider.Height = 3.0f;
+            wallCollider.Depth  = aabbDepth;
+            wallCollider.OffsetX = worldOffsetX;
+            wallCollider.OffsetZ = worldOffsetZ;
+
+            // Corner/crossing/T-split pieces — larger junction area
+            if (type == engine::PrefabType::WallCorner ||
+                type == engine::PrefabType::WallCrossing ||
+                type == engine::PrefabType::WallTsplit ||
+                type == engine::PrefabType::WallCornerSmall)
+            {
+                // These pieces extend in two directions from origin
+                // Use a box that covers the junction
+                wallCollider.Width  = 2.2f;
+                wallCollider.Depth  = 2.2f;
+                wallCollider.OffsetX = worldOffsetX * 0.5f;
+                wallCollider.OffsetZ = worldOffsetZ * 0.5f;
+            }
+
+            wallCollider.IsStatic = true;
+            m_Registry.AddComponent(e, wallCollider);
+        }
+
         return e;
     }
 
@@ -322,6 +364,23 @@ namespace game
     {
         const float dt = timestep.GetSeconds();
         const engine::Input& input = application.GetInput();
+
+        // Debug systems
+        m_DebugToggle.Update(input);
+        m_FPSCounter.Update(timestep);
+
+        // Update window title with FPS when debug mode is on
+        if (m_DebugToggle.ShowFPS())
+        {
+            std::string title = "Echoes of the Forgotten Keep - " + m_FPSCounter.GetDisplayString();
+            if (engine::Window* window = application.GetWindow())
+                SDL_SetWindowTitle(window->GetNativeWindow(), title.c_str());
+        }
+        else
+        {
+            if (engine::Window* window = application.GetWindow())
+                SDL_SetWindowTitle(window->GetNativeWindow(), "Echoes of the Forgotten Keep");
+        }
 
         if (input.IsKeyPressed(SDLK_ESCAPE))
         {
@@ -356,10 +415,56 @@ namespace game
         }
 
         MovementSystem::Update(m_Registry, input, dt);
+        m_CollisionSystem.Update(m_Registry);
         AnimationSystem::Update(m_Registry, dt);
         BoneAttachmentSystem::Update(m_Registry);
+        UpdateAttackHitbox();
 
         UpdateCamera();
+    }
+
+    void GameplayScene::UpdateAttackHitbox()
+    {
+        if (!m_Registry.IsAlive(m_PlayerEntity) ||
+            !m_Registry.HasComponent<AnimationState>(m_PlayerEntity))
+            return;
+
+        const auto& anim = m_Registry.GetComponent<AnimationState>(m_PlayerEntity);
+        const auto& playerTransform = m_Registry.GetComponent<Transform>(m_PlayerEntity);
+
+        if (anim.IsAttacking)
+        {
+            // Spawn hitbox if it doesn't exist
+            if (m_AttackHitbox.GetId() == 0 || !m_Registry.IsAlive(m_AttackHitbox))
+            {
+                m_AttackHitbox = m_Registry.CreateEntity();
+
+                Collider hitboxCollider(1.2f, 1.5f, 1.2f);
+                hitboxCollider.IsTrigger = true;
+                hitboxCollider.IsStatic = false;
+                m_Registry.AddComponent(m_AttackHitbox, Transform());
+                m_Registry.AddComponent(m_AttackHitbox, hitboxCollider);
+            }
+
+            // Position hitbox in front of the player based on facing direction
+            float offsetDist = 1.0f;
+            float hitX = playerTransform.X + std::sin(playerTransform.RotationY) * offsetDist;
+            float hitZ = playerTransform.Z + std::cos(playerTransform.RotationY) * offsetDist;
+
+            auto& hitTransform = m_Registry.GetComponent<Transform>(m_AttackHitbox);
+            hitTransform.X = hitX;
+            hitTransform.Y = playerTransform.Y + 0.5f;
+            hitTransform.Z = hitZ;
+        }
+        else
+        {
+            // Destroy hitbox when not attacking
+            if (m_AttackHitbox.GetId() != 0 && m_Registry.IsAlive(m_AttackHitbox))
+            {
+                m_Registry.DestroyEntity(m_AttackHitbox);
+                m_AttackHitbox = engine::Entity(0);
+            }
+        }
     }
 
     void GameplayScene::UpdateCamera()
@@ -379,10 +484,36 @@ namespace game
         if (!m_Shader)
             return;
 
+        // Pre-cache bone uniform locations on first render
+        static std::vector<int> boneUniformLocations;
+        if (boneUniformLocations.empty())
+        {
+            boneUniformLocations.resize(100);
+            for (int i = 0; i < 100; i++)
+            {
+                std::string name = "finalBonesMatrices[" + std::to_string(i) + "]";
+                boneUniformLocations[i] = m_Shader->GetCachedUniformLocation(name);
+            }
+        }
+
         m_Shader->Bind();
         m_Shader->SetMat4("view", m_Camera.GetViewMatrix());
         m_Shader->SetMat4("projection", m_Camera.GetProjectionMatrix());
         m_Shader->SetInt("texture_diffuse1", 0);
+
+        // Upload identity bones once at start for non-animated entities
+        static bool identityUploaded = false;
+        if (!identityUploaded)
+        {
+            glm::mat4 identity(1.0f);
+            for (int i = 0; i < 100; i++)
+            {
+                m_Shader->SetMat4(boneUniformLocations[i], glm::value_ptr(identity));
+            }
+            identityUploaded = true;
+        }
+
+        bool lastWasAnimated = false;
 
         for (const engine::Entity entity : m_Registry.GetActiveEntities())
         {
@@ -414,29 +545,36 @@ namespace game
 
             m_Shader->SetMat4("model", glm::value_ptr(modelMat));
 
-            // Upload bone matrices
+            // Upload bone matrices (use cached locations)
             bool hasAnimation = m_Registry.HasComponent<AnimationState>(entity);
             if (hasAnimation)
             {
                 const auto& anim = m_Registry.GetComponent<AnimationState>(entity);
                 for (int i = 0; i < static_cast<int>(anim.FinalBoneMatrices.size()); i++)
                 {
-                    std::string name = "finalBonesMatrices[" + std::to_string(i) + "]";
-                    m_Shader->SetMat4(name.c_str(), glm::value_ptr(anim.FinalBoneMatrices[i]));
+                    m_Shader->SetMat4(boneUniformLocations[i], glm::value_ptr(anim.FinalBoneMatrices[i]));
                 }
+                lastWasAnimated = true;
             }
-            else
+            else if (lastWasAnimated)
             {
+                // Reset to identity only after rendering an animated entity
                 glm::mat4 identity(1.0f);
                 for (int i = 0; i < 100; i++)
                 {
-                    std::string name = "finalBonesMatrices[" + std::to_string(i) + "]";
-                    m_Shader->SetMat4(name.c_str(), glm::value_ptr(identity));
+                    m_Shader->SetMat4(boneUniformLocations[i], glm::value_ptr(identity));
                 }
+                lastWasAnimated = false;
             }
 
             render.TexturePtr->Bind(0);
             render.MeshPtr->Draw();
+        }
+
+        // Render debug colliders after main scene
+        if (m_DebugToggle.ShowColliders())
+        {
+            m_DebugColliderRenderer.Render(m_Registry, m_Camera);
         }
     }
 }

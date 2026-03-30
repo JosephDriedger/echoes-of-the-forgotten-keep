@@ -16,7 +16,7 @@ namespace engine
 {
     Application::Application(const ApplicationSpecification& specification)
         : m_Specification(specification),
-          m_Window(nullptr),
+          m_Window(),
           m_Renderer(),
           m_Input(),
           m_IsRunning(false)
@@ -94,6 +94,11 @@ namespace engine
         return m_Input;
     }
 
+    Window* Application::GetWindow()
+    {
+        return m_Window.get();
+    }
+
     const ApplicationSpecification& Application::GetSpecification() const
     {
         return m_Specification;
@@ -113,7 +118,7 @@ namespace engine
 
         std::cout << "[Application] SDL initialized.\n";
 
-        m_Window = new Window();
+        m_Window = std::make_unique<Window>();
 
         std::cout << "[Application] Creating window.\n";
 
@@ -123,8 +128,7 @@ namespace engine
             m_Specification.Height))
         {
             std::cerr << "[Application] Window creation failed.\n";
-            delete m_Window;
-            m_Window = nullptr;
+            m_Window.reset();
             SDL_Quit();
             return false;
         }
@@ -150,8 +154,7 @@ namespace engine
         if (m_Window)
         {
             m_Window->Destroy();
-            delete m_Window;
-            m_Window = nullptr;
+            m_Window.reset();
         }
 
         SDL_Quit();

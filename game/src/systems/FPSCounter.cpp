@@ -1,8 +1,27 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+#include "game/systems/FPSCounter.h"
 
-#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_FPSCOUNTER_H
-#define ECHOES_OF_THE_FORGOTTEN_KEEP_FPSCOUNTER_H
+#include <sstream>
+#include <iomanip>
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_FPSCOUNTER_H
+namespace game
+{
+    void FPSCounter::Update(const engine::Timestep& timestep)
+    {
+        m_FrameCount++;
+        m_AccumulatedTime += timestep.GetSeconds();
+
+        if (m_AccumulatedTime >= UPDATE_INTERVAL)
+        {
+            m_FPS = static_cast<float>(m_FrameCount) / m_AccumulatedTime;
+            m_FrameTimeMs = (m_AccumulatedTime / static_cast<float>(m_FrameCount)) * 1000.0f;
+
+            std::ostringstream oss;
+            oss << "FPS: " << static_cast<int>(m_FPS)
+                << " (" << std::fixed << std::setprecision(1) << m_FrameTimeMs << " ms)";
+            m_DisplayString = oss.str();
+
+            m_FrameCount = 0;
+            m_AccumulatedTime = 0.0f;
+        }
+    }
+}
