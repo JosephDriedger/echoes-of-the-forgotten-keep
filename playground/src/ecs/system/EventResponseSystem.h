@@ -28,6 +28,7 @@ private:
     void applyDamageIfNeeded(const CollisionEvent& e, Entity* attacker, Entity* target, World& world);
     void handleItemPickup(const CollisionEvent& e, World& world);
     void handleWallCollision(const CollisionEvent& e);
+    void handleButtonPress(const CollisionEvent& e);
 };
 
 #endif //INC_8051TUTORIAL_EVENTRESPONSESYSTEM_H

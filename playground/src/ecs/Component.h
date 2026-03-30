@@ -290,8 +290,13 @@ struct ProjectileTag
 };
 
 struct Switch {
-    Entity* door = nullptr;
+    std::string id;
     bool pressed = false;
+};
+
+struct Door {
+    std::string triggerId;
+    bool open = false;
 };
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H

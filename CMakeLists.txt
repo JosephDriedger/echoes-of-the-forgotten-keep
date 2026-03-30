@@ -56,6 +56,7 @@ add_executable(echoes_of_the_forgotten_keep playground/src/main.cpp
         playground/src/ecs/system/MouseInputSystem.cpp
         playground/src/ecs/system/EventResponseSystem.cpp
         playground/src/ecs/system/BuildRoomSystem.cpp
+        playground/src/ecs/system/DoorPuzzleSystem.cpp
 )
 
 target_link_libraries(echoes_of_the_forgotten_keep
