@@ -1,6 +1,7 @@
 #include "game/systems/AnimationSystem.h"
 
 #include "game/components/AnimationState.h"
+#include "game/components/CombatState.h"
 
 #include "engine/rendering/Animator.h"
 
@@ -26,9 +27,9 @@ namespace game
             anim.IsBlending = true;
         }
 
-        int GetComboClipIndex(const AnimationState& anim)
+        int GetComboClipIndex(const AnimationState& anim, int comboIndex)
         {
-            switch (anim.ComboIndex)
+            switch (comboIndex)
             {
                 case 0: return anim.Attack1ClipIndex;
                 case 1: return anim.Attack2ClipIndex;
@@ -50,62 +51,88 @@ namespace game
             if (!anim.Clips || anim.Clips->empty() || !anim.SkeletonPtr)
                 continue;
 
+            // Read combat state if present (otherwise defaults to no combat)
+            bool isAttacking = false;
+            bool attackQueued = false;
+            bool comboWindowOpen = false;
+            int comboIndex = 0;
+            float comboWindow = 0.5f;
+            float comboTimer = 0.0f;
+            bool isHit = false;
+            bool isDead = false;
+
+            bool hasCombat = registry.HasComponent<CombatState>(entity);
+            if (hasCombat)
+            {
+                auto& combat = registry.GetComponent<CombatState>(entity);
+                isAttacking = combat.IsAttacking;
+                attackQueued = combat.AttackQueued;
+                comboWindowOpen = combat.ComboWindowOpen;
+                comboIndex = combat.ComboIndex;
+                comboWindow = combat.ComboWindow;
+                comboTimer = combat.ComboTimer;
+                isHit = combat.IsHit;
+                isDead = combat.IsDead;
+            }
+
             engine::AnimationClip& clip = (*anim.Clips)[anim.CurrentClip];
             anim.CurrentTime += deltaTime * clip.TicksPerSecond;
 
-            if (anim.IsDead)
+            if (isDead)
             {
                 if (anim.CurrentTime >= clip.Duration)
                     anim.CurrentTime = clip.Duration;
             }
 
-            if (anim.IsHit)
+            if (isHit)
             {
-                if (anim.CurrentTime >= clip.Duration)
-                    anim.IsHit = false;
+                if (anim.CurrentTime >= clip.Duration && hasCombat)
+                    registry.GetComponent<CombatState>(entity).IsHit = false;
             }
 
-            if (anim.IsAttacking)
+            if (isAttacking && hasCombat)
             {
-                if (anim.ComboTimer > 0.0f)
-                    anim.ComboTimer -= deltaTime;
+                auto& combat = registry.GetComponent<CombatState>(entity);
+
+                if (combat.ComboTimer > 0.0f)
+                    combat.ComboTimer -= deltaTime;
 
                 float comboStart = clip.Duration * 0.5f;
 
                 if (anim.CurrentTime >= comboStart &&
                     anim.CurrentTime < clip.Duration * 0.9f &&
-                    !anim.ComboWindowOpen)
+                    !combat.ComboWindowOpen)
                 {
-                    anim.ComboWindowOpen = true;
-                    anim.ComboTimer = anim.ComboWindow;
+                    combat.ComboWindowOpen = true;
+                    combat.ComboTimer = combat.ComboWindow;
                 }
 
-                if (anim.ComboWindowOpen &&
+                if (combat.ComboWindowOpen &&
                     !(anim.CurrentTime >= comboStart && anim.CurrentTime < clip.Duration * 0.9f))
                 {
-                    anim.ComboWindowOpen = false;
+                    combat.ComboWindowOpen = false;
                 }
 
                 if (anim.CurrentTime >= clip.Duration)
                 {
-                    if (anim.AttackQueued)
+                    if (combat.AttackQueued)
                     {
-                        anim.ComboIndex++;
-                        anim.AttackQueued = false;
+                        combat.ComboIndex++;
+                        combat.AttackQueued = false;
                         anim.CurrentTime = 0.0f;
 
-                        if (anim.ComboIndex > 2)
-                            anim.ComboIndex = 0;
+                        if (combat.ComboIndex > 2)
+                            combat.ComboIndex = 0;
 
-                        int nextAttackClip = GetComboClipIndex(anim);
+                        int nextAttackClip = GetComboClipIndex(anim, combat.ComboIndex);
                         if (nextAttackClip >= 0)
                             anim.CurrentClip = nextAttackClip;
                     }
                     else
                     {
-                        anim.IsAttacking = false;
-                        anim.ComboIndex = 0;
-                        anim.ComboTimer = 0.0f;
+                        combat.IsAttacking = false;
+                        combat.ComboIndex = 0;
+                        combat.ComboTimer = 0.0f;
                     }
                 }
             }
@@ -113,13 +140,13 @@ namespace game
             // State machine
             AnimState targetState = AnimState::Idle;
 
-            if (anim.IsDead)
+            if (isDead)
                 targetState = AnimState::Death;
-            else if (anim.IsHit)
+            else if (isHit)
                 targetState = AnimState::HitReact;
-            else if (anim.IsAttacking)
+            else if (isAttacking)
             {
-                switch (anim.ComboIndex)
+                switch (comboIndex)
                 {
                     case 0: targetState = AnimState::Attack1; break;
                     case 1: targetState = AnimState::Attack2; break;
@@ -155,7 +182,7 @@ namespace game
 
             anim.FinalNodeTransforms.clear();
 
-            if (anim.CurrentTime >= clip.Duration && !anim.IsAttacking && !anim.IsDead)
+            if (anim.CurrentTime >= clip.Duration && !isAttacking && !isDead)
             {
                 anim.CurrentTime -= clip.Duration;
             }

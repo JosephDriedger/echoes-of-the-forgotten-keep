@@ -1,6 +1,7 @@
 #include "game/systems/EntitySpawnSystem.h"
 
 #include "game/components/Collider.h"
+#include "game/components/CombatState.h"
 #include "game/components/EnemyAI.h"
 #include "game/components/Player.h"
 #include "game/components/Transform.h"
@@ -20,6 +21,7 @@ namespace game
         registry.RegisterComponent<Render>();
         registry.RegisterComponent<AnimationState>();
         registry.RegisterComponent<BoneAttachment>();
+        registry.RegisterComponent<CombatState>();
         registry.RegisterComponent<Door>();
     }
 
