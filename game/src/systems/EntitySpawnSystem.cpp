@@ -7,6 +7,7 @@
 #include "game/components/Render.h"
 #include "game/components/AnimationState.h"
 #include "game/components/BoneAttachment.h"
+#include "game/components/Door.h"
 
 namespace game
 {
@@ -19,6 +20,7 @@ namespace game
         registry.RegisterComponent<Render>();
         registry.RegisterComponent<AnimationState>();
         registry.RegisterComponent<BoneAttachment>();
+        registry.RegisterComponent<Door>();
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

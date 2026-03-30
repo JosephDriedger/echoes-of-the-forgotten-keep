@@ -15,6 +15,7 @@
 #include "game/components/BoneAttachment.h"
 #include "game/components/Player.h"
 #include "game/components/Collider.h"
+#include "game/components/Door.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -302,62 +303,129 @@ namespace game
         // Add static colliders to wall prefabs
         if (IsWallPrefab(type))
         {
-            // The wall mesh extends ~2 units along local +X from its origin,
-            // and is ~0.3 units thick along local +Z.
-            // We compute the world-space center offset by rotating the local
-            // mesh center by the wall's rotation.
-            float halfLength = 1.0f;   // half of ~2 unit wall length
-            float halfThick  = 0.15f;  // half of ~0.3 unit thickness
+            SpawnWallColliders(type, position, rotY);
+        }
 
-            float radians = glm::radians(rotY);
-            float cosR = std::cos(radians);
-            float sinR = std::sin(radians);
+        // Add trigger collider and Door component to doors
+        if (type == engine::PrefabType::Door)
+        {
+            Collider doorTrigger(2.5f, 3.0f, 2.5f);
+            doorTrigger.IsTrigger = true;
+            doorTrigger.IsStatic = false;
+            m_Registry.AddComponent(e, doorTrigger);
 
-            // Local center of the wall mesh (in mesh-local coordinates)
-            // Wall runs along local X, thin along local Z
-            float localCenterX = halfLength;
-            float localCenterZ = halfThick;
-
-            // Rotate local center to world space offset
-            float worldOffsetX = localCenterX * cosR - localCenterZ * sinR;
-            float worldOffsetZ = localCenterX * sinR + localCenterZ * cosR;
-
-            // AABB dimensions: after rotation, the bounding box dimensions change
-            // A 2x0.3 rect rotated gives AABB of:
-            float absLength = 2.0f;
-            float absThick  = 0.3f;
-            float absCosR = std::abs(cosR);
-            float absSinR = std::abs(sinR);
-
-            float aabbWidth = absLength * absCosR + absThick * absSinR;
-            float aabbDepth = absLength * absSinR + absThick * absCosR;
-
-            Collider wallCollider;
-            wallCollider.Width  = aabbWidth;
-            wallCollider.Height = 3.0f;
-            wallCollider.Depth  = aabbDepth;
-            wallCollider.OffsetX = worldOffsetX;
-            wallCollider.OffsetZ = worldOffsetZ;
-
-            // Corner/crossing/T-split pieces — larger junction area
-            if (type == engine::PrefabType::WallCorner ||
-                type == engine::PrefabType::WallCrossing ||
-                type == engine::PrefabType::WallTsplit ||
-                type == engine::PrefabType::WallCornerSmall)
-            {
-                // These pieces extend in two directions from origin
-                // Use a box that covers the junction
-                wallCollider.Width  = 2.2f;
-                wallCollider.Depth  = 2.2f;
-                wallCollider.OffsetX = worldOffsetX * 0.5f;
-                wallCollider.OffsetZ = worldOffsetZ * 0.5f;
-            }
-
-            wallCollider.IsStatic = true;
-            m_Registry.AddComponent(e, wallCollider);
+            Door door;
+            door.BaseRotationY = glm::radians(rotY);
+            m_Registry.AddComponent(e, door);
         }
 
         return e;
+    }
+
+    void GameplayScene::SpawnColliderEntity(const glm::vec3& position, float width, float height, float depth)
+    {
+        engine::Entity e = m_Registry.CreateEntity();
+        m_Registry.AddComponent(e, Transform(position.x, position.y, position.z));
+
+        Collider c(width, height, depth);
+        c.IsStatic = true;
+        m_Registry.AddComponent(e, c);
+    }
+
+    void GameplayScene::SpawnWallColliders(engine::PrefabType type, const glm::vec3& position, float rotY)
+    {
+        // Wall arm dimensions: spans one tile length (4 units), thin (0.5 units)
+        constexpr float armLength = 4.0f;
+        constexpr float armThick  = 0.5f;
+        constexpr float wallH     = 3.0f;
+        // Half-arm offset from center to place each arm
+        constexpr float halfArm   = armLength * 0.5f;
+
+        // Normalize rotation to determine which arms exist
+        float normRot = std::fmod(rotY, 360.0f);
+        if (normRot < 0.0f) normRot += 360.0f;
+
+        if (type == engine::PrefabType::Wall)
+        {
+            // Straight wall: one arm centered at position
+            // rotY=0 means E-W (along X), rotY=90 means N-S (along Z)
+            bool vertical = (normRot > 45.0f && normRot < 135.0f) ||
+                            (normRot > 225.0f && normRot < 315.0f);
+
+            if (vertical)
+                SpawnColliderEntity(position, armThick, wallH, armLength);
+            else
+                SpawnColliderEntity(position, armLength, wallH, armThick);
+        }
+        else if (type == engine::PrefabType::WallCorner || type == engine::PrefabType::WallCornerSmall)
+        {
+            // Corner: L-shape = 2 arms. The corner mesh sits at the junction.
+            // Determine which two directions the arms extend based on rotation.
+            // rotY=0: S+W corner arms extend along -X and +Z
+            // rotY=90: E+S arms extend along +X and +Z
+            // rotY=180: N+E arms extend along +X and -Z
+            // rotY=-90/270: W+N arms extend along -X and -Z
+            float dx1 = 0, dz1 = 0, dx2 = 0, dz2 = 0;
+
+            int rot = static_cast<int>(normRot + 0.5f) % 360;
+            if (rot < 45 || rot >= 315) { // 0: S+W
+                dx1 = -halfArm; dz1 = 0;   // arm along -X
+                dx2 = 0;        dz2 = halfArm; // arm along +Z
+            } else if (rot < 135) { // 90: E+S
+                dx1 = halfArm;  dz1 = 0;   // arm along +X
+                dx2 = 0;        dz2 = halfArm; // arm along +Z
+            } else if (rot < 225) { // 180: N+E
+                dx1 = halfArm;  dz1 = 0;   // arm along +X
+                dx2 = 0;        dz2 = -halfArm; // arm along -Z
+            } else { // 270: W+N
+                dx1 = -halfArm; dz1 = 0;   // arm along -X
+                dx2 = 0;        dz2 = -halfArm; // arm along -Z
+            }
+
+            // Horizontal arm (along X)
+            SpawnColliderEntity(position + glm::vec3(dx1, 0, 0), armLength, wallH, armThick);
+            // Vertical arm (along Z)
+            SpawnColliderEntity(position + glm::vec3(0, 0, dz2), armThick, wallH, armLength);
+        }
+        else if (type == engine::PrefabType::WallTsplit)
+        {
+            // T-split: 3 arms. The missing direction determines shape.
+            // rotY=0: missing N → arms go E, W, S
+            // rotY=90: missing W → arms go N, S, E
+            // rotY=180: missing S → arms go E, W, N
+            // rotY=-90/270: missing E → arms go N, S, W
+            int rot = static_cast<int>(normRot + 0.5f) % 360;
+
+            bool hasN = true, hasS = true, hasE = true, hasW = true;
+            if (rot < 45 || rot >= 315)      hasN = false; // 0
+            else if (rot < 135)              hasW = false; // 90
+            else if (rot < 225)              hasS = false; // 180
+            else                             hasE = false; // 270
+
+            // Horizontal bar (E-W) if both E and W exist
+            if (hasE && hasW)
+                SpawnColliderEntity(position, armLength, wallH, armThick);
+
+            // Vertical bar (N-S) if both N and S exist
+            if (hasN && hasS)
+                SpawnColliderEntity(position, armThick, wallH, armLength);
+
+            // Individual arms for the T-shape
+            if (hasE && !hasW)
+                SpawnColliderEntity(position + glm::vec3(halfArm, 0, 0), armLength, wallH, armThick);
+            if (hasW && !hasE)
+                SpawnColliderEntity(position + glm::vec3(-halfArm, 0, 0), armLength, wallH, armThick);
+            if (hasS && !hasN)
+                SpawnColliderEntity(position + glm::vec3(0, 0, halfArm), armThick, wallH, armLength);
+            if (hasN && !hasS)
+                SpawnColliderEntity(position + glm::vec3(0, 0, -halfArm), armThick, wallH, armLength);
+        }
+        else if (type == engine::PrefabType::WallCrossing)
+        {
+            // Crossing: 4-way junction = full cross
+            SpawnColliderEntity(position, armLength, wallH, armThick); // E-W bar
+            SpawnColliderEntity(position, armThick, wallH, armLength); // N-S bar
+        }
     }
 
     void GameplayScene::OnUpdate(engine::Application& application, const engine::Timestep timestep)
@@ -419,8 +487,9 @@ namespace game
         AnimationSystem::Update(m_Registry, dt);
         BoneAttachmentSystem::Update(m_Registry);
         UpdateAttackHitbox();
+        UpdateDoors(dt);
 
-        UpdateCamera();
+        UpdateCamera(input);
     }
 
     void GameplayScene::UpdateAttackHitbox()
@@ -467,13 +536,86 @@ namespace game
         }
     }
 
-    void GameplayScene::UpdateCamera()
+    void GameplayScene::UpdateDoors(float dt)
     {
         if (!m_Registry.IsAlive(m_PlayerEntity))
             return;
 
+        const auto& playerT = m_Registry.GetComponent<Transform>(m_PlayerEntity);
+
+        for (const engine::Entity entity : m_Registry.GetActiveEntities())
+        {
+            if (!m_Registry.HasComponent<Door>(entity) ||
+                !m_Registry.HasComponent<Transform>(entity))
+                continue;
+
+            auto& door = m_Registry.GetComponent<Door>(entity);
+            auto& doorT = m_Registry.GetComponent<Transform>(entity);
+
+            // Check if player is within trigger distance
+            float dx = playerT.X - doorT.X;
+            float dz = playerT.Z - doorT.Z;
+            float distSq = dx * dx + dz * dz;
+            bool playerNear = distSq < 2.5f * 2.5f;
+
+            // Determine swing direction based on which side player approaches from
+            if (playerNear && door.SwingDirection == 0)
+            {
+                // Door's local forward is determined by its base rotation
+                // The door faces along its local Z axis
+                float doorForwardX = std::sin(door.BaseRotationY);
+                float doorForwardZ = std::cos(door.BaseRotationY);
+
+                // Dot product of player-to-door direction with door forward
+                float dot = dx * doorForwardX + dz * doorForwardZ;
+                door.SwingDirection = (dot > 0.0f) ? 1 : -1;
+            }
+
+            // Reset swing direction when door fully closes
+            if (!playerNear && std::abs(door.CurrentAngle) < 0.1f)
+            {
+                door.SwingDirection = 0;
+            }
+
+            // Animate toward target
+            float goalAngle = playerNear ? 90.0f * door.SwingDirection : 0.0f;
+            float step = door.SwingSpeed * dt;
+
+            if (door.CurrentAngle < goalAngle)
+            {
+                door.CurrentAngle += step;
+                if (door.CurrentAngle > goalAngle)
+                    door.CurrentAngle = goalAngle;
+            }
+            else if (door.CurrentAngle > goalAngle)
+            {
+                door.CurrentAngle -= step;
+                if (door.CurrentAngle < goalAngle)
+                    door.CurrentAngle = goalAngle;
+            }
+
+            // Apply rotation: base rotation + swing offset
+            doorT.RotationY = door.BaseRotationY + glm::radians(door.CurrentAngle);
+        }
+    }
+
+    void GameplayScene::UpdateCamera(const engine::Input& input)
+    {
+        if (!m_Registry.IsAlive(m_PlayerEntity))
+            return;
+
+        // Scroll wheel zoom
+        float scroll = input.GetMouseWheelY();
+        if (scroll != 0.0f)
+        {
+            m_CameraZoom -= scroll * kZoomSpeed;
+            if (m_CameraZoom < kZoomMin) m_CameraZoom = kZoomMin;
+            if (m_CameraZoom > kZoomMax) m_CameraZoom = kZoomMax;
+        }
+
         const auto& transform = m_Registry.GetComponent<Transform>(m_PlayerEntity);
-        m_Camera.SetPosition(transform.X, 20.0f, transform.Z + 8.0f);
+        float zOffset = m_CameraZoom * 0.4f; // proportional Z offset
+        m_Camera.SetPosition(transform.X, m_CameraZoom, transform.Z + zOffset);
         m_Camera.SetTarget(transform.X, 0.0f, transform.Z);
     }
 
