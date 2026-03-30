@@ -220,8 +220,8 @@ void EventResponseSystem::handleWallCollision(const CollisionEvent& e)
 void EventResponseSystem::handleButtonPress(const CollisionEvent &e) {
     // if (e.state != CollisionState::Enter) return;
 
-    if (!e.entityA->hasComponent<PlayerTag>() || !e.entityB->hasComponent<PlayerTag>()) return;
-    if (!e.entityA->hasComponent<Switch>() || !e.entityB->hasComponent<Switch>()) return;
+    // if (!(e.entityA->hasComponent<PlayerTag>() && e.entityB->hasComponent<Switch>()) ||
+    //     !(e.entityA->hasComponent<Switch>() && e.entityB->hasComponent<PlayerTag>())) return;
 
     Entity* player = nullptr;
     Entity* button = nullptr;
@@ -230,12 +230,16 @@ void EventResponseSystem::handleButtonPress(const CollisionEvent &e) {
         player = e.entityA;
     } else if (e.entityB->hasComponent<PlayerTag>()) {
         player = e.entityB;
+    } else {
+        return;
     }
 
     if (e.entityA->hasComponent<Switch>()) {
         button = e.entityA;
     } else if (e.entityB->hasComponent<Switch>()) {
         button = e.entityB;
+    } else {
+        return;
     }
 
     auto& trigger = button->getComponent<Switch>();
@@ -243,6 +247,9 @@ void EventResponseSystem::handleButtonPress(const CollisionEvent &e) {
     if (!trigger.pressed && e.state == CollisionState::Enter) {
         trigger.pressed = true;
         std::cout << "Button pressed!" << std::endl;
+    } else if (trigger.pressed && e.state == CollisionState::Exit) {
+        trigger.pressed = false;
+        std::cout << "Button released!" << std::endl;
     }
 }
 
