@@ -11,6 +11,16 @@ namespace game
         int SwingDirection = 0;       // +1 or -1, determined by player approach side
 
         Door() = default;
+
+        std::string triggerId;
+        bool open = false;
+
+        float currentAngle = 0.0f;
+        float targetAngle = 0.0f;
+        float openAngle = 90.0f;   // degrees
+        float closeAngle = 0.0f;
+        float baseRotation = 0.0f;
+        float speed = 270.0f;
     };
 }
 

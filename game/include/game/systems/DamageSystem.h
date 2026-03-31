@@ -5,14 +5,17 @@
 #ifndef INC_8051TUTORIAL_DAMAGESYSTEM_H
 #define INC_8051TUTORIAL_DAMAGESYSTEM_H
 
-#include <vector>
-#include <memory>
+#pragma once
 
-class Entity;
+#include "engine/ecs/Registry.h"
 
-class DamageSystem {
-public:
-    void update(std::vector<std::unique_ptr<Entity>>& entities);
-};
+namespace game
+{
+    class DamageSystem
+    {
+    public:
+        static void Update(engine::Registry& registry);
+    };
+}
 
 #endif //INC_8051TUTORIAL_DAMAGESYSTEM_H

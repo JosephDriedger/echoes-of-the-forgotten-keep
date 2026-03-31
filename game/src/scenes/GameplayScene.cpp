@@ -29,6 +29,10 @@
 
 #include <iostream>
 
+#include "game/components/AI.h"
+#include "game/components/EnemyAI.h"
+#include "game/components/Health.h"
+
 namespace game
 {
     GameplayScene::GameplayScene()
@@ -235,6 +239,10 @@ namespace game
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
+
+        CreateEnemy({36.0f, 0.0f, 20.0f});
+        // CreateEnemy({25.0f, 0.0f, 28.0f});
+        // CreateEnemy({24.0f, 0.0f, 26.0f});
     }
 
     void GameplayScene::OnUpdate(engine::Application& application, const engine::Timestep timestep)
@@ -373,4 +381,76 @@ namespace game
             m_DebugColliderRenderer.Render(m_Registry, m_Camera);
         }
     }
+
+    engine::Entity GameplayScene::CreateEnemy(const glm::vec3& position)
+{
+    // === CREATE ENEMY ===
+    engine::Entity enemy = m_Registry.CreateEntity();
+
+    // Transform
+    Transform transform(position.x, position.y, position.z);
+    m_Registry.AddComponent(enemy, transform);
+
+    // Tag
+    m_Registry.AddComponent(enemy, EnemyTag());
+
+    // AI
+    AI ai;
+    ai.state = AIState::Idle;
+    ai.stateTimer = 0.0f;
+    ai.visionRange = 7.0f;
+    ai.combat.attackRange = 2.0f;
+    ai.attack.cooldown = 2.0f;
+
+    m_Registry.AddComponent(enemy, ai);
+
+    // Health
+    m_Registry.AddComponent(enemy, Health(3,3));
+
+    // === RENDER ===
+    auto mesh = m_MeshManager.Load("asset/Rogue_Hooded.glb");
+    auto texture = m_AssetManager.GetTextureManager().Load("asset/rogue_texture.png");
+
+    if (mesh.MeshPtr && texture)
+    {
+        m_Registry.AddComponent(enemy, Render(mesh.MeshPtr, texture));
+    }
+
+    // === ANIMATION ===
+    AnimationState anim;
+    anim.SkeletonPtr = m_PlayerSkeleton; // reuse skeleton if compatible
+    anim.Clips = m_PlayerClips;
+
+    anim.IdleClipIndex = FindClipIndex("Idle_A");
+    anim.RunClipIndex  = FindClipIndex("Running_A");
+    anim.Attack1ClipIndex = FindClipIndex("Melee_1H_Attack_Slice_Horizontal");
+    anim.DeathClipIndex = FindClipIndex("Death_A");
+
+    anim.CurrentClip = anim.IdleClipIndex;
+
+    m_Registry.AddComponent(enemy, anim);
+
+    // === COMBAT ===
+    // (simple version using AttackRequest system)
+    // Already handled by EnemyAISystem → no extra component needed
+
+    // === SWORD (Bone Attachment) ===
+    {
+        auto swordMesh = m_MeshManager.Load("asset/sword_1handed.gltf");
+        auto swordTex  = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+
+        if (swordMesh.MeshPtr && swordTex)
+        {
+            engine::Entity sword = m_Registry.CreateEntity();
+
+            m_Registry.AddComponent(sword, Transform(0,0,0));
+            m_Registry.AddComponent(sword, Render(swordMesh.MeshPtr, swordTex));
+
+            m_Registry.AddComponent(sword,
+                BoneAttachment(enemy, "handslot.r", glm::mat4(1.0f)));
+        }
+    }
+
+    return enemy;
+}
 }

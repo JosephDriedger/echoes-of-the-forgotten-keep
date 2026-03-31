@@ -2,77 +2,61 @@
 // Created by scept on 2026-03-29.
 //
 
-#include "../../include/game/systems/DoorPuzzleSystem.h"
+#include "game/systems/DoorPuzzleSystem.h"
+#include "game/components/Door.h"
+#include "game/components/Switch.h"
+#include "game/components/Transform.h"
 
-#include <iostream>
 #include <unordered_map>
+#include <cmath>
 
-#include "Component.h"
-
-void DoorPuzzleSystem::update(std::vector<std::unique_ptr<Entity>>& entities, float dt)
+namespace game
 {
-    // collect triggers
-    std::unordered_map<std::string, bool> triggerStates;
-
-    for (auto& e : entities)
+    void DoorPuzzleSystem::Update(engine::Registry& registry, float dt)
     {
-        if (!e->hasComponent<Switch>()) continue;
+        std::unordered_map<std::string, bool> triggerStates;
 
-        auto& trigger = e->getComponent<Switch>();
-        triggerStates[trigger.id] = trigger.pressed;
-    }
-
-    // update doors
-    for (auto& e : entities)
-    {
-        if (!e->hasComponent<Door>() || !e->hasComponent<Transform3D>()) continue;
-
-        auto& door = e->getComponent<Door>();
-        auto& doorTransform = e->getComponent<Transform3D>();
-
-        bool shouldOpen = false;
-
-        auto it = triggerStates.find(door.triggerId);
-        if (it != triggerStates.end())
+        // Collect switches
+        for (auto entity : registry.GetActiveEntities())
         {
-            shouldOpen = it->second;
+            if (!registry.HasComponent<Switch>(entity))
+                continue;
+
+            auto& sw = registry.GetComponent<Switch>(entity);
+            triggerStates[sw.id] = sw.pressed;
         }
 
-        if (shouldOpen != door.open)
+        // Update doors
+        for (auto entity : registry.GetActiveEntities())
         {
-            door.open = shouldOpen;
+            if (!registry.HasComponent<Door>(entity) ||
+                !registry.HasComponent<Transform>(entity))
+                continue;
 
-            if (door.open)
+            auto& door = registry.GetComponent<Door>(entity);
+            auto& transform = registry.GetComponent<Transform>(entity);
+
+            bool shouldOpen = triggerStates[door.triggerId];
+
+            if (shouldOpen != door.open)
             {
-                std::cout << "Door opened!" << std::endl;
-                door.targetAngle = door.openAngle;
-            }
-            else
-            {
-                std::cout << "Door closed!" << std::endl;
-                door.targetAngle = door.closeAngle;
-
-                // if you removed collider earlier, you'd need to re-add it here
-            }
-        }
-
-        float diff = door.targetAngle - door.currentAngle;
-
-        if (std::abs(diff) > 0.01f)
-        {
-            float step = door.speed * dt;
-
-            if (std::abs(diff) <= step)
-            {
-                door.currentAngle = door.targetAngle;
-            }
-            else
-            {
-                door.currentAngle += (diff > 0 ? step : -step);
+                door.open = shouldOpen;
+                door.targetAngle = shouldOpen ? door.openAngle : door.closeAngle;
             }
 
-            // apply rotation
-            doorTransform.rotation.y = door.baseRotation + door.currentAngle;
+            float diff = door.targetAngle - door.currentAngle;
+
+            if (std::abs(diff) > 0.01f)
+            {
+                float step = door.speed * dt;
+
+                if (std::abs(diff) <= step)
+                    door.currentAngle = door.targetAngle;
+                else
+                    door.currentAngle += (diff > 0 ? step : -step);
+
+                transform.RotationY = door.baseRotation + door.currentAngle;
+            }
         }
     }
 }

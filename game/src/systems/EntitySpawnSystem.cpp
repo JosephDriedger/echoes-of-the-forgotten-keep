@@ -1,5 +1,6 @@
 #include "game/systems/EntitySpawnSystem.h"
 
+#include "game/components/AI.h"
 #include "game/components/Collider.h"
 #include "game/components/CombatState.h"
 #include "game/components/EnemyAI.h"
@@ -9,6 +10,7 @@
 #include "game/components/AnimationState.h"
 #include "game/components/BoneAttachment.h"
 #include "game/components/Door.h"
+#include "game/components/Health.h"
 
 namespace game
 {
@@ -23,6 +25,12 @@ namespace game
         registry.RegisterComponent<BoneAttachment>();
         registry.RegisterComponent<CombatState>();
         registry.RegisterComponent<Door>();
+
+        registry.RegisterComponent<AI>();
+        registry.RegisterComponent<EnemyTag>();
+        registry.RegisterComponent<Health>();
+        registry.RegisterComponent<AttackRequest>();
+
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

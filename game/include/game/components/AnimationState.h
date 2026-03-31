@@ -53,6 +53,8 @@ namespace game
         int Attack3ClipIndex = -1;
         int HitClipIndex = -1;
         int DeathClipIndex = -1;
+        bool isDead = false;
+        bool isHit = false;
 
         AnimationState()
             : FinalBoneMatrices(100, glm::mat4(1.0f))

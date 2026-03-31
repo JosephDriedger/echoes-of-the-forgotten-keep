@@ -7,6 +7,8 @@
 
 namespace game
 {
+    struct EnemyTag{};
+
     struct EnemyAI
     {
         float MoveSpeed;

@@ -4,14 +4,18 @@
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_DOORPUZZLESYSTEM_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_DOORPUZZLESYSTEM_H
-#include <memory>
-#include <vector>
 
-#include "Entity.h"
+#pragma once
 
-class DoorPuzzleSystem {
+#include "engine/ecs/Registry.h"
+
+namespace game
+{
+    class DoorPuzzleSystem
+    {
     public:
-    void update(std::vector<std::unique_ptr<Entity> > &entities, float dt);
-};
+        static void Update(engine::Registry& registry, float dt);
+    };
+}
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_DOORPUZZLESYSTEM_H

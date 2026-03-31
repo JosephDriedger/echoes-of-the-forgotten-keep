@@ -5,33 +5,27 @@
 #ifndef INC_8051TUTORIAL_ENEMYAISYSTEM_H
 #define INC_8051TUTORIAL_ENEMYAISYSTEM_H
 
-#include <memory>
-#include <vector>
+#pragma once
+
+#include "engine/ecs/Registry.h"
 #include "engine/ecs/Entity.h"
-#include "engine/ecs/Component.h"
+#include "game/components/Transform.h"
+#include "game/components/AI.h"
+#include "game/components/Player.h"
+#include "game/components/AnimationState.h"
 
-class EnemyAISystem
+namespace game
 {
-public:
-    EnemyAISystem() = default;
+    class EnemyAISystem
+    {
+    public:
+        static void Update(engine::Registry& registry, float dt);
 
-    // called once per frame
-    void update(std::vector<std::unique_ptr<Entity>>& entities, float dt);
-
-private:
-    std::vector<Entity*> queryEnemies(const std::vector<std::unique_ptr<Entity>>& entities);
-
-    // state handlers
-    void UpdateIdle(Entity* enemy, AI& ai, Animator& animator, float dt);
-    void UpdatePatrol(Entity* enemy, AI& ai, Animator& animator, float dt);
-    void UpdateChase(Entity* enemy, AI& ai, Animator& animator, float dt);
-    void UpdateAttack(Entity* enemy, AI& ai, Animator& animator, float dt);
-
-    // helper functions
-    Entity* findPlayer(const std::vector<std::unique_ptr<Entity>>& entities);
-    float distance(const Transform3D& a, const Transform3D& b);
-    glm::vec3 safeNormalize(const glm::vec3& v);
-
-};
+    private:
+        static engine::Entity FindPlayer(engine::Registry& registry);
+        static float Distance(const Transform& a, const Transform& b);
+        static glm::vec3 Normalize(const glm::vec3& v);
+    };
+}
 
 #endif //INC_8051TUTORIAL_ENEMYAISYSTEM_H

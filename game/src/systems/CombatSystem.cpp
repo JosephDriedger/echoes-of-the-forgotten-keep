@@ -2,78 +2,49 @@
 // Created by scept on 2026-03-11.
 //
 
-#include "../../include/game/systems/CombatSystem.h"
-#include "World.h"
+#include "game/systems/CombatSystem.h"
+#include "game/components/Transform.h"
+#include "game/components/AttackRequest.h"
 
-void CombatSystem::update(std::vector<std::unique_ptr<Entity>>& entities, float dt)
+namespace game
 {
-    for (auto& e : entities)
+    void CombatSystem::Update(engine::Registry& registry, float dt)
     {
-        // if (e->hasComponent<Combat>()) {
-        //     auto& hitbox = e->getComponent<Combat>().weapon->getComponent<ProjectileTag>();
-        //     if (hitbox.melee) {
-        //         if (hitbox.active) {
-        //             hitbox.activationTime -= dt;
-        //             if (hitbox.activationTime <= 0) {
-        //                 hitbox.active = false;
-        //                 std::cout << "Hitbox Inactive" << std::endl;;
-        //             }
-        //         }
-        //     }
-        // }
+        for (auto entity : registry.GetActiveEntities())
+        {
+            if (!registry.HasComponent<AttackRequest>(entity))
+                continue;
 
-        if (!e->hasComponent<AttackRequest>()) {continue;}
+            auto& req = registry.GetComponent<AttackRequest>(entity);
 
-        auto& req = e->getComponent<AttackRequest>();
+            SpawnProjectile(registry, entity, req.direction, req.tag);
 
-        spawnProjectile(e.get(), req.direction, req.tag);
-        // if (e->hasComponent<Combat>()) {
-        //     auto& weapon = e->getComponent<Combat>().weapon;
-        //     if (weapon->hasComponent<ProjectileTag>()) {
-        //         auto& hitbox = weapon->getComponent<ProjectileTag>();
-        //         if (hitbox.melee && !hitbox.active) {
-        //             hitbox.active = true;
-        //             hitbox.activationTime = 1.0f;
-        //             std::cout << "Hitbox Active" << std::endl;
-        //         }
-        //     }
-        // }
-
-        e->removeComponent<AttackRequest>();
+            registry.RemoveComponent<AttackRequest>(entity);
+        }
     }
-}
 
-void CombatSystem::spawnProjectile(Entity* attacker, glm::vec3 direction, std::string tag)
-{
-    if (direction.length() == 0)
-        return;
+    void CombatSystem::SpawnProjectile(engine::Registry& registry,
+                                       engine::Entity attacker,
+                                       const glm::vec3& direction,
+                                       const std::string& tag)
+    {
+        if (glm::length(direction) == 0.0f)
+            return;
 
-    auto& transform = attacker->getComponent<Transform3D>();
+        if (!registry.HasComponent<Transform>(attacker))
+            return;
 
-    auto& projectile = world.createDeferredEntity();
+        auto& attackerTransform = registry.GetComponent<Transform>(attacker);
 
-    auto& t = projectile.addComponent<Transform3D>();
-    t.scale = glm::vec3(1.0);
+        engine::Entity proj = registry.CreateEntity();
 
-    float spawnDistance = 1.3f; // tweak this
+        Transform t;
+        t.X = attackerTransform.X + direction.x * 1.3f;
+        t.Y = attackerTransform.Y;
+        t.Z = attackerTransform.Z + direction.z * 1.3f;
 
-    glm::vec3 forward = glm::normalize(direction);
-    t.position = transform.position + forward * spawnDistance;
+        registry.AddComponent(proj, t);
 
-    auto& v = projectile.addComponent<Velocity3D>();
-    v.direction = glm::normalize(direction);
-    v.speed = 0;
-
-    auto& c = projectile.addComponent<Collider3D>(0.5, 0.5, 0.5);
-    c.tag = tag;
-    // c.rect = {t.position.x, t.position.y, 16, 16};
-
-    projectile.addComponent<ProjectileTag>(0.5);
-    projectile.addComponent<Damage>().amount = 1;
-    projectile.addComponent<Parent>().entity = attacker;
-
-    // SDL_Texture* tex = TextureManager::load("../asset/ball.png");
-    // SDL_FRect src {0, 0, 32, 32};
-    // SDL_FRect dest {t.position.x, t.position.y, 32, 32};
-    // projectile.addComponent<Sprite>(tex, src, dest);
+        // Add more components later (velocity, collider, damage, etc.)
+    }
 }

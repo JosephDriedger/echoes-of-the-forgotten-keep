@@ -5,24 +5,24 @@
 #ifndef INC_8051TUTORIAL_COMBATSYSTEM_H
 #define INC_8051TUTORIAL_COMBATSYSTEM_H
 
-#include <vector>
-#include <memory>
-#include "Entity.h"
-#include "Vector2D.h"
+#pragma once
+
+#include "engine/ecs/Registry.h"
 #include "glm/vec3.hpp"
 
-class World;
-
-class CombatSystem {
+namespace game
+{
+    class CombatSystem
+    {
     public:
-    CombatSystem(World& world) : world(world) {}
-
-    void update(std::vector<std::unique_ptr<Entity>>& entities, float dt);
+        static void Update(engine::Registry& registry, float dt);
 
     private:
-    World& world;
-
-    void spawnProjectile(Entity* attacker, glm::vec3 direction, std::string tag);
-};
+        static void SpawnProjectile(engine::Registry& registry,
+                                    engine::Entity attacker,
+                                    const glm::vec3& direction,
+                                    const std::string& tag);
+    };
+}
 
 #endif //INC_8051TUTORIAL_COMBATSYSTEM_H

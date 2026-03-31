@@ -67,6 +67,7 @@ namespace game
         AttackHitboxSystem m_AttackHitboxSystem;
         CameraFollowSystem m_CameraFollowSystem;
         std::unique_ptr<DungeonSpawnSystem> m_DungeonSpawnSystem;
+        engine::Entity CreateEnemy(const glm::vec3& position);
     };
 }
 

@@ -2,48 +2,43 @@
 // Created by scept on 2026-03-09.
 //
 
-#include "../../include/game/systems/DamageSystem.h"
-
-#include "Entity.h"
-#include "Component.h"
+#include "game/systems/DamageSystem.h"
+#include "game/components/Health.h"
+#include "game/components/DamageEvent.h"
+#include "game/components/AnimationState.h"
 #include <iostream>
 
-#include "Game.h"
-
-void DamageSystem::update(std::vector<std::unique_ptr<Entity>>& entities)
+namespace game
 {
-    for (auto& e : entities)
+    void DamageSystem::Update(engine::Registry& registry)
     {
-        if (!e->hasComponent<DamageEvent>()) {continue;}
-
-        auto& dmg = e->getComponent<DamageEvent>();
-
-        if (dmg.target && dmg.target->hasComponent<Health>())
+        for (auto entity : registry.GetActiveEntities())
         {
-            auto& health = dmg.target->getComponent<Health>();
+            if (!registry.HasComponent<DamageEvent>(entity))
+                continue;
 
-            health.currentHealth -= dmg.amount;
-            if (dmg.target->hasComponent<PlayerTag>()) {
-                Game::gameState.playerHealth = health.currentHealth;
-            }
+            auto& dmg = registry.GetComponent<DamageEvent>(entity);
 
-            std::cout << "Damage applied: " << dmg.amount
-                      << " remaining HP: " << health.currentHealth
-                      << std::endl;
+            if (!registry.IsAlive(*dmg.target))
+                continue;
 
-            if (health.currentHealth <= 0)
+            if (registry.HasComponent<Health>(*dmg.target))
             {
-                if (dmg.target->hasComponent<Animator>()) {
-                    auto& anim = dmg.target->getComponent<Animator>();
+                auto& health = registry.GetComponent<Health>(*dmg.target);
+                health.Current -= dmg.amount;
+
+                std::cout << "Damage: " << dmg.amount
+                          << " HP left: " << health.Current << "\n";
+
+                if (health.Current <= 0 &&
+                    registry.HasComponent<AnimationState>(*dmg.target))
+                {
+                    auto& anim = registry.GetComponent<AnimationState>(*dmg.target);
                     anim.isDead = true;
                 }
-                if (dmg.target->hasComponent<PlayerTag>()) {
-                    Game::onSceneChangeRequest("gameover");
-                }
             }
-        }
 
-        // remove the transient damage entity
-        e->destory();
+            registry.DestroyEntity(entity);
+        }
     }
 }
