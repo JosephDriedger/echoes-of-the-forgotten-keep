@@ -5,7 +5,7 @@
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_AI_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_AI_H
 #include "engine/ecs/Entity.h"
-#include "glm/glm.hpp"
+#include "glm/vec3.hpp"
 
 enum class AIState {
     Idle,
