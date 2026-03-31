@@ -26,7 +26,8 @@ namespace engine
 
     Shader::Shader(Shader&& other) noexcept
         : m_ProgramId(other.m_ProgramId),
-          m_IsLoaded(other.m_IsLoaded)
+          m_IsLoaded(other.m_IsLoaded),
+          m_UniformLocationCache(std::move(other.m_UniformLocationCache))
     {
         other.m_ProgramId = 0;
         other.m_IsLoaded = false;
@@ -43,6 +44,7 @@ namespace engine
 
         m_ProgramId = other.m_ProgramId;
         m_IsLoaded = other.m_IsLoaded;
+        m_UniformLocationCache = std::move(other.m_UniformLocationCache);
 
         other.m_ProgramId = 0;
         other.m_IsLoaded = false;
@@ -109,6 +111,7 @@ namespace engine
         }
 
         m_IsLoaded = false;
+        m_UniformLocationCache.clear();
     }
 
     void Shader::Bind() const
@@ -147,6 +150,11 @@ namespace engine
     void Shader::SetMat4(const std::string& name, const float* values) const
     {
         glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, values);
+    }
+
+    void Shader::SetMat4(int location, const float* values) const
+    {
+        glUniformMatrix4fv(location, 1, GL_FALSE, values);
     }
 
     unsigned int Shader::GetProgramId() const
@@ -213,8 +221,19 @@ namespace engine
         return false;
     }
 
+    int Shader::GetCachedUniformLocation(const std::string& name) const
+    {
+        return GetUniformLocation(name);
+    }
+
     int Shader::GetUniformLocation(const std::string& name) const
     {
-        return glGetUniformLocation(m_ProgramId, name.c_str());
+        auto it = m_UniformLocationCache.find(name);
+        if (it != m_UniformLocationCache.end())
+            return it->second;
+
+        int location = glGetUniformLocation(m_ProgramId, name.c_str());
+        m_UniformLocationCache[name] = location;
+        return location;
     }
 }

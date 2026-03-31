@@ -6,6 +6,7 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H
 
 #include <string>
+#include <unordered_map>
 
 namespace engine
 {
@@ -32,9 +33,11 @@ namespace engine
         void SetFloat(const std::string& name, float value) const;
         void SetVec3(const std::string& name, float x, float y, float z) const;
         void SetMat4(const std::string& name, const float* values) const;
+        void SetMat4(int location, const float* values) const;
 
         [[nodiscard]] unsigned int GetProgramId() const;
         [[nodiscard]] bool IsLoaded() const;
+        [[nodiscard]] int GetCachedUniformLocation(const std::string& name) const;
 
     private:
         static std::string ReadTextFile(const std::string& path);
@@ -46,6 +49,7 @@ namespace engine
     private:
         unsigned int m_ProgramId;
         bool m_IsLoaded;
+        mutable std::unordered_map<std::string, int> m_UniformLocationCache;
     };
 }
 

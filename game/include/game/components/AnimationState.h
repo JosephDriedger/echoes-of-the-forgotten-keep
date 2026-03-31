@@ -38,18 +38,6 @@ namespace game
         float BlendDuration = 0.2f;
         bool IsBlending = false;
 
-        bool IsAttacking = false;
-        bool AttackQueued = false;
-        bool ComboWindowOpen = false;
-        int ComboIndex = 0;
-        float ComboWindow = 0.5f;
-        float ComboTimer = 0.0f;
-
-        bool IsHit = false;
-        bool IsDead = false;
-        int Health = 3;
-        float HitTimer = 0.0f;
-
         bool IsMoving = false;
 
         AnimState CurrentState = AnimState::Idle;

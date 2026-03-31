@@ -11,6 +11,7 @@
 #include "engine/rendering/Renderer.h"
 
 #include <SDL3/SDL_events.h>
+#include <memory>
 
 namespace engine
 {
@@ -45,6 +46,7 @@ namespace engine
 
         Renderer& GetRenderer();
         Input& GetInput();
+        Window* GetWindow();
         const ApplicationSpecification& GetSpecification() const;
 
     private:
@@ -54,7 +56,7 @@ namespace engine
 
     private:
         ApplicationSpecification m_Specification;
-        Window* m_Window;
+        std::unique_ptr<Window> m_Window;
         Renderer m_Renderer;
         Input m_Input;
         bool m_IsRunning;

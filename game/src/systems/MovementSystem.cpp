@@ -3,6 +3,7 @@
 #include "game/components/Transform.h"
 #include "game/components/Player.h"
 #include "game/components/AnimationState.h"
+#include "game/components/CombatState.h"
 
 #include <SDL3/SDL_keycode.h>
 
@@ -23,12 +24,14 @@ namespace game
                 continue;
             }
 
-            if (registry.HasComponent<AnimationState>(entity))
+            // Check combat state to block movement during attacks/hits
+            if (registry.HasComponent<CombatState>(entity))
             {
-                auto& anim = registry.GetComponent<AnimationState>(entity);
-                if (anim.IsAttacking || anim.IsHit)
+                const auto& combat = registry.GetComponent<CombatState>(entity);
+                if (combat.IsAttacking || combat.IsHit)
                 {
-                    anim.IsMoving = false;
+                    if (registry.HasComponent<AnimationState>(entity))
+                        registry.GetComponent<AnimationState>(entity).IsMoving = false;
                     continue;
                 }
             }
