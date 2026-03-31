@@ -29,6 +29,7 @@
 #include "UIRenderSystem.h"
 #include "DebugRenderSystem.h"
 #include "LifetimeSystem.h"
+#include "DoorPuzzleSystem.h"
 
 
 class World {
@@ -55,6 +56,7 @@ private:
     UIRenderSystem uiRenderSystem;
     MouseInputSystem mouseInputSystem;
     DebugRenderSystem debugRenderSystem;
+    DoorPuzzleSystem doorPuzzleSystem;
 
 public:
     World();
@@ -62,6 +64,7 @@ public:
         keyboardInputSystem.update(entities, event);
         movementSystem.update(entities, dt);
         collisionSystem.update(*this);
+        doorPuzzleSystem.update(entities, dt);
         cameraSystem.update(entities);
         animation3DSystem.update(entities, dt);
         attachmentSystem.update(entities);

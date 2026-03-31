@@ -98,7 +98,13 @@ void BuildRoomSystem::Build(World& world, const MapGrid& map) {
                     else if (rot.y == 180) offset = {0.82f, 0, 0};
                     else if (rot.y == -90) offset = {0, 0, 0.82f};
 
-                    SpawnSystem::CreateEntity(world, AssetType::Door, pos + offset, wallRot);
+                    auto & door = SpawnSystem::CreateEntity(world, AssetType::Door, pos + offset, wallRot);
+                    auto& doorComponent = door.addComponent<Door>("DoorA");
+                    doorComponent.baseRotation = wallRot.y;
+                    doorComponent.closeAngle = 0.0f;
+                    doorComponent.openAngle = 90.0f;
+                    doorComponent.currentAngle = 0.0f;
+                    doorComponent.targetAngle = 0.0f;
                     break;
             }
         }

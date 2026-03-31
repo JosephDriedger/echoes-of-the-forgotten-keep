@@ -290,8 +290,20 @@ struct ProjectileTag
 };
 
 struct Switch {
-    Entity* door = nullptr;
+    std::string id;
     bool pressed = false;
+};
+
+struct Door {
+    std::string triggerId;
+    bool open = false;
+
+    float currentAngle = 0.0f;
+    float targetAngle = 0.0f;
+    float openAngle = 90.0f;   // degrees
+    float closeAngle = 0.0f;
+    float baseRotation = 0.0f;
+    float speed = 270.0f;
 };
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENT_H

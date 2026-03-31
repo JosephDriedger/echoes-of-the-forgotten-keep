@@ -31,6 +31,7 @@ private:
     void createDungeon();
     void createPlayer();
     void createEnemy();
+    void createButton();
 };
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_SCENE_H

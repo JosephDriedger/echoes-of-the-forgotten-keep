@@ -19,6 +19,7 @@ Scene::Scene (SceneType sceneType, const char* sceneName, const char* mapPath, i
     createPlayer();
     createEnemy();
     //createDungeon();
+    createButton();
 
     MapGrid map;
 
@@ -183,4 +184,13 @@ void Scene::RegisterDungeonAsset() {
     SpawnSystem::RegisterAsset(AssetType::Door, "../asset/dungeon/door.gltf", "../asset/dungeon/dungeon_texture.png");
     SpawnSystem::RegisterAsset(AssetType::FloorTileLarge, "../asset/dungeon/floor_tile_large.gltf", "../asset/dungeon/dungeon_texture.png");
     SpawnSystem::RegisterAsset(AssetType::FloorTileSmall, "../asset/dungeon/floor_tile_small.gltf", "../asset/dungeon/dungeon_texture.png");
+}
+
+void Scene::createButton() {
+    auto& button = world.createEntity();
+    auto& buttonTransform = button.addComponent<Transform3D>(glm::vec3(4,0,5));
+    button.addComponent<Collider3D>();
+    button.addComponent<Model>(ModelManager::load("../asset/dungeon/button_base_blue.gltf"));
+    button.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/platformer_texture.png"));
+    button.addComponent<Switch>("DoorA");
 }
