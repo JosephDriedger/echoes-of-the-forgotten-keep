@@ -9,6 +9,8 @@
 #include "game/components/AnimationState.h"
 #include "game/components/BoneAttachment.h"
 #include "game/components/Door.h"
+#include "game/components/Health.h"
+#include "game/components/Switch.h"
 
 namespace game
 {
@@ -23,6 +25,8 @@ namespace game
         registry.RegisterComponent<BoneAttachment>();
         registry.RegisterComponent<CombatState>();
         registry.RegisterComponent<Door>();
+        registry.RegisterComponent<Health>();
+        registry.RegisterComponent<Switch>();
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

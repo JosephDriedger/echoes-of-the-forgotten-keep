@@ -1,18 +1,15 @@
-//
-// Created by scept on 2026-03-09.
-//
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_DAMAGESYSTEM_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_DAMAGESYSTEM_H
 
-#ifndef INC_8051TUTORIAL_DAMAGESYSTEM_H
-#define INC_8051TUTORIAL_DAMAGESYSTEM_H
+#include "engine/ecs/Registry.h"
 
-#include <vector>
-#include <memory>
+namespace game
+{
+    class DamageSystem
+    {
+    public:
+        void Update(engine::Registry& registry);
+    };
+}
 
-class Entity;
-
-class DamageSystem {
-public:
-    void update(std::vector<std::unique_ptr<Entity>>& entities);
-};
-
-#endif //INC_8051TUTORIAL_DAMAGESYSTEM_H
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_DAMAGESYSTEM_H

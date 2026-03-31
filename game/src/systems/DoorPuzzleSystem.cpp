@@ -1,78 +1,87 @@
-//
-// Created by scept on 2026-03-29.
-//
+#include "game/systems/DoorPuzzleSystem.h"
 
-#include "../../include/game/systems/DoorPuzzleSystem.h"
+#include "game/components/Door.h"
+#include "game/components/Switch.h"
+#include "game/components/Transform.h"
 
+#include <cmath>
 #include <iostream>
 #include <unordered_map>
 
-#include "Component.h"
+#include <glm/glm.hpp>
 
-void DoorPuzzleSystem::update(std::vector<std::unique_ptr<Entity>>& entities, float dt)
+namespace game
 {
-    // collect triggers
-    std::unordered_map<std::string, bool> triggerStates;
-
-    for (auto& e : entities)
+    void DoorPuzzleSystem::Update(engine::Registry& registry, float deltaTime)
     {
-        if (!e->hasComponent<Switch>()) continue;
+        // Collect trigger states from all switch entities
+        std::unordered_map<std::string, bool> triggerStates;
 
-        auto& trigger = e->getComponent<Switch>();
-        triggerStates[trigger.id] = trigger.pressed;
-    }
-
-    // update doors
-    for (auto& e : entities)
-    {
-        if (!e->hasComponent<Door>() || !e->hasComponent<Transform3D>()) continue;
-
-        auto& door = e->getComponent<Door>();
-        auto& doorTransform = e->getComponent<Transform3D>();
-
-        bool shouldOpen = false;
-
-        auto it = triggerStates.find(door.triggerId);
-        if (it != triggerStates.end())
+        for (const engine::Entity entity : registry.GetActiveEntities())
         {
-            shouldOpen = it->second;
+            if (!registry.HasComponent<Switch>(entity))
+                continue;
+
+            const auto& trigger = registry.GetComponent<Switch>(entity);
+            triggerStates[trigger.Id] = trigger.Pressed;
         }
 
-        if (shouldOpen != door.open)
+        // Update doors that have a trigger ID
+        for (const engine::Entity entity : registry.GetActiveEntities())
         {
-            door.open = shouldOpen;
+            if (!registry.HasComponent<Door>(entity) ||
+                !registry.HasComponent<Transform>(entity))
+                continue;
 
-            if (door.open)
+            auto& door = registry.GetComponent<Door>(entity);
+            auto& doorTransform = registry.GetComponent<Transform>(entity);
+
+            // Skip doors without a trigger ID (handled by DoorSystem proximity logic)
+            if (door.TriggerId.empty())
+                continue;
+
+            bool shouldOpen = false;
+
+            auto it = triggerStates.find(door.TriggerId);
+            if (it != triggerStates.end())
             {
-                std::cout << "Door opened!" << std::endl;
-                door.targetAngle = door.openAngle;
-            }
-            else
-            {
-                std::cout << "Door closed!" << std::endl;
-                door.targetAngle = door.closeAngle;
-
-                // if you removed collider earlier, you'd need to re-add it here
-            }
-        }
-
-        float diff = door.targetAngle - door.currentAngle;
-
-        if (std::abs(diff) > 0.01f)
-        {
-            float step = door.speed * dt;
-
-            if (std::abs(diff) <= step)
-            {
-                door.currentAngle = door.targetAngle;
-            }
-            else
-            {
-                door.currentAngle += (diff > 0 ? step : -step);
+                shouldOpen = it->second;
             }
 
-            // apply rotation
-            doorTransform.rotation.y = door.baseRotation + door.currentAngle;
+            if (shouldOpen != door.Open)
+            {
+                door.Open = shouldOpen;
+
+                if (door.Open)
+                {
+                    std::cout << "Door opened!" << std::endl;
+                    door.TargetAngle = door.OpenAngle;
+                }
+                else
+                {
+                    std::cout << "Door closed!" << std::endl;
+                    door.TargetAngle = door.CloseAngle;
+                }
+            }
+
+            float diff = door.TargetAngle - door.CurrentAngle;
+
+            if (std::abs(diff) > 0.01f)
+            {
+                float step = door.SwingSpeed * deltaTime;
+
+                if (std::abs(diff) <= step)
+                {
+                    door.CurrentAngle = door.TargetAngle;
+                }
+                else
+                {
+                    door.CurrentAngle += (diff > 0 ? step : -step);
+                }
+
+                // Apply rotation
+                doorTransform.RotationY = door.BaseRotationY + glm::radians(door.CurrentAngle);
+            }
         }
     }
 }

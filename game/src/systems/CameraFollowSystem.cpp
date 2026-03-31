@@ -20,7 +20,7 @@ namespace game
         }
 
         const auto& transform = registry.GetComponent<Transform>(target);
-        float zOffset = m_Zoom * 0.4f;
+        float zOffset = m_Zoom * 0.65f;
         camera.SetPosition(transform.X, m_Zoom, transform.Z + zOffset);
         camera.SetTarget(transform.X, 0.0f, transform.Z);
     }

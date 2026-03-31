@@ -1,37 +1,25 @@
-//
-// Created by scept on 2026-03-09.
-//
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ENEMYAISYSTEM_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_ENEMYAISYSTEM_H
 
-#ifndef INC_8051TUTORIAL_ENEMYAISYSTEM_H
-#define INC_8051TUTORIAL_ENEMYAISYSTEM_H
-
-#include <memory>
-#include <vector>
+#include "engine/ecs/Registry.h"
 #include "engine/ecs/Entity.h"
-#include "engine/ecs/Component.h"
 
-class EnemyAISystem
+namespace game
 {
-public:
-    EnemyAISystem() = default;
+    class EnemyAISystem
+    {
+    public:
+        void Update(engine::Registry& registry, float deltaTime);
 
-    // called once per frame
-    void update(std::vector<std::unique_ptr<Entity>>& entities, float dt);
+    private:
+        void UpdateIdle(engine::Registry& registry, engine::Entity enemy, float dt);
+        void UpdateChase(engine::Registry& registry, engine::Entity enemy,
+                         engine::Entity player, float dt);
+        void UpdateAttack(engine::Registry& registry, engine::Entity enemy,
+                          engine::Entity player, float dt);
 
-private:
-    std::vector<Entity*> queryEnemies(const std::vector<std::unique_ptr<Entity>>& entities);
+        static float Distance(float ax, float az, float bx, float bz);
+    };
+}
 
-    // state handlers
-    void UpdateIdle(Entity* enemy, AI& ai, Animator& animator, float dt);
-    void UpdatePatrol(Entity* enemy, AI& ai, Animator& animator, float dt);
-    void UpdateChase(Entity* enemy, AI& ai, Animator& animator, float dt);
-    void UpdateAttack(Entity* enemy, AI& ai, Animator& animator, float dt);
-
-    // helper functions
-    Entity* findPlayer(const std::vector<std::unique_ptr<Entity>>& entities);
-    float distance(const Transform3D& a, const Transform3D& b);
-    glm::vec3 safeNormalize(const glm::vec3& v);
-
-};
-
-#endif //INC_8051TUTORIAL_ENEMYAISYSTEM_H
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_ENEMYAISYSTEM_H

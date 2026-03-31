@@ -4,6 +4,7 @@
 #include "engine/ecs/Registry.h"
 #include "engine/ecs/Entity.h"
 #include "engine/scene/PrefabManager.h"
+#include "engine/scene/BuildRoomSystem.h"
 #include "engine/resources/MeshManager.h"
 #include "engine/resources/AssetManager.h"
 
@@ -29,6 +30,7 @@ namespace game
         void SpawnColliderEntity(const glm::vec3& position, float width, float height, float depth);
         void SpawnWallColliders(engine::PrefabType type, const glm::vec3& position, float rotY);
         void SpawnDoorwayPillarColliders(const glm::vec3& position, float rotY);
+        void SpawnEnemies(const engine::MapGrid& map, const engine::BuildRoomConfig& config, int seed);
 
         engine::Registry& m_Registry;
         engine::MeshManager& m_MeshManager;

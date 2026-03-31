@@ -17,6 +17,10 @@
 #include "game/systems/AttackHitboxSystem.h"
 #include "game/systems/CameraFollowSystem.h"
 #include "game/systems/DungeonSpawnSystem.h"
+#include "game/systems/EnemyAISystem.h"
+#include "game/systems/CombatSystem.h"
+#include "game/systems/DamageSystem.h"
+#include "game/systems/DoorPuzzleSystem.h"
 
 #include <memory>
 
@@ -67,6 +71,9 @@ namespace game
         AttackHitboxSystem m_AttackHitboxSystem;
         CameraFollowSystem m_CameraFollowSystem;
         std::unique_ptr<DungeonSpawnSystem> m_DungeonSpawnSystem;
+        EnemyAISystem m_EnemyAISystem;
+        CombatSystem m_CombatSystem;
+        DamageSystem m_DamageSystem;
     };
 }
 

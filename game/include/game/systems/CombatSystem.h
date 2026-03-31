@@ -1,28 +1,16 @@
-//
-// Created by scept on 2026-03-11.
-//
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_COMBATSYSTEM_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_COMBATSYSTEM_H
 
-#ifndef INC_8051TUTORIAL_COMBATSYSTEM_H
-#define INC_8051TUTORIAL_COMBATSYSTEM_H
+#include "engine/ecs/Registry.h"
+#include "engine/ecs/Entity.h"
 
-#include <vector>
-#include <memory>
-#include "Entity.h"
-#include "Vector2D.h"
-#include "glm/vec3.hpp"
-
-class World;
-
-class CombatSystem {
+namespace game
+{
+    class CombatSystem
+    {
     public:
-    CombatSystem(World& world) : world(world) {}
+        void Update(engine::Registry& registry, float deltaTime);
+    };
+}
 
-    void update(std::vector<std::unique_ptr<Entity>>& entities, float dt);
-
-    private:
-    World& world;
-
-    void spawnProjectile(Entity* attacker, glm::vec3 direction, std::string tag);
-};
-
-#endif //INC_8051TUTORIAL_COMBATSYSTEM_H
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_COMBATSYSTEM_H

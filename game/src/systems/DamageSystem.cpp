@@ -1,49 +1,40 @@
-//
-// Created by scept on 2026-03-09.
-//
+#include "game/systems/DamageSystem.h"
 
-#include "../../include/game/systems/DamageSystem.h"
+#include "game/components/Health.h"
+#include "game/components/CombatState.h"
+#include "game/components/Player.h"
+#include "game/components/EnemyAI.h"
 
-#include "Entity.h"
-#include "Component.h"
 #include <iostream>
 
-#include "Game.h"
-
-void DamageSystem::update(std::vector<std::unique_ptr<Entity>>& entities)
+namespace game
 {
-    for (auto& e : entities)
+    void DamageSystem::Update(engine::Registry& registry)
     {
-        if (!e->hasComponent<DamageEvent>()) {continue;}
-
-        auto& dmg = e->getComponent<DamageEvent>();
-
-        if (dmg.target && dmg.target->hasComponent<Health>())
+        for (const engine::Entity entity : registry.GetActiveEntities())
         {
-            auto& health = dmg.target->getComponent<Health>();
+            if (!registry.HasComponent<Health>(entity) ||
+                !registry.HasComponent<CombatState>(entity))
+                continue;
 
-            health.currentHealth -= dmg.amount;
-            if (dmg.target->hasComponent<PlayerTag>()) {
-                Game::gameState.playerHealth = health.currentHealth;
-            }
+            auto& health = registry.GetComponent<Health>(entity);
+            auto& combat = registry.GetComponent<CombatState>(entity);
 
-            std::cout << "Damage applied: " << dmg.amount
-                      << " remaining HP: " << health.currentHealth
-                      << std::endl;
-
-            if (health.currentHealth <= 0)
+            if (combat.IsHit)
             {
-                if (dmg.target->hasComponent<Animator>()) {
-                    auto& anim = dmg.target->getComponent<Animator>();
-                    anim.isDead = true;
-                }
-                if (dmg.target->hasComponent<PlayerTag>()) {
-                    Game::onSceneChangeRequest("gameover");
+                health.Current -= 1;
+
+                std::cout << "Damage applied! Remaining HP: " << health.Current << std::endl;
+
+                combat.IsHit = false;
+
+                if (health.Current <= 0)
+                {
+                    combat.IsDead = true;
+
+                    std::cout << "Entity died!" << std::endl;
                 }
             }
         }
-
-        // remove the transient damage entity
-        e->destory();
     }
 }

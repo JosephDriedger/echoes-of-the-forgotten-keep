@@ -4,6 +4,9 @@
 #include "game/components/Render.h"
 #include "game/components/Collider.h"
 #include "game/components/Door.h"
+#include "game/components/EnemyAI.h"
+#include "game/components/Health.h"
+#include "game/components/CombatState.h"
 
 #include "engine/scene/BuildRoomSystem.h"
 #include "engine/scene/FloorGenerator.h"
@@ -12,6 +15,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <random>
 
 namespace game
 {
@@ -49,6 +53,73 @@ namespace game
                 SpawnPrefab(engine::PrefabType::WallCornerSmall,
                     inst.position + glm::vec3{-2, 0, 4.5}, inst.rotationY + 180);
             }
+        }
+
+        // Spawn enemies on random floor tiles
+        SpawnEnemies(map, config.buildConfig, seed);
+    }
+
+    void DungeonSpawnSystem::SpawnEnemies(const engine::MapGrid& map,
+                                           const engine::BuildRoomConfig& config,
+                                           int seed)
+    {
+        std::mt19937 rng(seed + 999);
+
+        // Collect floor tiles (not start/end/door/wall)
+        std::vector<glm::vec3> floorPositions;
+        for (int y = 0; y < map.height; ++y)
+        {
+            for (int x = 0; x < map.width; ++x)
+            {
+                engine::CellType cell = map.cells[y * map.width + x];
+                if (cell == engine::CellType::Floor)
+                {
+                    float worldX = x * config.tileSize - config.floorOffset;
+                    float worldZ = y * config.tileSize - config.floorOffset;
+                    floorPositions.emplace_back(worldX, 0.0f, worldZ);
+                }
+            }
+        }
+
+        if (floorPositions.empty())
+            return;
+
+        // Shuffle and pick a subset for enemy placement
+        std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
+
+        int enemyCount = std::min(static_cast<int>(floorPositions.size() / 8), 5);
+        if (enemyCount < 1) enemyCount = 1;
+
+        // Load enemy mesh
+        auto enemyMeshResult = m_MeshManager.Load("asset/Rogue_Hooded.glb");
+        auto enemyTexture = m_AssetManager.GetTextureManager().Load("asset/rogue_texture.png");
+
+        if (!enemyMeshResult.MeshPtr || !enemyTexture)
+        {
+            std::cerr << "[DungeonSpawnSystem] Failed to load enemy model\n";
+            return;
+        }
+
+        for (int i = 0; i < enemyCount; ++i)
+        {
+            const glm::vec3& pos = floorPositions[i];
+
+            engine::Entity enemy = m_Registry.CreateEntity();
+
+            Transform t(pos.x, pos.y, pos.z);
+            m_Registry.AddComponent(enemy, t);
+            m_Registry.AddComponent(enemy, Render(enemyMeshResult.MeshPtr, enemyTexture));
+
+            Collider c(0.6f, 1.8f, 0.6f);
+            c.IsStatic = false;
+            m_Registry.AddComponent(enemy, c);
+
+            m_Registry.AddComponent(enemy, EnemyAI(2.0f));
+            m_Registry.AddComponent(enemy, Health(3, 3));
+            m_Registry.AddComponent(enemy, CombatState());
+
+            std::cout << "[DungeonSpawnSystem] Spawned enemy at ("
+                      << pos.x << ", " << pos.z << ")\n";
         }
     }
 
