@@ -192,5 +192,5 @@ void Scene::createButton() {
     button.addComponent<Collider3D>();
     button.addComponent<Model>(ModelManager::load("../asset/dungeon/button_base_blue.gltf"));
     button.addComponent<Texture3D>(*TextureManager::load3D("../asset/dungeon/platformer_texture.png"));
-    button.addComponent<Switch>();
+    button.addComponent<Switch>("DoorA");
 }

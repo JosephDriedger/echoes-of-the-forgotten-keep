@@ -11,7 +11,7 @@
 
 class DoorPuzzleSystem {
     public:
-    void update(std::vector<std::unique_ptr<Entity> > &entities);
+    void update(std::vector<std::unique_ptr<Entity> > &entities, float dt);
 };
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_DOORPUZZLESYSTEM_H
