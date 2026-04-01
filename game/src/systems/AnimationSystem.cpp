@@ -71,7 +71,7 @@ namespace game
                 comboIndex = combat.ComboIndex;
                 comboWindow = combat.ComboWindow;
                 comboTimer = combat.ComboTimer;
-                isHit = combat.IsHit;
+                isHit = combat.IncomingHit.has_value();
                 isDead = combat.IsDead;
             }
 
@@ -87,7 +87,7 @@ namespace game
             if (isHit)
             {
                 if (anim.CurrentTime >= clip.Duration && hasCombat)
-                    registry.GetComponent<CombatState>(entity).IsHit = false;
+                    registry.GetComponent<CombatState>(entity).IncomingHit.reset();
             }
 
             if (isAttacking && hasCombat)
