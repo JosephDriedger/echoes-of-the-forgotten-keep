@@ -11,6 +11,8 @@ file(GLOB_RECURSE EFK_GAME_SOURCES CONFIGURE_DEPENDS
 add_library(efk_game STATIC
         ${EFK_GAME_HEADERS}
         ${EFK_GAME_SOURCES}
+        include/game/ui/UIRenderer.h
+        src/ui/UIRenderer.cpp
 )
 
 target_include_directories(efk_game
