@@ -87,7 +87,7 @@ namespace game
 
     void GameplayScene::LoadContent()
     {
-        std::string playerMeshPath = "asset/Knight.glb";
+        std::string playerMeshPath = "asset/characters/Knight.glb";
         engine::MeshLoader::Result playerResult = m_MeshManager.Load(playerMeshPath);
 
         if (playerResult.SkeletonPtr)
@@ -177,8 +177,8 @@ namespace game
         playerCollider.IsStatic = false;
 
         // Add render component
-        auto playerMesh = m_MeshManager.Get("asset/Knight.glb");
-        auto playerTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+        auto playerMesh = m_MeshManager.Get("asset/characters/Knight.glb");
+        auto playerTexture = m_AssetManager.GetTextureManager().Load("asset/characters/knight_texture.png");
         m_Registry.AddComponent(m_PlayerEntity, Render(playerMesh, playerTexture));
 
         // Add animation state
@@ -204,8 +204,8 @@ namespace game
 
         // Spawn sword (right hand)
         {
-            engine::MeshLoader::Result swordResult = m_MeshManager.Load("asset/sword_1handed.gltf");
-            auto swordTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+            engine::MeshLoader::Result swordResult = m_MeshManager.Load("asset/equipment/sword_1handed.gltf");
+            auto swordTexture = m_AssetManager.GetTextureManager().Load("asset/characters/knight_texture.png");
 
             if (swordResult.MeshPtr && swordTexture)
             {
@@ -219,8 +219,8 @@ namespace game
 
         // Spawn shield (left hand)
         {
-            engine::MeshLoader::Result shieldResult = m_MeshManager.Load("asset/shield_spikes.gltf");
-            auto shieldTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+            engine::MeshLoader::Result shieldResult = m_MeshManager.Load("asset/equipment/shield_spikes.gltf");
+            auto shieldTexture = m_AssetManager.GetTextureManager().Load("asset/characters/knight_texture.png");
 
             if (shieldResult.MeshPtr && shieldTexture)
             {

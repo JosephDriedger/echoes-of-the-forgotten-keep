@@ -329,12 +329,12 @@ namespace game
 
         // Load skeleton enemy mesh (randomly pick from available skeleton types)
         std::vector<std::string> skeletonModels = {
-            "asset/Skeleton_Minion.glb",
-            "asset/Skeleton_Warrior.glb",
-            "asset/Skeleton_Rogue.glb",
-            "asset/Skeleton_Mage.glb"
+            "asset/characters/Skeleton_Minion.glb",
+            "asset/characters/Skeleton_Warrior.glb",
+            "asset/characters/Skeleton_Rogue.glb",
+            "asset/characters/Skeleton_Mage.glb"
         };
-        auto texture = m_AssetManager.GetTextureManager().Load("asset/skeleton_texture.png");
+        auto texture = m_AssetManager.GetTextureManager().Load("asset/characters/skeleton_texture.png");
 
         if (!texture)
         {
