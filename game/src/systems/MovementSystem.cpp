@@ -28,7 +28,7 @@ namespace game
             if (registry.HasComponent<CombatState>(entity))
             {
                 const auto& combat = registry.GetComponent<CombatState>(entity);
-                if (combat.IsAttacking || combat.IsHit)
+                if (combat.IsAttacking || combat.IncomingHit.has_value())
                 {
                     if (registry.HasComponent<AnimationState>(entity))
                         registry.GetComponent<AnimationState>(entity).IsMoving = false;

@@ -1,8 +1,26 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+#include "game/ui/HUD.h"
+#include "game/components/Health.h"
+#include "game/components/CombatState.h"
 
-#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_HUD_H
-#define ECHOES_OF_THE_FORGOTTEN_KEEP_HUD_H
+namespace game
+{
+    void HUD::Initialize(engine::AssetManager& assets)
+    {
+        auto heart  = assets.GetTextureManager().Load("asset/ui/heart.png");
+        auto empty  = assets.GetTextureManager().Load("asset/ui/background.png");
+        auto border = assets.GetTextureManager().Load("asset/ui/border.png");
+        m_HealthBar.SetTextures(heart, empty, border);
+    }
 
-#endif //ECHOES_OF_THE_FORGOTTEN_KEEP_HUD_H
+    void HUD::Render(UIRenderer& renderer, engine::Registry& registry,
+                     engine::Entity playerEntity, int screenWidth, int screenHeight)
+    {
+        if (!playerEntity.IsValid() || !registry.IsAlive(playerEntity)) return;
+        if (!registry.HasComponent<Health>(playerEntity)) return;
+
+        const auto& health = registry.GetComponent<Health>(playerEntity);
+        m_HealthBar.Render(renderer, health.Current, health.Maximum,
+                           16.0f, 16.0f, 32.0f, 4.0f, screenWidth, screenHeight);
+    }
+}
+
