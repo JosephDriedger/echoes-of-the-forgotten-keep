@@ -23,6 +23,7 @@
 #include "game/systems/DoorPuzzleSystem.h"
 #include "game/systems/LifetimeSystem.h"
 #include "game/systems/SwitchTriggerSystem.h"
+#include "game/systems/UISystem.h"
 
 #include <memory>
 
@@ -57,6 +58,7 @@ namespace game
         engine::MeshManager m_MeshManager;
         engine::AnimationLoader m_AnimationLoader;
         engine::Registry m_Registry;
+        SDL_Renderer* m_SDLRenderer = nullptr;
 
         std::shared_ptr<engine::Shader> m_Shader;
 
@@ -77,6 +79,7 @@ namespace game
         EnemyAISystem m_EnemyAISystem;
         CombatSystem m_CombatSystem;
         DamageSystem m_DamageSystem;
+        UISystem m_UISystem;
     };
 }
 

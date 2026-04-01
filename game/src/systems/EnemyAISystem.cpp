@@ -247,20 +247,6 @@ namespace game
                 auto& combat = registry.GetComponent<CombatState>(enemy);
                 combat.IsAttacking = true;
             }
-
-            if (registry.HasComponent<Health>(player))
-            {
-                auto& health = registry.GetComponent<Health>(player);
-                health.Current -= 1;
-                if (health.Current <= 0)
-                {
-                    if (registry.HasComponent<CombatState>(player))
-                    {
-                        auto& playerCombat = registry.GetComponent<CombatState>(player);
-                        playerCombat.IsDead = true;
-                    }
-                }
-            }
         }
 
         if (dist > ai.AttackRange + 1.0f)

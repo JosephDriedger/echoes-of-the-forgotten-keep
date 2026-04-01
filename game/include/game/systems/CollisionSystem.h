@@ -5,6 +5,8 @@
 
 #include "game/components/Collider.h"
 #include "game/components/Transform.h"
+#include "game/components/CombatState.h"
+#include "game/components/EnemyAI.h"
 
 namespace game
 {

@@ -25,8 +25,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/gl.h>
-#include <SDL3/SDL_keycode.h>
-#include <SDL3/SDL.h>
 
 #include <iostream>
 
@@ -48,6 +46,7 @@ namespace game
         m_Camera.SetPosition(0.0f, 10.0f, 13.0f);
         m_Camera.SetTarget(0.0f, 0.0f, 5.0f);
         m_Camera.SetPerspective(40.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+        m_UISystem.Initialize(m_AssetManager);
 
         m_Shader = m_AssetManager.GetShaderManager().Load(
             "default",
@@ -381,5 +380,9 @@ namespace game
         {
             m_DebugColliderRenderer.Render(m_Registry, m_Camera);
         }
+
+        int w, h;
+        SDL_GetWindowSize(application.GetWindow()->GetNativeWindow(), &w, &h);
+        m_UISystem.Render(m_Registry, m_PlayerEntity, w, h);
     }
 }
