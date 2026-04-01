@@ -4,6 +4,11 @@
 #include "game/components/Render.h"
 #include "game/components/Collider.h"
 #include "game/components/Door.h"
+#include "game/components/EnemyAI.h"
+#include "game/components/Health.h"
+#include "game/components/CombatState.h"
+#include "game/components/AnimationState.h"
+#include "game/components/Switch.h"
 
 #include "engine/scene/BuildRoomSystem.h"
 #include "engine/scene/FloorGenerator.h"
@@ -12,6 +17,8 @@
 
 #include <cmath>
 #include <iostream>
+#include <random>
+#include <algorithm>
 
 namespace game
 {
@@ -50,6 +57,9 @@ namespace game
                     inst.position + glm::vec3{-2, 0, 4.5}, inst.rotationY + 180);
             }
         }
+
+        SpawnEnemies(map, config.buildConfig, seed);
+        SpawnButtons(map, config.buildConfig, seed);
     }
 
     engine::Entity DungeonSpawnSystem::SpawnPrefab(
@@ -118,7 +128,28 @@ namespace game
 
             Door door;
             door.BaseRotationY = glm::radians(rotY);
+
+            // Spawn a separate physical collider entity for the door panel
+            engine::Entity doorCollider = m_Registry.CreateEntity();
+            float baseRad = glm::radians(rotY);
+            float halfPanel = door.PanelLength * 0.5f;
+            float centerX = position.x + std::cos(baseRad) * halfPanel;
+            float centerZ = position.z - std::sin(baseRad) * halfPanel;
+            m_Registry.AddComponent(doorCollider, Transform(centerX, position.y, centerZ));
+
+            // AABB sized to match door panel in its closed orientation
+            float absS = std::abs(std::sin(baseRad));
+            float absC = std::abs(std::cos(baseRad));
+            float w = door.PanelLength * absC + door.PanelThickness * absS;
+            float d = door.PanelLength * absS + door.PanelThickness * absC;
+            Collider panelCol(w, 3.0f, d);
+            panelCol.IsStatic = true;
+            m_Registry.AddComponent(doorCollider, panelCol);
+
+            door.ColliderEntity = doorCollider;
             m_Registry.AddComponent(e, door);
+
+            SpawnedDoors.push_back(e);
         }
 
         return e;
@@ -146,7 +177,7 @@ namespace game
     void DungeonSpawnSystem::SpawnWallColliders(engine::PrefabType type, const glm::vec3& position, float rotY)
     {
         constexpr float armLength = 4.0f;
-        constexpr float armThick  = 0.5f;
+        constexpr float armThick  = 1.2f;
         constexpr float wallH     = 3.0f;
         constexpr float halfArm   = armLength * 0.5f;
 
@@ -221,7 +252,7 @@ namespace game
     {
         // The doorway scaffold has two pillars flanking the opening.
         // Pillars are ~0.5 wide/deep and sit ~1.5 units from center along the wall axis.
-        constexpr float pillarThick = 0.5f;
+        constexpr float pillarThick = 1.2f;
         constexpr float pillarHeight = 3.0f;
         constexpr float pillarOffset = 1.5f;
 
@@ -243,5 +274,240 @@ namespace game
             SpawnColliderEntity(position + glm::vec3(-pillarOffset, 0, 0), pillarThick, pillarHeight, pillarThick);
             SpawnColliderEntity(position + glm::vec3(pillarOffset, 0, 0), pillarThick, pillarHeight, pillarThick);
         }
+    }
+
+    void DungeonSpawnSystem::SpawnEnemies(engine::MapGrid& map, const engine::BuildRoomConfig& config, int seed)
+    {
+        // Collect floor tile center positions (matching Build coordinate system)
+        // Build uses: x_world = (x - map.width/2) * tileSize, z_world = y * tileSize
+        // Floor tiles are placed at (x_world - floorOffset, floorY, z_world - floorOffset)
+        // Enemy should stand at floor tile center: (x_world - floorOffset, 0, z_world - floorOffset)
+        std::vector<glm::vec3> floorPositions;
+        for (int y = 0; y < map.height; ++y)
+        {
+            for (int x = 0; x < map.width; ++x)
+            {
+                auto cell = map.get(x, y);
+                // Only spawn on Floor tiles, skip Start/End/Door/Wall
+                if (cell != engine::CellType::Floor) continue;
+
+                // Check neighbors — skip tiles adjacent to walls to avoid clipping
+                bool adjacentToWall = false;
+                int dx[] = {-1, 1, 0, 0};
+                int dz[] = {0, 0, -1, 1};
+                for (int d = 0; d < 4; ++d)
+                {
+                    int nx = x + dx[d];
+                    int nz = y + dz[d];
+                    if (nx < 0 || nx >= map.width || nz < 0 || nz >= map.height)
+                    {
+                        adjacentToWall = true;
+                        break;
+                    }
+                    auto neighbor = map.get(nx, nz);
+                    if (neighbor == engine::CellType::Wall || neighbor == engine::CellType::Empty)
+                    {
+                        adjacentToWall = true;
+                        break;
+                    }
+                }
+                if (adjacentToWall) continue;
+
+                float wx = (x - map.width / 2.0f) * config.tileSize - config.floorOffset;
+                float wz = y * config.tileSize - config.floorOffset;
+                floorPositions.emplace_back(wx, 0.0f, wz);
+            }
+        }
+
+        if (floorPositions.empty()) return;
+
+        std::mt19937 rng(seed);
+        std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
+
+        int count = static_cast<int>(floorPositions.size()) / 8;
+        count = std::max(1, std::min(count, 5));
+
+        // Load skeleton enemy mesh (randomly pick from available skeleton types)
+        std::vector<std::string> skeletonModels = {
+            "asset/Skeleton_Minion.glb",
+            "asset/Skeleton_Warrior.glb",
+            "asset/Skeleton_Rogue.glb",
+            "asset/Skeleton_Mage.glb"
+        };
+        auto texture = m_AssetManager.GetTextureManager().Load("asset/skeleton_texture.png");
+
+        if (!texture)
+        {
+            std::cerr << "[DungeonSpawnSystem] Failed to load skeleton texture\n";
+            return;
+        }
+
+        std::uniform_int_distribution<int> modelDist(0, static_cast<int>(skeletonModels.size()) - 1);
+
+        for (int i = 0; i < count && i < static_cast<int>(floorPositions.size()); ++i)
+        {
+            const auto& pos = floorPositions[i];
+
+            // Pick a random skeleton model
+            int modelIdx = modelDist(rng);
+            auto meshResult = m_MeshManager.Load(skeletonModels[modelIdx]);
+
+            if (!meshResult.MeshPtr)
+            {
+                std::cerr << "[DungeonSpawnSystem] Failed to load: " << skeletonModels[modelIdx] << "\n";
+                continue;
+            }
+
+            // Store skeleton for animation (use first valid one)
+            if (meshResult.SkeletonPtr && !EnemySkeleton)
+                EnemySkeleton = meshResult.SkeletonPtr;
+
+            engine::Entity e = m_Registry.CreateEntity();
+
+            Transform t(pos.x, pos.y, pos.z);
+            m_Registry.AddComponent(e, t);
+            m_Registry.AddComponent(e, Render(meshResult.MeshPtr, texture));
+
+            Collider col(1.2f, 1.8f, 1.2f);
+            col.IsStatic = false;
+            m_Registry.AddComponent(e, col);
+
+            EnemyAI ai(2.0f);
+            // Set up patrol around spawn point (±4 tiles in a random direction)
+            std::uniform_real_distribution<float> offsetDist(-8.0f, 8.0f);
+            float patrolOffX = offsetDist(rng);
+            float patrolOffZ = offsetDist(rng);
+            ai.HasPatrol = true;
+            ai.PatrolAX = pos.x;
+            ai.PatrolAZ = pos.z;
+            ai.PatrolBX = pos.x + patrolOffX;
+            ai.PatrolBZ = pos.z + patrolOffZ;
+            m_Registry.AddComponent(e, ai);
+            m_Registry.AddComponent(e, Health(3, 3));
+            m_Registry.AddComponent(e, CombatState());
+
+            // Add animation state if clips are available
+            if (SharedClips && EnemySkeleton)
+            {
+                AnimationState anim;
+                anim.SkeletonPtr = EnemySkeleton;
+                anim.Clips = SharedClips;
+
+                // Find skeleton-specific clip indices
+                for (int c = 0; c < static_cast<int>(SharedClips->size()); ++c)
+                {
+                    const auto& name = (*SharedClips)[c].Name;
+                    if (name == "Skeletons_Idle") anim.IdleClipIndex = c;
+                    else if (name == "Skeletons_Walking") anim.RunClipIndex = c;
+                    else if (name == "Skeletons_Death") anim.DeathClipIndex = c;
+                    else if (name == "Skeletons_Attack") anim.Attack1ClipIndex = c;
+                }
+
+                // If no skeleton-specific clips, fall back to generic ones
+                if (anim.IdleClipIndex < 0)
+                {
+                    for (int c = 0; c < static_cast<int>(SharedClips->size()); ++c)
+                    {
+                        const auto& name = (*SharedClips)[c].Name;
+                        if (name == "Idle_A") anim.IdleClipIndex = c;
+                        else if (name == "Running_A") anim.RunClipIndex = c;
+                        else if (name == "Death_A") anim.DeathClipIndex = c;
+                        else if (name == "Hit_A") anim.HitClipIndex = c;
+                    }
+                }
+
+                if (anim.IdleClipIndex >= 0)
+                    anim.CurrentClip = anim.IdleClipIndex;
+
+                m_Registry.AddComponent(e, anim);
+            }
+        }
+
+        std::cout << "[DungeonSpawnSystem] Spawned " << count << " enemies\n";
+    }
+
+    void DungeonSpawnSystem::SpawnButtons(engine::MapGrid& map, const engine::BuildRoomConfig& config, int seed)
+    {
+        // Collect interior floor positions (same filter as enemies)
+        std::vector<glm::vec3> floorPositions;
+        for (int y = 0; y < map.height; ++y)
+        {
+            for (int x = 0; x < map.width; ++x)
+            {
+                auto cell = map.get(x, y);
+                if (cell != engine::CellType::Floor) continue;
+
+                // Skip tiles next to walls
+                bool adjacentToWall = false;
+                int dx[] = {-1, 1, 0, 0};
+                int dz[] = {0, 0, -1, 1};
+                for (int d = 0; d < 4; ++d)
+                {
+                    int nx = x + dx[d];
+                    int nz = y + dz[d];
+                    if (nx < 0 || nx >= map.width || nz < 0 || nz >= map.height)
+                    { adjacentToWall = true; break; }
+                    auto neighbor = map.get(nx, nz);
+                    if (neighbor == engine::CellType::Wall || neighbor == engine::CellType::Empty)
+                    { adjacentToWall = true; break; }
+                }
+                if (adjacentToWall) continue;
+
+                float wx = (x - map.width / 2.0f) * config.tileSize - config.floorOffset;
+                float wz = y * config.tileSize - config.floorOffset;
+                floorPositions.emplace_back(wx, 0.0f, wz);
+            }
+        }
+
+        if (floorPositions.empty()) return;
+
+        // Use a different seed offset so buttons don't land on enemies
+        std::mt19937 rng(seed + 777);
+        std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
+
+        // Spawn 1-2 buttons
+        int buttonCount = std::min(2, static_cast<int>(floorPositions.size()));
+
+        auto buttonMeshResult = m_MeshManager.Load("asset/dungeon/button_base_blue.gltf");
+        auto buttonTexture = m_AssetManager.GetTextureManager().Load("asset/dungeon/platformer_texture.png");
+
+        if (!buttonMeshResult.MeshPtr || !buttonTexture)
+        {
+            std::cerr << "[DungeonSpawnSystem] Failed to load button mesh\n";
+            return;
+        }
+
+        // Only spawn as many buttons as we have doors to link to
+        buttonCount = std::min(buttonCount, static_cast<int>(SpawnedDoors.size()));
+
+        for (int i = 0; i < buttonCount; ++i)
+        {
+            const auto& pos = floorPositions[i];
+
+            engine::Entity e = m_Registry.CreateEntity();
+
+            Transform t(pos.x, pos.y, pos.z);
+            m_Registry.AddComponent(e, t);
+            m_Registry.AddComponent(e, Render(buttonMeshResult.MeshPtr, buttonTexture));
+
+            Collider col(1.5f, 0.5f, 1.5f);
+            col.IsTrigger = true;
+            col.IsStatic = true;
+            m_Registry.AddComponent(e, col);
+
+            std::string switchId = "Button_" + std::to_string(i);
+            m_Registry.AddComponent(e, Switch(switchId));
+
+            // Link a door to this button
+            engine::Entity doorEntity = SpawnedDoors[i];
+            if (m_Registry.IsAlive(doorEntity) && m_Registry.HasComponent<Door>(doorEntity))
+            {
+                auto& door = m_Registry.GetComponent<Door>(doorEntity);
+                door.TriggerId = switchId;
+                door.SwingDirection = 1; // always open one direction for puzzle doors
+            }
+        }
+
+        std::cout << "[DungeonSpawnSystem] Spawned " << buttonCount << " buttons\n";
     }
 }

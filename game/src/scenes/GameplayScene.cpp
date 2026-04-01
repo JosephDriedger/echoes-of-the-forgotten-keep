@@ -19,6 +19,7 @@
 #include "game/components/BoneAttachment.h"
 #include "game/components/Player.h"
 #include "game/components/Collider.h"
+#include "game/components/Health.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -170,9 +171,9 @@ namespace game
         playerTransform.Z = 25.0f;
 
         auto& playerCollider = m_Registry.GetComponent<Collider>(m_PlayerEntity);
-        playerCollider.Width = 0.6f;
+        playerCollider.Width = 1.2f;
         playerCollider.Height = 1.8f;
-        playerCollider.Depth = 0.6f;
+        playerCollider.Depth = 1.2f;
         playerCollider.IsStatic = false;
 
         // Add render component
@@ -197,8 +198,9 @@ namespace game
 
         m_Registry.AddComponent(m_PlayerEntity, animState);
 
-        // Add combat state
+        // Add combat state and health
         m_Registry.AddComponent(m_PlayerEntity, CombatState());
+        m_Registry.AddComponent(m_PlayerEntity, Health(10, 10));
 
         // Spawn sword (right hand)
         {
@@ -234,6 +236,7 @@ namespace game
         // Spawn dungeon via DungeonSpawnSystem
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
+        m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
         m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
     }
 
@@ -270,7 +273,13 @@ namespace game
         AnimationSystem::Update(m_Registry, dt);
         BoneAttachmentSystem::Update(m_Registry);
         m_AttackHitboxSystem.Update(m_Registry);
+        m_EnemyAISystem.Update(m_Registry, dt);
+        m_CombatSystem.Update(m_Registry, dt);
+        m_DamageSystem.Update(m_Registry);
+        SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt);
+        DoorPuzzleSystem::Update(m_Registry, dt);
+        LifetimeSystem::Update(m_Registry, dt);
         m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);
     }
 

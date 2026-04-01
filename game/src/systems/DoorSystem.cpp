@@ -2,6 +2,7 @@
 
 #include "game/components/Door.h"
 #include "game/components/Transform.h"
+#include "game/components/Collider.h"
 #include "game/components/Player.h"
 
 #include <glm/glm.hpp>
@@ -40,6 +41,10 @@ namespace game
                 continue;
 
             auto& door = registry.GetComponent<Door>(entity);
+
+            // Skip trigger-based doors — handled by DoorPuzzleSystem
+            if (!door.TriggerId.empty()) continue;
+
             auto& doorT = registry.GetComponent<Transform>(entity);
 
             // Check if player is within trigger distance
@@ -83,6 +88,25 @@ namespace game
 
             // Apply rotation: base rotation + swing offset
             doorT.RotationY = door.BaseRotationY + glm::radians(door.CurrentAngle);
+
+            // Update the physical door collider position and size
+            if (door.ColliderEntity.IsValid() && registry.IsAlive(door.ColliderEntity) &&
+                registry.HasComponent<Transform>(door.ColliderEntity) &&
+                registry.HasComponent<Collider>(door.ColliderEntity))
+            {
+                float totalAngle = door.BaseRotationY + glm::radians(door.CurrentAngle);
+                float halfPanel = door.PanelLength * 0.5f;
+
+                auto& colT = registry.GetComponent<Transform>(door.ColliderEntity);
+                colT.X = doorT.X + std::cos(totalAngle) * halfPanel;
+                colT.Z = doorT.Z - std::sin(totalAngle) * halfPanel;
+
+                auto& col = registry.GetComponent<Collider>(door.ColliderEntity);
+                float absS = std::abs(std::sin(totalAngle));
+                float absC = std::abs(std::cos(totalAngle));
+                col.Width = door.PanelLength * absC + door.PanelThickness * absS;
+                col.Depth = door.PanelLength * absS + door.PanelThickness * absC;
+            }
         }
     }
 }
