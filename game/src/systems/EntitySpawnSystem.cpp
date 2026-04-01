@@ -11,6 +11,7 @@
 #include "game/components/Door.h"
 #include "game/components/Health.h"
 #include "game/components/Switch.h"
+#include "game/components/Lifetime.h"
 
 namespace game
 {
@@ -27,6 +28,7 @@ namespace game
         registry.RegisterComponent<Door>();
         registry.RegisterComponent<Health>();
         registry.RegisterComponent<Switch>();
+        registry.RegisterComponent<Lifetime>();
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

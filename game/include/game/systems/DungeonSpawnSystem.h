@@ -24,6 +24,7 @@ namespace game
 
         void SpawnDungeon(int roomCount, int seed, float mazeFactor);
         void SpawnEnemies(engine::MapGrid& map, const engine::BuildRoomConfig& config, int seed);
+        void SpawnButtons(engine::MapGrid& map, const engine::BuildRoomConfig& config, int seed);
 
         engine::Entity SpawnPrefab(engine::PrefabType type,
                                     const glm::vec3& position,
@@ -42,6 +43,7 @@ namespace game
     public:
         std::shared_ptr<std::vector<engine::AnimationClip>> SharedClips;
         std::shared_ptr<engine::Skeleton> EnemySkeleton;
+        std::vector<engine::Entity> SpawnedDoors;
     };
 }
 

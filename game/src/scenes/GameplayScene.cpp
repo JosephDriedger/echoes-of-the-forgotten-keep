@@ -276,8 +276,10 @@ namespace game
         m_EnemyAISystem.Update(m_Registry, dt);
         m_CombatSystem.Update(m_Registry, dt);
         m_DamageSystem.Update(m_Registry);
+        SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt);
         DoorPuzzleSystem::Update(m_Registry, dt);
+        LifetimeSystem::Update(m_Registry, dt);
         m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);
     }
 

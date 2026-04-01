@@ -3,7 +3,7 @@
 
 namespace game
 {
-    enum class AIState { Idle, Chase, Attack };
+    enum class AIState { Idle, Patrol, Chase, Attack };
 
     struct EnemyAI
     {
@@ -20,6 +20,13 @@ namespace game
         float MaxChaseTime = 5.0f;
         float LoseTargetCooldown = 2.0f;
         float LoseTargetTimer = 0.0f;
+
+        // Patrol waypoints
+        bool HasPatrol = false;
+        float PatrolAX = 0.0f, PatrolAZ = 0.0f;
+        float PatrolBX = 0.0f, PatrolBZ = 0.0f;
+        bool MovingToB = true;
+        float IdleBeforePatrol = 2.0f;
 
         explicit EnemyAI(const float moveSpeed = 1.0f)
             : MoveSpeed(moveSpeed)

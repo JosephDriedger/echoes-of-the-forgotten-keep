@@ -21,6 +21,8 @@
 #include "game/systems/CombatSystem.h"
 #include "game/systems/DamageSystem.h"
 #include "game/systems/DoorPuzzleSystem.h"
+#include "game/systems/LifetimeSystem.h"
+#include "game/systems/SwitchTriggerSystem.h"
 
 #include <memory>
 

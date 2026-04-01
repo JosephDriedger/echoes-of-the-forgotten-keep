@@ -6,6 +6,7 @@
 #include "game/components/Player.h"
 #include "game/components/Health.h"
 #include "game/components/AnimationState.h"
+#include "game/components/Lifetime.h"
 
 #include <cmath>
 
@@ -42,31 +43,56 @@ namespace game
 
             auto& ai = registry.GetComponent<EnemyAI>(entity);
 
-            // Skip dead enemies
+            // Skip dead enemies — add a corpse timer so they get cleaned up
             if (registry.HasComponent<Health>(entity))
             {
                 auto& health = registry.GetComponent<Health>(entity);
-                if (health.Current <= 0) continue;
+                if (health.Current <= 0)
+                {
+                    if (!registry.HasComponent<Lifetime>(entity))
+                    {
+                        registry.AddComponent(entity, Lifetime(3.0f));
+
+                        if (registry.HasComponent<AnimationState>(entity))
+                        {
+                            auto& anim = registry.GetComponent<AnimationState>(entity);
+                            anim.CurrentState = AnimState::Death;
+                            anim.IsMoving = false;
+                        }
+                    }
+                    continue;
+                }
             }
 
+            // Decrease lose-target cooldown
+            if (ai.LoseTargetTimer > 0.0f)
+                ai.LoseTargetTimer -= deltaTime;
+
             ai.StateTimer += deltaTime;
+
+            // Global detection check — can interrupt Idle/Patrol
+            if (playerEntity.IsValid() && registry.IsAlive(playerEntity) &&
+                ai.LoseTargetTimer <= 0.0f &&
+                (ai.State == AIState::Idle || ai.State == AIState::Patrol))
+            {
+                const auto& et = registry.GetComponent<Transform>(entity);
+                const auto& pt = registry.GetComponent<Transform>(playerEntity);
+                float dist = Distance(et.X, et.Z, pt.X, pt.Z);
+                if (dist < ai.VisionRange)
+                {
+                    ai.State = AIState::Chase;
+                    ai.StateTimer = 0.0f;
+                }
+            }
 
             switch (ai.State)
             {
                 case AIState::Idle:
                     UpdateIdle(registry, entity, deltaTime);
-                    // Check if player is in vision range to start chasing
-                    if (playerEntity.IsValid() && registry.IsAlive(playerEntity))
-                    {
-                        const auto& et = registry.GetComponent<Transform>(entity);
-                        const auto& pt = registry.GetComponent<Transform>(playerEntity);
-                        float dist = Distance(et.X, et.Z, pt.X, pt.Z);
-                        if (dist < ai.VisionRange)
-                        {
-                            ai.State = AIState::Chase;
-                            ai.StateTimer = 0.0f;
-                        }
-                    }
+                    break;
+
+                case AIState::Patrol:
+                    UpdatePatrol(registry, entity, deltaTime);
                     break;
 
                 case AIState::Chase:
@@ -94,11 +120,55 @@ namespace game
 
     void EnemyAISystem::UpdateIdle(engine::Registry& registry, engine::Entity enemy, float dt)
     {
-        // Set animation to idle
         if (registry.HasComponent<AnimationState>(enemy))
         {
             auto& anim = registry.GetComponent<AnimationState>(enemy);
             anim.IsMoving = false;
+        }
+
+        // After idle timer, start patrolling if patrol is set up
+        auto& ai = registry.GetComponent<EnemyAI>(enemy);
+        if (ai.HasPatrol && ai.StateTimer > ai.IdleBeforePatrol)
+        {
+            ai.State = AIState::Patrol;
+            ai.StateTimer = 0.0f;
+        }
+    }
+
+    void EnemyAISystem::UpdatePatrol(engine::Registry& registry, engine::Entity enemy, float dt)
+    {
+        auto& ai = registry.GetComponent<EnemyAI>(enemy);
+        auto& et = registry.GetComponent<Transform>(enemy);
+
+        float targetX = ai.MovingToB ? ai.PatrolBX : ai.PatrolAX;
+        float targetZ = ai.MovingToB ? ai.PatrolBZ : ai.PatrolAZ;
+
+        float dist = Distance(et.X, et.Z, targetX, targetZ);
+
+        // Reached patrol point — switch direction and go idle briefly
+        if (dist < 1.0f)
+        {
+            ai.MovingToB = !ai.MovingToB;
+            ai.State = AIState::Idle;
+            ai.StateTimer = 0.0f;
+            return;
+        }
+
+        // Move toward patrol target
+        float dx = targetX - et.X;
+        float dz = targetZ - et.Z;
+        if (dist > 0.01f)
+        {
+            float speed = ai.MoveSpeed * 0.5f; // patrol at half speed
+            et.X += (dx / dist) * speed * dt;
+            et.Z += (dz / dist) * speed * dt;
+            et.RotationY = std::atan2(dx, dz);
+        }
+
+        if (registry.HasComponent<AnimationState>(enemy))
+        {
+            auto& anim = registry.GetComponent<AnimationState>(enemy);
+            anim.IsMoving = true;
         }
     }
 
@@ -110,7 +180,6 @@ namespace game
 
         float dist = Distance(et.X, et.Z, pt.X, pt.Z);
 
-        // If close enough, switch to attack
         if (dist < ai.AttackRange)
         {
             ai.State = AIState::Attack;
@@ -118,7 +187,6 @@ namespace game
             return;
         }
 
-        // If chased too long, lose interest
         if (ai.StateTimer > ai.MaxChaseTime)
         {
             ai.State = AIState::Idle;
@@ -127,7 +195,6 @@ namespace game
             return;
         }
 
-        // If player out of extended range, stop chasing
         if (dist > ai.VisionRange * 1.5f)
         {
             ai.State = AIState::Idle;
@@ -135,19 +202,15 @@ namespace game
             return;
         }
 
-        // Move toward player
         float dx = pt.X - et.X;
         float dz = pt.Z - et.Z;
         if (dist > 0.01f)
         {
             et.X += (dx / dist) * ai.MoveSpeed * dt;
             et.Z += (dz / dist) * ai.MoveSpeed * dt;
-
-            // Face toward player
             et.RotationY = std::atan2(dx, dz);
         }
 
-        // Set animation to walking
         if (registry.HasComponent<AnimationState>(enemy))
         {
             auto& anim = registry.GetComponent<AnimationState>(enemy);
@@ -163,26 +226,22 @@ namespace game
 
         float dist = Distance(et.X, et.Z, pt.X, pt.Z);
 
-        // Face the player
         float dx = pt.X - et.X;
         float dz = pt.Z - et.Z;
         if (dist > 0.01f)
             et.RotationY = std::atan2(dx, dz);
 
-        // Stop moving while attacking
         if (registry.HasComponent<AnimationState>(enemy))
         {
             auto& anim = registry.GetComponent<AnimationState>(enemy);
             anim.IsMoving = false;
         }
 
-        // Attack cooldown
         ai.AttackTimer += dt;
         if (ai.AttackTimer >= ai.AttackCooldown)
         {
             ai.AttackTimer = 0.0f;
 
-            // Deal damage to player
             if (registry.HasComponent<CombatState>(enemy))
             {
                 auto& combat = registry.GetComponent<CombatState>(enemy);
@@ -204,7 +263,6 @@ namespace game
             }
         }
 
-        // If player moved away, chase again
         if (dist > ai.AttackRange + 1.0f)
         {
             ai.State = AIState::Chase;
