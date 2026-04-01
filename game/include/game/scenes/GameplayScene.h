@@ -71,6 +71,7 @@ namespace game
         AttackHitboxSystem m_AttackHitboxSystem;
         CameraFollowSystem m_CameraFollowSystem;
         std::unique_ptr<DungeonSpawnSystem> m_DungeonSpawnSystem;
+
         EnemyAISystem m_EnemyAISystem;
         CombatSystem m_CombatSystem;
         DamageSystem m_DamageSystem;

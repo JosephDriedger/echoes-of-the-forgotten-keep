@@ -11,11 +11,7 @@ namespace game
         bool Pressed = false;
 
         Switch() = default;
-
-        explicit Switch(std::string id)
-            : Id(std::move(id))
-        {
-        }
+        explicit Switch(std::string id) : Id(std::move(id)) {}
     };
 }
 

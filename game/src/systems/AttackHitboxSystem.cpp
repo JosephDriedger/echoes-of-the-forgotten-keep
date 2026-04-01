@@ -37,7 +37,7 @@ namespace game
             {
                 m_AttackHitbox = registry.CreateEntity();
 
-                Collider hitboxCollider(1.2f, 1.5f, 1.2f);
+                Collider hitboxCollider(2.0f, 1.5f, 2.0f);
                 hitboxCollider.IsTrigger = true;
                 hitboxCollider.IsStatic = false;
                 registry.AddComponent(m_AttackHitbox, Transform());

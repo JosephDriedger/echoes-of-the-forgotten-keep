@@ -4,17 +4,15 @@
 #include "game/components/EnemyAI.h"
 #include "game/components/Health.h"
 #include "game/components/Transform.h"
-#include "game/components/Collider.h"
 #include "game/components/Player.h"
 
 #include <cmath>
-#include <iostream>
 
 namespace game
 {
     void CombatSystem::Update(engine::Registry& registry, float deltaTime)
     {
-        // Find the player entity
+        // Find the player
         engine::Entity playerEntity(0);
         for (const engine::Entity entity : registry.GetActiveEntities())
         {
@@ -31,38 +29,39 @@ namespace game
 
         const auto& playerTransform = registry.GetComponent<Transform>(playerEntity);
 
-        // Check enemy attacks against the player
+        // Check each enemy's attack against player
         for (const engine::Entity entity : registry.GetActiveEntities())
         {
             if (!registry.HasComponent<EnemyAI>(entity) ||
                 !registry.HasComponent<Transform>(entity) ||
                 !registry.HasComponent<CombatState>(entity))
+            {
                 continue;
+            }
 
             auto& combat = registry.GetComponent<CombatState>(entity);
             const auto& enemyTransform = registry.GetComponent<Transform>(entity);
 
-            // Check if enemy is in attack range
-            float dx = playerTransform.X - enemyTransform.X;
-            float dz = playerTransform.Z - enemyTransform.Z;
-            float dist = std::sqrt(dx * dx + dz * dz);
-
-            if (combat.IsAttacking && dist < 2.0f)
+            if (combat.IsAttacking)
             {
-                // Apply damage to player
-                if (registry.HasComponent<Health>(playerEntity))
+                float dx = playerTransform.X - enemyTransform.X;
+                float dz = playerTransform.Z - enemyTransform.Z;
+                float dist = std::sqrt(dx * dx + dz * dz);
+
+                if (dist < 2.0f && registry.HasComponent<Health>(playerEntity))
                 {
                     auto& health = registry.GetComponent<Health>(playerEntity);
                     health.Current -= 1;
-
-                    std::cout << "Enemy attacks player! HP: " << health.Current << std::endl;
-
                     if (health.Current <= 0)
                     {
-                        auto& playerCombat = registry.GetComponent<CombatState>(playerEntity);
-                        playerCombat.IsDead = true;
+                        if (registry.HasComponent<CombatState>(playerEntity))
+                        {
+                            auto& playerCombat = registry.GetComponent<CombatState>(playerEntity);
+                            playerCombat.IsDead = true;
+                        }
                     }
                 }
+                combat.IsAttacking = false;
             }
         }
     }

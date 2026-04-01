@@ -13,10 +13,8 @@ namespace game
 
     private:
         void UpdateIdle(engine::Registry& registry, engine::Entity enemy, float dt);
-        void UpdateChase(engine::Registry& registry, engine::Entity enemy,
-                         engine::Entity player, float dt);
-        void UpdateAttack(engine::Registry& registry, engine::Entity enemy,
-                          engine::Entity player, float dt);
+        void UpdateChase(engine::Registry& registry, engine::Entity enemy, engine::Entity player, float dt);
+        void UpdateAttack(engine::Registry& registry, engine::Entity enemy, engine::Entity player, float dt);
 
         static float Distance(float ax, float az, float bx, float bz);
     };

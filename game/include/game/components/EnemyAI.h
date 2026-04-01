@@ -3,12 +3,7 @@
 
 namespace game
 {
-    enum class AIState
-    {
-        Idle,
-        Chase,
-        Attack
-    };
+    enum class AIState { Idle, Chase, Attack };
 
     struct EnemyAI
     {
