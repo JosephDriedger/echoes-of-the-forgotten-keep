@@ -38,6 +38,23 @@ namespace game
                 if (!colliderA.IsTrigger && !colliderB.IsTrigger)
                 {
                     ResolveCollision(transformA, colliderA, transformB, colliderB);
+                } else {
+                    // Attack hitbox hit an enemy
+                    bool aIsHitbox = colliderA.IsTrigger && !colliderA.IsStatic;
+                    bool bIsHitbox = colliderB.IsTrigger && !colliderB.IsStatic;
+
+                    engine::Entity hitboxEntity  = aIsHitbox ? entityA : (bIsHitbox ? entityB : engine::Entity(0));
+                    engine::Entity otherEntity   = aIsHitbox ? entityB : (bIsHitbox ? entityA : engine::Entity(0));
+
+                    if (hitboxEntity.IsValid() &&
+                        otherEntity.IsValid() &&
+                        registry.HasComponent<EnemyAI>(otherEntity) &&
+                        registry.HasComponent<CombatState>(otherEntity))
+                    {
+                        auto& combat = registry.GetComponent<CombatState>(otherEntity);
+                        if (!combat.IsHit && !combat.IsDead)
+                            combat.IsHit = true;
+                    }
                 }
             }
         }
