@@ -1,10 +1,8 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
-
 #include "game/GameApp.h"
 
+#include "game/scenes/MainMenuScene.h"
 #include "game/scenes/GameplayScene.h"
+#include "game/scenes/SettingsScene.h"
 
 #include <iostream>
 
@@ -37,15 +35,15 @@ namespace game
         }
 
         std::cout << "[GameApp] SceneManager initialized.\n";
-        std::cout << "[GameApp] Changing to GameplayScene.\n";
+        std::cout << "[GameApp] Changing to MainMenuScene.\n";
 
-        if (!m_SceneManager.ChangeScene<GameplayScene>())
+        if (!m_SceneManager.ChangeScene<MainMenuScene>())
         {
-            std::cerr << "[GameApp] Failed to activate GameplayScene.\n";
+            std::cerr << "[GameApp] Failed to activate MainMenuScene.\n";
             return false;
         }
 
-        std::cout << "[GameApp] GameplayScene activated.\n";
+        std::cout << "[GameApp] MainMenuScene activated.\n";
         std::cout << "[EFK] Entering main loop.\n";
         return true;
     }
@@ -68,6 +66,26 @@ namespace game
     {
         (void)application;
         m_SceneManager.Update(timestep);
+
+        // Handle deferred scene change requests
+        const std::string& requested = application.GetRequestedScene();
+        if (!requested.empty())
+        {
+            if (requested == "GameplayScene")
+            {
+                m_SceneManager.ChangeScene<GameplayScene>();
+            }
+            else if (requested == "MainMenuScene")
+            {
+                m_SceneManager.ChangeScene<MainMenuScene>();
+            }
+            else if (requested == "SettingsScene")
+            {
+                m_SceneManager.ChangeScene<SettingsScene>();
+            }
+
+            application.ClearSceneChangeRequest();
+        }
     }
 
     void GameApp::OnRender(engine::Application& application)

@@ -43,6 +43,9 @@ namespace engine
         int Run(IApplicationListener& listener);
 
         void RequestQuit();
+        void RequestSceneChange(const std::string& sceneName);
+        const std::string& GetRequestedScene() const;
+        void ClearSceneChangeRequest();
 
         Renderer& GetRenderer();
         Input& GetInput();
@@ -60,6 +63,7 @@ namespace engine
         Renderer m_Renderer;
         Input m_Input;
         bool m_IsRunning;
+        std::string m_RequestedScene;
     };
 }
 

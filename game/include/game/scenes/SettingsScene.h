@@ -1,13 +1,12 @@
-#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_MAINMENUSCENE_H
-#define ECHOES_OF_THE_FORGOTTEN_KEEP_MAINMENUSCENE_H
+#ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_SETTINGSSCENE_H
+#define ECHOES_OF_THE_FORGOTTEN_KEEP_SETTINGSSCENE_H
 
 #include "engine/scene/Scene.h"
 #include "engine/rendering/TextRenderer.h"
+#include "engine/rendering/QuadRenderer.h"
 
 #include "game/ui/UIButton.h"
-
-#include <string>
-#include <vector>
+#include "game/ui/UISlider.h"
 
 namespace engine
 {
@@ -16,10 +15,10 @@ namespace engine
 
 namespace game
 {
-    class MainMenuScene final : public engine::Scene
+    class SettingsScene final : public engine::Scene
     {
     public:
-        MainMenuScene();
+        SettingsScene();
 
         bool OnCreate(engine::Application& application) override;
         void OnDestroy() override;
@@ -27,17 +26,18 @@ namespace game
         void OnRender(engine::Application& application) override;
 
     private:
-        void LayoutButtons();
+        void LayoutUI();
 
         engine::TextRenderer m_TextRenderer;
+        engine::QuadRenderer m_QuadRenderer;
 
-        std::vector<UIButton> m_Buttons;
+        UISlider m_MusicSlider;
+        UISlider m_VFXSlider;
         UIButton m_BackButton;
+
         int m_ScreenWidth;
         int m_ScreenHeight;
-
-        bool m_ShowCredits;
     };
 }
 
-#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_MAINMENUSCENE_H
+#endif // ECHOES_OF_THE_FORGOTTEN_KEEP_SETTINGSSCENE_H

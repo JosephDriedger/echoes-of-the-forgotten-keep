@@ -84,6 +84,21 @@ namespace engine
         m_IsRunning = false;
     }
 
+    void Application::RequestSceneChange(const std::string& sceneName)
+    {
+        m_RequestedScene = sceneName;
+    }
+
+    const std::string& Application::GetRequestedScene() const
+    {
+        return m_RequestedScene;
+    }
+
+    void Application::ClearSceneChangeRequest()
+    {
+        m_RequestedScene.clear();
+    }
+
     Renderer& Application::GetRenderer()
     {
         return m_Renderer;
