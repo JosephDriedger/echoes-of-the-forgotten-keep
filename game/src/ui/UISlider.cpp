@@ -31,6 +31,12 @@ namespace game
     {
     }
 
+    void UISlider::Layout(engine::TextRenderer& textRenderer, float labelScale)
+    {
+        m_LabelWidth = textRenderer.MeasureTextWidth(m_Label, labelScale);
+        m_TrackOffsetX = m_LabelWidth + 20.0f;
+    }
+
     void UISlider::Update(const engine::Input& input)
     {
         if (!m_ValuePtr) return;

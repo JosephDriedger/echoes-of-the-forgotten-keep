@@ -1,6 +1,7 @@
 #include "game/scenes/SettingsScene.h"
 
 #include "engine/core/Application.h"
+#include "engine/input/Input.h"
 #include "game/GameSettings.h"
 
 #include <SDL3/SDL_keycode.h>
@@ -60,9 +61,8 @@ namespace game
 
     void SettingsScene::LayoutUI()
     {
-        float centerX = static_cast<float>(m_ScreenWidth) / 2.0f;
+        float screenW = static_cast<float>(m_ScreenWidth);
         float trackWidth = 300.0f;
-        float labelOffset = 200.0f;
 
         GameSettings& settings = GameSettings::Instance();
 
@@ -71,18 +71,21 @@ namespace game
         m_VFXSlider = UISlider("VFX", 0, 0, trackWidth,
                                &settings.VFXVolume, 0.0f, 1.0f);
 
-        // Position sliders centered
-        float sliderStartX = centerX - (labelOffset + trackWidth) / 2.0f;
+        m_MusicSlider.Layout(m_TextRenderer);
+        m_VFXSlider.Layout(m_TextRenderer);
+
         float sliderY = static_cast<float>(m_ScreenHeight) * 0.38f;
         float sliderSpacing = 70.0f;
 
-        m_MusicSlider.SetPosition(sliderStartX, sliderY);
-        m_VFXSlider.SetPosition(sliderStartX, sliderY + sliderSpacing);
+        m_MusicSlider.SetPosition(0, sliderY);
+        m_MusicSlider.CenterHorizontally(screenW);
+        m_VFXSlider.SetPosition(0, sliderY + sliderSpacing);
+        m_VFXSlider.CenterHorizontally(screenW);
 
-        // Back button
-        m_BackButton = UIButton("Back", 0, static_cast<float>(m_ScreenHeight) * 0.75f);
+        // Back button - bottom left corner
+        float margin = 30.0f;
+        m_BackButton = UIButton("Back", margin, static_cast<float>(m_ScreenHeight) - 80.0f);
         m_BackButton.Layout(m_TextRenderer);
-        m_BackButton.CenterHorizontally(static_cast<float>(m_ScreenWidth));
     }
 
     void SettingsScene::OnUpdate(engine::Application& application, engine::Timestep timestep)
@@ -98,9 +101,9 @@ namespace game
 
         m_BackButton.UpdateHover(mouseX, mouseY);
 
-        if (m_BackButton.IsClicked(input))
+        if (m_BackButton.IsClicked(input) || input.IsKeyPressed(SDLK_ESCAPE))
         {
-            application.RequestSceneChange("MainMenuScene");
+            application.RequestSceneChange(GameSettings::Instance().SettingsReturnScene);
         }
     }
 

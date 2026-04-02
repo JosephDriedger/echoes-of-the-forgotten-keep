@@ -43,6 +43,10 @@ namespace engine
         int Run(IApplicationListener& listener);
 
         void RequestQuit();
+
+        /// Request a deferred scene change. The name is read by GameApp
+        /// after the current frame's Update() completes, so the active
+        /// scene is not destroyed mid-update.
         void RequestSceneChange(const std::string& sceneName);
         const std::string& GetRequestedScene() const;
         void ClearSceneChangeRequest();

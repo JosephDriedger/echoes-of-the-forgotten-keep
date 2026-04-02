@@ -262,7 +262,8 @@ namespace game
 
         if (input.IsKeyPressed(SDLK_ESCAPE))
         {
-            application.RequestQuit();
+            application.RequestSceneChange("PauseMenuScene");
+            return;
         }
 
         // ECS systems

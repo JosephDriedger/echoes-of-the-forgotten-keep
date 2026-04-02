@@ -1,4 +1,4 @@
-#include "game/scenes/MainMenuScene.h"
+#include "game/scenes/PauseMenuScene.h"
 
 #include "engine/core/Application.h"
 
@@ -7,20 +7,18 @@
 
 namespace game
 {
-    MainMenuScene::MainMenuScene()
-        : engine::Scene("MainMenuScene"),
+    PauseMenuScene::PauseMenuScene()
+        : engine::Scene("PauseMenuScene"),
           m_TextRenderer(),
-          m_BackButton(),
           m_QuitYesButton(),
           m_QuitNoButton(),
           m_ScreenWidth(1280),
           m_ScreenHeight(720),
-          m_ShowCredits(false),
           m_ShowQuitConfirm(false)
     {
     }
 
-    bool MainMenuScene::OnCreate(engine::Application& application)
+    bool PauseMenuScene::OnCreate(engine::Application& application)
     {
         const auto& spec = application.GetSpecification();
         m_ScreenWidth = spec.Width;
@@ -33,30 +31,30 @@ namespace game
                 "asset/shaders/text_fragment.glsl",
                 m_ScreenWidth, m_ScreenHeight))
         {
-            std::cerr << "[MainMenuScene] Failed to initialize text renderer\n";
+            std::cerr << "[PauseMenuScene] Failed to initialize text renderer\n";
             return false;
         }
 
         LayoutButtons();
 
-        std::cout << "[MainMenuScene] Created successfully\n";
+        std::cout << "[PauseMenuScene] Created successfully\n";
         return true;
     }
 
-    void MainMenuScene::OnDestroy()
+    void PauseMenuScene::OnDestroy()
     {
         m_TextRenderer.Destroy();
     }
 
-    void MainMenuScene::LayoutButtons()
+    void PauseMenuScene::LayoutButtons()
     {
         m_Buttons.clear();
 
         float screenW = static_cast<float>(m_ScreenWidth);
-        float startY = static_cast<float>(m_ScreenHeight) * 0.45f;
+        float startY = static_cast<float>(m_ScreenHeight) * 0.40f;
         float spacing = 80.0f;
 
-        std::vector<std::string> labels = { "Play", "Settings", "Credits", "Quit" };
+        std::vector<std::string> labels = { "Resume", "Settings", "Main Menu", "Quit" };
 
         for (int i = 0; i < static_cast<int>(labels.size()); i++)
         {
@@ -65,11 +63,6 @@ namespace game
             btn.CenterHorizontally(screenW);
             m_Buttons.push_back(btn);
         }
-
-        // Back button for credits screen - bottom left corner
-        float margin = 30.0f;
-        m_BackButton = UIButton("Back", margin, static_cast<float>(m_ScreenHeight) - 80.0f);
-        m_BackButton.Layout(m_TextRenderer);
 
         // Quit confirmation buttons
         float confirmY = static_cast<float>(m_ScreenHeight) * 0.55f;
@@ -86,7 +79,7 @@ namespace game
         m_QuitNoButton.SetPosition(startX + m_QuitYesButton.GetWidth() + gap, confirmY);
     }
 
-    void MainMenuScene::OnUpdate(engine::Application& application, engine::Timestep timestep)
+    void PauseMenuScene::OnUpdate(engine::Application& application, engine::Timestep timestep)
     {
         (void)timestep;
 
@@ -94,7 +87,7 @@ namespace game
         int mouseX = input.GetMouseX();
         int mouseY = input.GetMouseY();
 
-        // Quit confirmation overlay
+        // Quit confirmation
         if (m_ShowQuitConfirm)
         {
             m_QuitYesButton.UpdateHover(mouseX, mouseY);
@@ -116,22 +109,17 @@ namespace game
             return;
         }
 
-        // Credits overlay
-        if (m_ShowCredits)
-        {
-            m_BackButton.UpdateHover(mouseX, mouseY);
-
-            if (m_BackButton.IsClicked(input))
-            {
-                m_ShowCredits = false;
-            }
-            return;
-        }
-
-        // Main menu
+        // Pause menu buttons
         for (auto& btn : m_Buttons)
         {
             btn.UpdateHover(mouseX, mouseY);
+        }
+
+        // ESC to resume
+        if (input.IsKeyPressed(SDLK_ESCAPE))
+        {
+            application.RequestSceneChange("GameplayScene");
+            return;
         }
 
         for (const auto& btn : m_Buttons)
@@ -140,19 +128,20 @@ namespace game
             {
                 const std::string& label = btn.GetLabel();
 
-                if (label == "Play")
+                if (label == "Resume")
                 {
                     application.RequestSceneChange("GameplayScene");
                     return;
                 }
                 else if (label == "Settings")
                 {
-                    application.RequestSceneChange("SettingsScene");
+                    application.RequestSceneChange("PauseSettingsScene");
                     return;
                 }
-                else if (label == "Credits")
+                else if (label == "Main Menu")
                 {
-                    m_ShowCredits = true;
+                    application.RequestSceneChange("MainMenuScene");
+                    return;
                 }
                 else if (label == "Quit")
                 {
@@ -160,28 +149,22 @@ namespace game
                 }
             }
         }
-
-        if (input.IsKeyPressed(SDLK_ESCAPE))
-        {
-            m_ShowQuitConfirm = true;
-        }
     }
 
-    void MainMenuScene::OnRender(engine::Application& application)
+    void PauseMenuScene::OnRender(engine::Application& application)
     {
         (void)application;
 
         // Title
-        float titleScale = 1.5f;
-        std::string title = "Echoes of the Forgotten Keep";
+        float titleScale = 1.2f;
+        std::string title = "Paused";
         float titleWidth = m_TextRenderer.MeasureTextWidth(title, titleScale);
         float titleX = (static_cast<float>(m_ScreenWidth) - titleWidth) / 2.0f;
-        float titleY = static_cast<float>(m_ScreenHeight) * 0.12f;
+        float titleY = static_cast<float>(m_ScreenHeight) * 0.15f;
 
         m_TextRenderer.RenderText(title, titleX, titleY, titleScale,
                                   0.85f, 0.65f, 0.3f);
 
-        // Quit confirmation
         if (m_ShowQuitConfirm)
         {
             float promptScale = 0.8f;
@@ -195,37 +178,6 @@ namespace game
 
             m_QuitYesButton.Render(m_TextRenderer);
             m_QuitNoButton.Render(m_TextRenderer);
-            return;
-        }
-
-        // Credits
-        if (m_ShowCredits)
-        {
-            float creditScale = 0.7f;
-            float centerX = static_cast<float>(m_ScreenWidth) / 2.0f;
-            float creditY = static_cast<float>(m_ScreenHeight) * 0.35f;
-            float lineSpacing = 50.0f;
-
-            std::vector<std::string> credits = {
-                "Credits",
-                "",
-                "Joey Driedger - Engine Lead",
-                "Adam Van Woerden - Rendering Lead",
-                "Elijah Fabon - Game Design Lead",
-            };
-
-            for (const auto& line : credits)
-            {
-                if (!line.empty())
-                {
-                    float w = m_TextRenderer.MeasureTextWidth(line, creditScale);
-                    m_TextRenderer.RenderText(line, centerX - w / 2.0f, creditY,
-                                              creditScale, 0.8f, 0.8f, 0.8f);
-                }
-                creditY += lineSpacing;
-            }
-
-            m_BackButton.Render(m_TextRenderer);
             return;
         }
 

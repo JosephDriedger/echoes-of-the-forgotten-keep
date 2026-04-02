@@ -1,3 +1,11 @@
+/// @file TextRenderer.cpp
+/// @brief Implementation of TrueType text rendering via stb_truetype + OpenGL.
+///
+/// The font atlas is a single-channel (GL_RED) texture containing rasterized
+/// glyphs for ASCII 32-126. Each glyph is rendered as a textured quad with
+/// alpha blending -- the fragment shader reads the red channel as alpha and
+/// multiplies by a uniform text color.
+
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb/stb_truetype.h>
 
@@ -250,9 +258,11 @@ namespace engine
 
         glBindVertexArray(m_VAO);
 
+        // y is the top of the text box; move down by ascent to reach the baseline
         float cursorX = x;
         float baselineY = y + m_Ascent * scale;
 
+        // Render each character as a textured quad
         for (char c : text)
         {
             auto it = m_Glyphs.find(c);

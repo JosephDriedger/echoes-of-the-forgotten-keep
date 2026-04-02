@@ -1,3 +1,11 @@
+/// @file SettingsScene.h
+/// @brief Settings screen with Music and VFX volume sliders.
+///
+/// Reachable from both MainMenuScene and PauseMenuScene. The Back
+/// button returns to whichever scene opened it, tracked by
+/// GameSettings::SettingsReturnScene (set by GameApp before the
+/// scene transition).
+
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_SETTINGSSCENE_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_SETTINGSSCENE_H
 

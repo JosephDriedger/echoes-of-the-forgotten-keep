@@ -1,3 +1,6 @@
+/// @file QuadRenderer.cpp
+/// @brief Solid-color rectangle rendering for UI elements.
+
 #include "engine/rendering/QuadRenderer.h"
 #include "engine/rendering/Shader.h"
 

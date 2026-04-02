@@ -1,8 +1,25 @@
+/// @file GameApp.cpp
+/// @brief Application listener and scene router.
+///
+/// GameApp owns the SceneManager and handles deferred scene transitions.
+/// Scenes request transitions by calling Application::RequestSceneChange()
+/// with a scene name string. After each Update(), GameApp checks for a
+/// pending request and maps it to the concrete scene type.
+///
+/// Scene routing table:
+///   "MainMenuScene"     -> MainMenuScene
+///   "GameplayScene"     -> GameplayScene
+///   "SettingsScene"     -> SettingsScene (returns to MainMenuScene)
+///   "PauseMenuScene"    -> PauseMenuScene
+///   "PauseSettingsScene"-> SettingsScene (returns to PauseMenuScene)
+
 #include "game/GameApp.h"
 
 #include "game/scenes/MainMenuScene.h"
 #include "game/scenes/GameplayScene.h"
 #include "game/scenes/SettingsScene.h"
+#include "game/scenes/PauseMenuScene.h"
+#include "game/GameSettings.h"
 
 #include <iostream>
 
@@ -81,6 +98,16 @@ namespace game
             }
             else if (requested == "SettingsScene")
             {
+                GameSettings::Instance().SettingsReturnScene = "MainMenuScene";
+                m_SceneManager.ChangeScene<SettingsScene>();
+            }
+            else if (requested == "PauseMenuScene")
+            {
+                m_SceneManager.ChangeScene<PauseMenuScene>();
+            }
+            else if (requested == "PauseSettingsScene")
+            {
+                GameSettings::Instance().SettingsReturnScene = "PauseMenuScene";
                 m_SceneManager.ChangeScene<SettingsScene>();
             }
 
