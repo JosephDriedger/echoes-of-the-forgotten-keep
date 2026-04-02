@@ -66,6 +66,13 @@ namespace game
             std::cerr << "[GameplayScene] Failed to initialize debug collider renderer\n";
         }
 
+        const auto& spec = application.GetSpecification();
+        m_DebugTextRenderer.Initialize(
+            "asset/fonts/BreatheFireIi-2z9W.ttf", 32.0f,
+            "asset/shaders/text_vertex.glsl",
+            "asset/shaders/text_fragment.glsl",
+            spec.Width, spec.Height);
+
         return true;
     }
 
@@ -77,6 +84,7 @@ namespace game
         m_PlayerClips.reset();
         m_PlayerSkeleton.reset();
         m_DungeonSpawnSystem.reset();
+        m_DebugTextRenderer.Destroy();
     }
 
     void GameplayScene::LoadContent()
@@ -243,18 +251,6 @@ namespace game
         m_DebugToggle.Update(input);
         m_FPSCounter.Update(timestep);
 
-        if (m_DebugToggle.ShowFPS())
-        {
-            std::string title = "Echoes of the Forgotten Keep - " + m_FPSCounter.GetDisplayString();
-            if (engine::Window* window = application.GetWindow())
-                SDL_SetWindowTitle(window->GetNativeWindow(), title.c_str());
-        }
-        else
-        {
-            if (engine::Window* window = application.GetWindow())
-                SDL_SetWindowTitle(window->GetNativeWindow(), "Echoes of the Forgotten Keep");
-        }
-
         if (input.IsKeyPressed(SDLK_ESCAPE))
         {
             application.RequestSceneChange("PauseMenuScene");
@@ -380,5 +376,16 @@ namespace game
         int w, h;
         SDL_GetWindowSize(application.GetWindow()->GetNativeWindow(), &w, &h);
         m_UISystem.Render(m_Registry, m_PlayerEntity, w, h);
+
+        // Debug FPS overlay (top-right corner)
+        if (m_DebugToggle.ShowFPS())
+        {
+            const std::string& fps = m_FPSCounter.GetDisplayString();
+            float scale = 0.5f;
+            float textW = m_DebugTextRenderer.MeasureTextWidth(fps, scale);
+            m_DebugTextRenderer.RenderText(fps,
+                static_cast<float>(w) - textW - 10.0f, 10.0f,
+                scale, 0.0f, 1.0f, 0.0f);
+        }
     }
 }

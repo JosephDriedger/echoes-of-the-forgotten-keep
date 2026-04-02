@@ -75,15 +75,18 @@ Dungeons are procedurally generated using the `DungeonSpawnSystem`:
 - **Quit** - Shows "Are you sure?" confirmation dialog
 
 ### Pause Menu (ESC during gameplay)
-- **Resume** - Returns to gameplay
-- **Settings** - Opens settings (returns to pause menu)
-- **Main Menu** - Returns to the main menu
+
+The pause menu is pushed as an overlay on top of the gameplay scene. The game world freezes (no updates) but remains visible behind the menu. All pause/settings overlays use a scene stack so resuming returns to the exact game state.
+
+- **Resume** - Pops the pause overlay, resuming gameplay
+- **Settings** - Pushes settings overlay on top of the pause menu
+- **Main Menu** - Replaces the entire scene stack with MainMenuScene
 - **Quit** - Shows quit confirmation dialog
 
 ### Settings
 - **Music Volume** - Slider control (0-100%)
 - **VFX Volume** - Slider control (0-100%)
-- **Back** - Returns to the previous menu (Main Menu or Pause Menu)
+- **Back** - Pops the settings overlay, returning to the previous screen
 
 Settings are stored in a singleton (`GameSettings`) and persist across scene transitions.
 
@@ -102,8 +105,9 @@ The game uses two reusable UI widget classes:
 | Left Mouse Button | Attack (combo chain) |
 | Mouse Wheel | Camera zoom in/out |
 | ESC | Pause menu (during gameplay) |
-| F1 | Toggle FPS display (debug) |
-| F3 | Toggle collider visualization (debug) |
+| F3 | Toggle debug mode (enables F4/F5) |
+| F4 | Toggle FPS overlay (requires F3) |
+| F5 | Toggle collider visualization (requires F3) |
 
 ## Team
 

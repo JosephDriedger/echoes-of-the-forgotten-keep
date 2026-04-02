@@ -13,7 +13,7 @@ The engine follows a modular architecture with a clean separation between the `e
 - **Skeletal Animation** - Full bone hierarchy support with keyframe interpolation, animation blending, and GPU skinning via bone matrices. Animations are loaded from GLB files via Assimp.
 - **TrueType Text Rendering** - Font atlas rasterization using stb_truetype with per-glyph textured quads.
 - **SDL3 Platform Layer** - Cross-platform windowing, input handling (keyboard + mouse with frame-edge detection), and event processing.
-- **Scene Management** - Scene lifecycle system with deferred transitions to prevent mid-update destruction.
+- **Scene Management** - Scene stack with push/pop for overlay menus (pause, settings) and deferred transitions to prevent mid-update destruction.
 - **Resource Management** - Cached loading for shaders, textures, meshes, and animations with path-based deduplication.
 - **Procedural Dungeon Generation** - Seed-based room placement with a prefab system for walls, floors, doors, and props.
 - **UI System** - Reusable UIButton and UISlider widgets with orthographic rendering over the 3D scene.
@@ -97,8 +97,9 @@ cmake --build build
 | Left Mouse Button | Attack (3-hit combo chain) |
 | Mouse Wheel | Camera zoom |
 | ESC | Pause menu |
-| F1 | Toggle FPS display |
-| F3 | Toggle collider visualization |
+| F3 | Toggle debug mode (enables F4/F5) |
+| F4 | Toggle FPS display (requires F3) |
+| F5 | Toggle collider visualization (requires F3) |
 
 ## Team
 

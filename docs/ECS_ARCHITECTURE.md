@@ -76,7 +76,7 @@ Base class providing a `std::set<Entity> m_Entities` member for systems that nee
 
 ## Components
 
-All game components are defined in `game/include/game/components/`. They are plain structs with public members.
+All game components are defined in a single header: `game/include/game/components/Components.h`. They are plain structs with public members.
 
 ### Transform
 Position, rotation, and scale in 3D space.
@@ -215,7 +215,6 @@ All game systems are in `game/include/game/systems/`. Systems are either static 
 | **CombatSystem** | Instance | Processes attack timing, combo windows, animation state transitions |
 | **AttackHitboxSystem** | Instance | Tracks active attack hitboxes, prevents multi-hit per swing |
 | **DamageSystem** | Instance | Processes `IncomingHit` on `CombatState`, applies damage to `Health` |
-| **HealthSystem** | Defined | Monitors health values, handles death state |
 
 ### World Systems
 
@@ -228,7 +227,6 @@ All game systems are in `game/include/game/systems/`. Systems are either static 
 | **SwitchTriggerSystem** | Static | Detects `Player` collisions with `Switch` entities, sets `Pressed = true` |
 | **RoomTransitionSystem** | Defined | Manages loading/unloading of room contents |
 | **LifetimeSystem** | Static | Decrements `Lifetime::Duration`, destroys entities when expired |
-| **AudioSystem** | Defined | Audio playback management |
 
 ### UI & Debug Systems
 

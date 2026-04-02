@@ -26,6 +26,7 @@
 #include "game/systems/LifetimeSystem.h"
 #include "game/systems/SwitchTriggerSystem.h"
 #include "game/systems/UISystem.h"
+#include "engine/rendering/TextRenderer.h"
 
 #include <memory>
 
@@ -82,6 +83,7 @@ namespace game
         CombatSystem m_CombatSystem;
         DamageSystem m_DamageSystem;
         UISystem m_UISystem;
+        engine::TextRenderer m_DebugTextRenderer;
     };
 }
 

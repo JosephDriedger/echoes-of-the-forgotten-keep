@@ -13,11 +13,10 @@ main.cpp
               ├── Window (SDL3)
               ├── Renderer (OpenGL 4.6)
               ├── Input (keyboard + mouse)
-              └── SceneManager
-                    └── Active Scene
-                          ├── Registry (ECS world)
-                          ├── Systems (game logic)
-                          └── Resource Managers
+              └── SceneManager (scene stack)
+                    ├── GameplayScene (bottom)
+                    ├── PauseMenuScene (overlay)
+                    └── SettingsScene  (overlay)
 ```
 
 ### Application Lifecycle
@@ -31,22 +30,32 @@ The engine follows a listener pattern. `Application` owns the main loop, and `Ga
 5. **OnShutdown** - Clean up all resources
 
 The main loop in `Application::Run()` handles:
+- `Input::BeginFrame()` to snapshot previous-frame key/mouse state for edge detection
 - SDL event polling via `ProcessEvents()`
-- Fixed-timestep updates via `OnUpdate(timestep)`
+- Timestep calculation with a 100ms clamp to prevent physics explosions after pauses
+- Updates via `OnUpdate(timestep)`
 - Rendering via `OnRender()`
-- Frame timing to maintain 60 FPS target
 
-### Deferred Scene Transitions
+### Scene Stack and Transitions
 
-Scenes cannot directly access the `SceneManager`. Instead, they call `Application::RequestSceneChange("SceneName")`, which stores the request. After the current frame's `OnUpdate()` completes, `GameApp` reads the request and routes it to the correct scene type:
+The `SceneManager` maintains a **stack of scenes** rather than a single active scene. This allows overlay scenes (pause menu, settings) to be pushed on top without destroying the gameplay scene underneath.
 
-| Request String       | Scene Created   | Notes                              |
-|---------------------|-----------------|------------------------------------|
-| `"MainMenuScene"`   | MainMenuScene   |                                    |
-| `"GameplayScene"`   | GameplayScene   |                                    |
-| `"SettingsScene"`   | SettingsScene   | Returns to MainMenuScene           |
-| `"PauseMenuScene"`  | PauseMenuScene  |                                    |
-| `"PauseSettingsScene"` | SettingsScene | Returns to PauseMenuScene          |
+- **`ChangeScene<T>()`** - Destroys all scenes in the stack and creates a new one (used for full transitions like Main Menu to Gameplay)
+- **`PushScene<T>()`** - Pushes an overlay scene on top. The scene below stays alive but stops receiving updates.
+- **`PopScene()`** - Destroys the top overlay and resumes the scene underneath.
+- **Rendering** renders all scenes bottom-to-top, so the gameplay scene is visible behind the pause menu.
+- **Updating** only runs the top scene, so gameplay is frozen while paused.
+
+Scenes cannot directly access the `SceneManager`. Instead, they call `Application::RequestSceneChange("SceneName")`, which stores the request. After the current frame's `OnUpdate()` completes, `GameApp` reads the request and routes it:
+
+| Request String         | Action          | Notes                              |
+|------------------------|-----------------|------------------------------------|
+| `"MainMenuScene"`      | ChangeScene     | Replaces entire stack              |
+| `"GameplayScene"`      | ChangeScene     | Replaces entire stack              |
+| `"SettingsScene"`      | PushScene       | Pushed over MainMenuScene          |
+| `"PauseMenuScene"`     | PushScene       | Pushed over GameplayScene          |
+| `"PauseSettingsScene"` | PushScene       | Pushed over PauseMenuScene         |
+| `"PopScene"`           | PopScene        | Resumes the scene underneath       |
 
 This deferred approach prevents destroying the active scene while it is still executing.
 
@@ -88,7 +97,7 @@ The `Input` class wraps SDL3 event handling with frame-based state tracking:
 - **Mouse**: Button state, position (`GetMouseX/Y()`), delta movement, scroll wheel
 - **Quit detection**: `IsQuitRequested()` for window close events
 
-Previous-frame state is stored to detect press/release edges.
+`BeginFrame()` is called at the start of each frame to copy current state to previous state, enabling accurate press/release edge detection. Without this, `IsKeyPressed()` would not reliably detect single-frame key presses.
 
 ## Resource Management
 
@@ -142,7 +151,7 @@ echoes-of-the-forgotten-keep/
 │   └── src/                    Implementation files (mirrors include structure)
 ├── game/                       Game library
 │   ├── include/game/
-│   │   ├── components/         ECS components (Transform, Health, etc.)
+│   │   ├── components/         ECS components (all in Components.h)
 │   │   ├── scenes/             Scene implementations
 │   │   ├── systems/            ECS systems (Movement, Combat, etc.)
 │   │   └── ui/                 UI widgets (UIButton, UISlider)
