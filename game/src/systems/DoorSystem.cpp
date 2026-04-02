@@ -1,10 +1,9 @@
 // Created by Elijah Fabon
 
 #include "game/systems/DoorSystem.h"
+#include "game/systems/DoorAnimationHelper.h"
 
 #include "game/components/Components.h"
-
-#include <glm/glm.hpp>
 
 #include <cmath>
 
@@ -68,44 +67,8 @@ namespace game
                 door.SwingDirection = 0;
             }
 
-            // Animate toward target
             float goalAngle = playerNear ? 90.0f * door.SwingDirection : 0.0f;
-            float step = door.SwingSpeed * deltaTime;
-
-            if (door.CurrentAngle < goalAngle)
-            {
-                door.CurrentAngle += step;
-                if (door.CurrentAngle > goalAngle)
-                    door.CurrentAngle = goalAngle;
-            }
-            else if (door.CurrentAngle > goalAngle)
-            {
-                door.CurrentAngle -= step;
-                if (door.CurrentAngle < goalAngle)
-                    door.CurrentAngle = goalAngle;
-            }
-
-            // Apply rotation: base rotation + swing offset
-            doorT.RotationY = door.BaseRotationY + glm::radians(door.CurrentAngle);
-
-            // Update the physical door collider position and size
-            if (door.ColliderEntity.IsValid() && registry.IsAlive(door.ColliderEntity) &&
-                registry.HasComponent<Transform>(door.ColliderEntity) &&
-                registry.HasComponent<Collider>(door.ColliderEntity))
-            {
-                float totalAngle = door.BaseRotationY + glm::radians(door.CurrentAngle);
-                float halfPanel = door.PanelLength * 0.5f;
-
-                auto& colT = registry.GetComponent<Transform>(door.ColliderEntity);
-                colT.X = doorT.X + std::cos(totalAngle) * halfPanel;
-                colT.Z = doorT.Z - std::sin(totalAngle) * halfPanel;
-
-                auto& col = registry.GetComponent<Collider>(door.ColliderEntity);
-                float absS = std::abs(std::sin(totalAngle));
-                float absC = std::abs(std::cos(totalAngle));
-                col.Width = door.PanelLength * absC + door.PanelThickness * absS;
-                col.Depth = door.PanelLength * absS + door.PanelThickness * absC;
-            }
+            DoorAnimationHelper::AnimateDoor(registry, entity, door, doorT, goalAngle, deltaTime);
         }
     }
 }

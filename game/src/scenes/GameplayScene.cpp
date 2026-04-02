@@ -12,6 +12,7 @@
 #include "game/systems/AnimationSystem.h"
 #include "game/systems/BoneAttachmentSystem.h"
 #include "game/systems/CombatInputSystem.h"
+#include "game/systems/DeathSystem.h"
 #include "game/systems/DoorSystem.h"
 #include "game/systems/DungeonSpawnSystem.h"
 #include "game/components/Components.h"
@@ -264,9 +265,10 @@ namespace game
         AnimationSystem::Update(m_Registry, dt);
         BoneAttachmentSystem::Update(m_Registry);
         m_AttackHitboxSystem.Update(m_Registry);
+        m_DamageSystem.Update(m_Registry);
+        DeathSystem::Update(m_Registry);
         m_EnemyAISystem.Update(m_Registry, dt);
         m_CombatSystem.Update(m_Registry, dt);
-        m_DamageSystem.Update(m_Registry);
         SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt);
         DoorPuzzleSystem::Update(m_Registry, dt);

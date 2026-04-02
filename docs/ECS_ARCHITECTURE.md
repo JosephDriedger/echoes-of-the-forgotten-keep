@@ -215,6 +215,13 @@ All game systems are in `game/include/game/systems/`. Systems are either static 
 | **CombatSystem** | Instance | Processes attack timing, combo windows, animation state transitions |
 | **AttackHitboxSystem** | Instance | Tracks active attack hitboxes, prevents multi-hit per swing |
 | **DamageSystem** | Instance | Processes `IncomingHit` on `CombatState`, applies damage to `Health` |
+| **DeathSystem** | Static | Marks dead entities (Health <= 0) with `IsDead`, clears movement, adds corpse `Lifetime` |
+
+### AI Systems
+
+| System | Style | Purpose |
+|--------|-------|---------|
+| **EnemyAISystem** | Instance | Runs AI state machine: Idle / Patrol / Chase / Attack (skips dead entities) |
 
 ### World Systems
 
@@ -222,8 +229,9 @@ All game systems are in `game/include/game/systems/`. Systems are either static 
 |--------|-------|---------|
 | **DungeonSpawnSystem** | Instance | Procedurally generates dungeon rooms with walls, floors, doors, enemies |
 | **EntitySpawnSystem** | Static | Registers component types and provides `SpawnPlayer()` prefab function |
-| **DoorSystem** | Static | Animates door swing based on `Door::Open` state |
-| **DoorPuzzleSystem** | Static | Links `Switch` presses to `Door` opens via matching IDs |
+| **DoorSystem** | Static | Proximity-based door opening (detects player, sets swing direction) |
+| **DoorPuzzleSystem** | Static | Links `Switch` presses to `Door` opens via matching trigger IDs |
+| **DoorAnimationHelper** | Static | Shared door swing animation and collider update (used by DoorSystem and DoorPuzzleSystem) |
 | **SwitchTriggerSystem** | Static | Detects `Player` collisions with `Switch` entities, sets `Pressed = true` |
 | **RoomTransitionSystem** | Defined | Manages loading/unloading of room contents |
 | **LifetimeSystem** | Static | Decrements `Lifetime::Duration`, destroys entities when expired |
@@ -232,11 +240,10 @@ All game systems are in `game/include/game/systems/`. Systems are either static 
 
 | System | Style | Purpose |
 |--------|-------|---------|
-| **UISystem** | Instance | Renders HUD elements (health bar) using TextRenderer and QuadRenderer |
-| **DebugToggle** | Instance | Toggles debug visualizations via keyboard shortcuts |
+| **UISystem** | Instance | Renders HUD elements (health bar) |
+| **DebugToggle** | Instance | Toggles debug visualizations via F3/F4/F5 |
 | **DebugColliderRenderer** | Instance | Draws wireframe collider boxes in 3D space |
-| **FPSCounter** | Instance | Tracks and displays frames per second in the window title |
-| **EnemyAISystem** | Instance | Runs AI state machine: Idle → Patrol → Chase → Attack |
+| **FPSCounter** | Instance | Tracks and displays FPS as on-screen overlay |
 
 ## System Execution Order
 
@@ -249,14 +256,15 @@ Systems are executed in a specific order each frame in `GameplayScene::OnUpdate(
 4. AnimationSystem      (update skeletons)
 5. BoneAttachmentSystem (position attached items)
 6. AttackHitboxSystem   (track hitboxes)
-7. EnemyAISystem        (run AI behavior)
-8. CombatSystem         (process attacks)
-9. DamageSystem         (apply damage)
-10. SwitchTriggerSystem (check switches)
-11. DoorSystem          (animate doors)
-12. DoorPuzzleSystem    (link switches to doors)
-13. LifetimeSystem      (destroy expired entities)
-14. CameraFollowSystem  (update camera)
+7. DamageSystem         (apply damage)
+8. DeathSystem          (mark dead entities, add corpse timer)
+9. EnemyAISystem        (run AI behavior, skip dead)
+10. CombatSystem        (process attacks)
+11. SwitchTriggerSystem (check switches)
+12. DoorSystem          (proximity doors)
+13. DoorPuzzleSystem    (trigger doors)
+14. LifetimeSystem      (destroy expired entities)
+15. CameraFollowSystem  (update camera)
 ```
 
 This ordering ensures that input is processed first, physics resolves before rendering, and the camera captures the final state.
