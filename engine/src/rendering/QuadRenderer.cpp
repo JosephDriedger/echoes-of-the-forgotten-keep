@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file QuadRenderer.cpp
 /// @brief Solid-color rectangle rendering for UI elements.
 

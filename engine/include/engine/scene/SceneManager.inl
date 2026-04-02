@@ -11,26 +11,39 @@ namespace engine
     template<typename TScene>
     bool SceneManager::ChangeScene()
     {
-        if (m_ActiveScene)
+        // Destroy all scenes in the stack (top to bottom)
+        while (!m_SceneStack.empty())
         {
-            m_ActiveScene->OnDestroy();
+            m_SceneStack.back()->OnDestroy();
+            m_SceneStack.pop_back();
         }
 
-        m_ActiveScene = std::make_shared<TScene>();
+        auto scene = std::make_shared<TScene>();
 
-        if (!m_ActiveScene)
-        {
-            return false;
-        }
-
-        if (!m_ActiveScene->OnCreate(*m_Application))
+        if (!scene->OnCreate(*m_Application))
         {
             std::cerr << "[SceneManager] Scene OnCreate() failed: "
-                      << m_ActiveScene->GetName() << '\n';
-            m_ActiveScene.reset();
+                      << scene->GetName() << '\n';
             return false;
         }
 
+        m_SceneStack.push_back(scene);
+        return true;
+    }
+
+    template<typename TScene>
+    bool SceneManager::PushScene()
+    {
+        auto scene = std::make_shared<TScene>();
+
+        if (!scene->OnCreate(*m_Application))
+        {
+            std::cerr << "[SceneManager] PushScene OnCreate() failed: "
+                      << scene->GetName() << '\n';
+            return false;
+        }
+
+        m_SceneStack.push_back(scene);
         return true;
     }
 }

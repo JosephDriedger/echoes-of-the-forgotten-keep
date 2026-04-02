@@ -9,8 +9,7 @@
 
 #include "engine/ecs/Registry.h"
 #include "engine/scene/RoomManager.h"
-#include "game/components/Player.h"
-#include "game/components/Transform.h"
+#include "game/components/Components.h"
 
 int RunRoomTransitionTests()
 {

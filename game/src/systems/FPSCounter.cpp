@@ -1,3 +1,5 @@
+// Created by Elijah Fabon
+
 #include "game/systems/FPSCounter.h"
 
 #include <sstream>

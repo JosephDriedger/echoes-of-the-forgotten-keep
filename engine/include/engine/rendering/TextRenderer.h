@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file TextRenderer.h
 /// @brief TrueType font rendering using stb_truetype and OpenGL.
 ///

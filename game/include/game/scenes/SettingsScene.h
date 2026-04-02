@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file SettingsScene.h
 /// @brief Settings screen with Music and VFX volume sliders.
 ///

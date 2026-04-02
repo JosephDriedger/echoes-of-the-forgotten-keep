@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file GameSettings.h
 /// @brief Global game settings singleton (audio volumes, etc.).
 ///

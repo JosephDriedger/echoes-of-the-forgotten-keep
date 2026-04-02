@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file TextRenderer.cpp
 /// @brief Implementation of TrueType text rendering via stb_truetype + OpenGL.
 ///

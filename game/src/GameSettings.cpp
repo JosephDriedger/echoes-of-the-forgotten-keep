@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "game/GameSettings.h"
 
 namespace game

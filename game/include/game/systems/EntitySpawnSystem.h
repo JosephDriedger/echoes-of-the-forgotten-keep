@@ -1,6 +1,4 @@
-//
-// Created by Joseph Driedger on 3/23/2026.
-//
+// Created by Adam Van Woerden
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITYSPAWNSYSTEM_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITYSPAWNSYSTEM_H

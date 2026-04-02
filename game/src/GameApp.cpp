@@ -1,3 +1,4 @@
+// Created by Joey Driedger
 /// @file GameApp.cpp
 /// @brief Application listener and scene router.
 ///
@@ -7,11 +8,12 @@
 /// pending request and maps it to the concrete scene type.
 ///
 /// Scene routing table:
-///   "MainMenuScene"     -> MainMenuScene
-///   "GameplayScene"     -> GameplayScene
-///   "SettingsScene"     -> SettingsScene (returns to MainMenuScene)
-///   "PauseMenuScene"    -> PauseMenuScene
-///   "PauseSettingsScene"-> SettingsScene (returns to PauseMenuScene)
+///   "MainMenuScene"      -> MainMenuScene (replaces stack)
+///   "GameplayScene"      -> GameplayScene (replaces stack)
+///   "SettingsScene"      -> SettingsScene pushed over MainMenuScene
+///   "PauseMenuScene"     -> PauseMenuScene pushed over GameplayScene
+///   "PauseSettingsScene" -> SettingsScene pushed over PauseMenuScene
+///   "PopScene"           -> Pops the top overlay, resuming the scene below
 
 #include "game/GameApp.h"
 
@@ -88,7 +90,11 @@ namespace game
         const std::string& requested = application.GetRequestedScene();
         if (!requested.empty())
         {
-            if (requested == "GameplayScene")
+            if (requested == "PopScene")
+            {
+                m_SceneManager.PopScene();
+            }
+            else if (requested == "GameplayScene")
             {
                 m_SceneManager.ChangeScene<GameplayScene>();
             }
@@ -99,16 +105,16 @@ namespace game
             else if (requested == "SettingsScene")
             {
                 GameSettings::Instance().SettingsReturnScene = "MainMenuScene";
-                m_SceneManager.ChangeScene<SettingsScene>();
+                m_SceneManager.PushScene<SettingsScene>();
             }
             else if (requested == "PauseMenuScene")
             {
-                m_SceneManager.ChangeScene<PauseMenuScene>();
+                m_SceneManager.PushScene<PauseMenuScene>();
             }
             else if (requested == "PauseSettingsScene")
             {
                 GameSettings::Instance().SettingsReturnScene = "PauseMenuScene";
-                m_SceneManager.ChangeScene<SettingsScene>();
+                m_SceneManager.PushScene<SettingsScene>();
             }
 
             application.ClearSceneChangeRequest();

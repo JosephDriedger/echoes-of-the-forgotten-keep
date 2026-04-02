@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file MainMenuScene.h
 /// @brief Title screen with Play, Settings, Credits, and Quit buttons.
 ///

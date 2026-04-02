@@ -1,3 +1,5 @@
+// Created by Joey Driedger
+
 #include "engine/scene/Scene.h"
 
 namespace engine

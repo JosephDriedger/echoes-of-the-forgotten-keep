@@ -1,3 +1,5 @@
+// Created by Joey Driedger
+
 #include "engine/resources/AnimationLoader.h"
 
 #include <assimp/Importer.hpp>

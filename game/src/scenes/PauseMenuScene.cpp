@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "game/scenes/PauseMenuScene.h"
 
 #include "engine/core/Application.h"
@@ -118,7 +120,7 @@ namespace game
         // ESC to resume
         if (input.IsKeyPressed(SDLK_ESCAPE))
         {
-            application.RequestSceneChange("GameplayScene");
+            application.RequestSceneChange("PopScene");
             return;
         }
 
@@ -130,7 +132,7 @@ namespace game
 
                 if (label == "Resume")
                 {
-                    application.RequestSceneChange("GameplayScene");
+                    application.RequestSceneChange("PopScene");
                     return;
                 }
                 else if (label == "Settings")

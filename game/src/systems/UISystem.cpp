@@ -1,6 +1,4 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+// Created by Adam Van Woerden
 
 #include "game/systems/UISystem.h"
 #include "SDL3/SDL_render.h"

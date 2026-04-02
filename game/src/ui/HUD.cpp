@@ -1,6 +1,7 @@
+// Created by Adam Van Woerden
+
 #include "game/ui/HUD.h"
-#include "game/components/Health.h"
-#include "game/components/CombatState.h"
+#include "game/components/Components.h"
 
 namespace game
 {

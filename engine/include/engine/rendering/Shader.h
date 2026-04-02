@@ -1,6 +1,4 @@
-//
-// Created by Adam Van Woerden on 3/24/2026.
-//
+// Created by Adam Van Woerden
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_SHADER_H

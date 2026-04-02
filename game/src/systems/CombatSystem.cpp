@@ -1,9 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/CombatSystem.h"
 
-#include "game/components/CombatState.h"
-#include "game/components/Transform.h"
-#include "game/components/Player.h"
-#include "game/components/EnemyAI.h"
+#include "game/components/Components.h"
 
 namespace game
 {

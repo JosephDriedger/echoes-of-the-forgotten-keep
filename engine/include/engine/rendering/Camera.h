@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_CAMERA_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_CAMERA_H
 

@@ -1,7 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/AnimationSystem.h"
 
-#include "game/components/AnimationState.h"
-#include "game/components/CombatState.h"
+#include "game/components/Components.h"
 
 #include "engine/rendering/Animator.h"
 

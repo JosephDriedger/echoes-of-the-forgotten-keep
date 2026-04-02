@@ -1,17 +1,8 @@
+// Created by Adam Van Woerden
+
 #include "game/systems/EntitySpawnSystem.h"
 
-#include "game/components/Collider.h"
-#include "game/components/CombatState.h"
-#include "game/components/EnemyAI.h"
-#include "game/components/Player.h"
-#include "game/components/Transform.h"
-#include "game/components/Render.h"
-#include "game/components/AnimationState.h"
-#include "game/components/BoneAttachment.h"
-#include "game/components/Door.h"
-#include "game/components/Health.h"
-#include "game/components/Switch.h"
-#include "game/components/Lifetime.h"
+#include "game/components/Components.h"
 
 namespace game
 {

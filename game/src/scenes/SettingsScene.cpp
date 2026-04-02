@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "game/scenes/SettingsScene.h"
 
 #include "engine/core/Application.h"
@@ -103,7 +105,7 @@ namespace game
 
         if (m_BackButton.IsClicked(input) || input.IsKeyPressed(SDLK_ESCAPE))
         {
-            application.RequestSceneChange(GameSettings::Instance().SettingsReturnScene);
+            application.RequestSceneChange("PopScene");
         }
     }
 

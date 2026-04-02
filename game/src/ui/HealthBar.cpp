@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "game/ui/HealthBar.h"
 
 namespace game

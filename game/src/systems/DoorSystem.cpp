@@ -1,9 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/DoorSystem.h"
 
-#include "game/components/Door.h"
-#include "game/components/Transform.h"
-#include "game/components/Collider.h"
-#include "game/components/Player.h"
+#include "game/components/Components.h"
 
 #include <glm/glm.hpp>
 

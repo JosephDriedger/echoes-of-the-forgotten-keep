@@ -1,6 +1,4 @@
-//
-// Created by scept on 2026-04-01.
-//
+// Created by Adam Van Woerden
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_UIRENDERER_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_UIRENDERER_H

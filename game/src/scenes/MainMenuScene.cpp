@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "game/scenes/MainMenuScene.h"
 
 #include "engine/core/Application.h"

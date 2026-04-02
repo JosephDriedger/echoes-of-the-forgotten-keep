@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file PauseMenuScene.h
 /// @brief In-game pause menu with Resume, Settings, Main Menu, and Quit.
 ///

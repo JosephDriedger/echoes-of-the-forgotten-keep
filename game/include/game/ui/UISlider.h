@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file UISlider.h
 /// @brief Reusable horizontal slider widget for settings screens.
 ///

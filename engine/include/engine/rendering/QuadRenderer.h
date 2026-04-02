@@ -1,3 +1,4 @@
+// Created by Adam Van Woerden
 /// @file QuadRenderer.h
 /// @brief Draws filled rectangles for UI elements (slider tracks, handles, etc.).
 ///

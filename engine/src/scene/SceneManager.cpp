@@ -1,3 +1,5 @@
+// Created by Joey Driedger
+
 #include "engine/scene/SceneManager.h"
 
 #include "engine/scene/Scene.h"
@@ -6,8 +8,7 @@
 namespace engine
 {
     SceneManager::SceneManager()
-        : m_Application(nullptr),
-          m_ActiveScene(nullptr)
+        : m_Application(nullptr)
     {
     }
 
@@ -19,28 +20,39 @@ namespace engine
 
     void SceneManager::Shutdown()
     {
-        if (m_ActiveScene)
+        while (!m_SceneStack.empty())
         {
-            m_ActiveScene->OnDestroy();
-            m_ActiveScene.reset();
+            m_SceneStack.back()->OnDestroy();
+            m_SceneStack.pop_back();
         }
 
         m_Application = nullptr;
     }
 
+    void SceneManager::PopScene()
+    {
+        if (m_SceneStack.empty())
+            return;
+
+        m_SceneStack.back()->OnDestroy();
+        m_SceneStack.pop_back();
+    }
+
     void SceneManager::Update(Timestep timestep)
     {
-        if (m_ActiveScene)
+        // Only the top scene receives updates
+        if (!m_SceneStack.empty())
         {
-            m_ActiveScene->OnUpdate(*m_Application, timestep);
+            m_SceneStack.back()->OnUpdate(*m_Application, timestep);
         }
     }
 
     void SceneManager::Render()
     {
-        if (m_ActiveScene)
+        // Render all scenes bottom to top so gameplay shows behind overlays
+        for (auto& scene : m_SceneStack)
         {
-            m_ActiveScene->OnRender(*m_Application);
+            scene->OnRender(*m_Application);
         }
     }
 }

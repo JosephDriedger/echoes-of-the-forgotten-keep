@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "game/ui/UIButton.h"
 
 #include "engine/rendering/TextRenderer.h"

@@ -8,8 +8,7 @@
 #include <iostream>
 
 #include "engine/ecs/Registry.h"
-#include "game/components/Collider.h"
-#include "game/components/Transform.h"
+#include "game/components/Components.h"
 
 int RunCollisionTests()
 {
