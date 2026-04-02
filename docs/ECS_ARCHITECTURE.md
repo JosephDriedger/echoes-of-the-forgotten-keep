@@ -2,11 +2,13 @@
 
 ## Overview
 
-The engine uses an Entity-Component-System (ECS) pattern where:
+The engine uses an Entity-Component-System (ECS) pattern, a data-oriented design that separates identity, data, and logic:
 
-- **Entities** are lightweight integer handles (no data or behavior)
-- **Components** are plain data structs attached to entities
-- **Systems** are stateless (or minimal-state) functions that operate on entities with specific component combinations
+- **Entities** are lightweight integer handles — just a number, no data or behavior. Think of an entity as a row ID in a database.
+- **Components** are plain data structs attached to entities — they hold state but contain no logic. Think of components as columns in a database.
+- **Systems** are functions that operate on entities with specific component combinations — they contain all the logic but hold no per-entity state.
+
+This separation means that adding new behavior (e.g., making doors openable) only requires adding a new component (Door data) and a new system (DoorSystem logic), without modifying any existing entity or component classes.
 
 All ECS state is managed by the **Registry**, which serves as the central coordinator.
 
@@ -29,7 +31,7 @@ Components are identified by a `ComponentType` (`uint8_t`), assigned at registra
 
 ### Signature (`engine/ecs/Signature.h`)
 
-A `std::bitset<64>` where each bit corresponds to a registered component type. Every entity has a signature that tracks which components are attached to it. Systems can use signatures to filter entities.
+A `std::bitset<64>` where each bit position corresponds to a registered component type. For example, if `Transform` is component type 0 and `Health` is component type 3, an entity with both would have bits 0 and 3 set: `...001001`. Every entity has a signature that tracks which components are attached to it. When a component is added or removed, the corresponding bit is flipped. This allows quick checks like "does this entity have a Transform and a Health component?" by comparing bit patterns.
 
 ### ComponentStorage (`engine/ecs/ComponentStorage.h`)
 
@@ -42,7 +44,7 @@ m_Entities:   [Entity(3),  Entity(1),  Entity(7),  ...]
 m_EntityToIndex: { 3->0, 1->1, 7->2, ... }
 ```
 
-**Removal**: Uses "swap and pop" - the removed element is swapped with the last element, then the vector is shrunk. This keeps storage contiguous with no gaps.
+**Removal**: Uses "swap and pop" — when an element is removed from the middle, it is swapped with the last element in the vector, then the vector size is decremented by one. This avoids shifting all subsequent elements (which would be O(n)) and keeps the storage contiguous with no gaps. The trade-off is that element order is not preserved, but since systems iterate all entities anyway, order does not matter.
 
 ### Registry (`engine/ecs/Registry.h`)
 
@@ -96,7 +98,7 @@ TexturePtr  - shared_ptr<Texture> (diffuse texture)
 ```
 
 ### Player
-Empty marker component. Identifies the player entity for systems that need to find it.
+Empty **marker component** — a struct with no data members. Its sole purpose is to tag an entity as "the player" so that systems can distinguish it from enemies and world objects. For example, `MovementSystem` iterates all entities but only moves ones that have a `Player` component. This is a common ECS pattern for filtering entities by role without using inheritance.
 
 ### Health
 Entity health for combat.
@@ -106,12 +108,12 @@ Maximum  - Maximum hit points (default 100)
 ```
 
 ### Collider
-Axis-aligned bounding box for collision detection.
+Axis-Aligned Bounding Box (AABB) for collision detection. An AABB is a box whose edges are aligned with the world axes (X, Y, Z) — it cannot rotate. This makes overlap checks very fast (just compare min/max coordinates on each axis) at the cost of less precise shapes for rotated objects.
 ```
 Width, Height, Depth       - Box dimensions
-OffsetX, OffsetY, OffsetZ  - Offset from Transform position
-IsTrigger                  - If true, detects overlap but doesn't block movement
-IsStatic                   - If true, doesn't get pushed by collisions
+OffsetX, OffsetY, OffsetZ  - Offset from Transform position (e.g., to center the box on the entity)
+IsTrigger                  - If true, detects overlap but doesn't block movement (used for floor switches)
+IsStatic                   - If true, doesn't get pushed by collisions (used for walls and doors)
 ```
 
 ### AnimationState
@@ -173,11 +175,11 @@ Id  - Which room this entity belongs to
 ```
 
 ### BoneAttachment
-Attaches a child entity to a parent entity's skeleton bone.
+Attaches a child entity's Transform to a bone in a parent entity's skeleton, so the child moves with the bone each frame. This is how the sword and shield follow the knight's hands during animations — the sword entity has a `BoneAttachment` pointing to the right hand bone (`"handslot.r"`), and `BoneAttachmentSystem` copies the bone's world-space transform to the sword's `Transform` every frame.
 ```
-ParentEntity  - Entity with the AnimationState
+ParentEntity  - Entity with the AnimationState (e.g., the knight)
 BoneName      - Name of the bone to attach to (e.g., "handslot.r")
-Offset        - mat4 offset relative to the bone
+Offset        - mat4 offset relative to the bone (adjusts position/rotation)
 ```
 
 ### Switch
@@ -195,7 +197,10 @@ Duration  - Seconds remaining (default 5.0)
 
 ## Systems
 
-All game systems are in `game/include/game/systems/`. Systems are either static classes (stateless, called via `SystemName::Update(...)`) or instance-based (hold state, called via `m_system.Update(...)`).
+All game systems are in `game/include/game/systems/`. Systems come in two styles:
+
+- **Static** systems have no member variables. All their methods are `static`, so they are called directly on the class (e.g., `MovementSystem::Update(registry, input, dt)`). This is used when the system needs no persistent state between frames — it simply reads components, does work, and writes results back.
+- **Instance** systems are created as member variables of GameplayScene (e.g., `m_CollisionSystem`). They hold state that persists across frames, such as cached data structures, tracked entity sets, or GPU resources. They are called on the instance (e.g., `m_CollisionSystem.Update(registry)`).
 
 ### Core Gameplay Systems
 

@@ -21,7 +21,7 @@ main.cpp
 
 ### Application Lifecycle
 
-The engine follows a listener pattern. `Application` owns the main loop, and `GameApp` implements `IApplicationListener` to receive lifecycle callbacks:
+The engine follows a **listener pattern** (also known as the observer or callback pattern). `Application` owns the main loop and core engine resources (window, renderer, input), but it has no knowledge of game-specific code. Instead, `GameApp` implements the `IApplicationListener` interface, and `Application` calls its methods at the appropriate times. This keeps the engine reusable — a different game could provide a different listener without modifying `Application`. The lifecycle callbacks are:
 
 1. **OnInitialize** - Set up the SceneManager, load the first scene
 2. **OnEvent** - Process SDL events (input, window resize, quit)
@@ -43,7 +43,7 @@ The `SceneManager` maintains a **stack of scenes** rather than a single active s
 - **`ChangeScene<T>()`** - Destroys all scenes in the stack and creates a new one (used for full transitions like Main Menu to Gameplay)
 - **`PushScene<T>()`** - Pushes an overlay scene on top. The scene below stays alive but stops receiving updates.
 - **`PopScene()`** - Destroys the top overlay and resumes the scene underneath.
-- **Rendering** renders all scenes bottom-to-top, so the gameplay scene is visible behind the pause menu.
+- **Rendering** renders all scenes bottom-to-top, so the gameplay scene is visible behind the pause menu. Overlay scenes (PauseMenuScene, SettingsScene) draw a dark semi-transparent background quad before their UI elements to dim the scene underneath.
 - **Updating** only runs the top scene, so gameplay is frozen while paused.
 
 Scenes cannot directly access the `SceneManager`. Instead, they call `Application::RequestSceneChange("SceneName")`, which stores the request. After the current frame's `OnUpdate()` completes, `GameApp` reads the request and routes it:
@@ -55,7 +55,9 @@ Scenes cannot directly access the `SceneManager`. Instead, they call `Applicatio
 | `"SettingsScene"`      | PushScene       | Pushed over MainMenuScene          |
 | `"PauseMenuScene"`     | PushScene       | Pushed over GameplayScene          |
 | `"PauseSettingsScene"` | PushScene       | Pushed over PauseMenuScene         |
-| `"PopScene"`           | PopScene        | Resumes the scene underneath       |
+| `"PopScene"`           | PopScene        | Not a scene — a command to close the top overlay and resume the scene underneath |
+
+`"PopScene"` is not an actual scene class. It is a command string that overlay scenes (PauseMenuScene, SettingsScene) use to close themselves and return to whatever scene is below them on the stack. This is necessary because overlays do not know which scene opened them — SettingsScene can be reached from either MainMenuScene or PauseMenuScene.
 
 This deferred approach prevents destroying the active scene while it is still executing.
 
@@ -63,7 +65,7 @@ This deferred approach prevents destroying the active scene while it is still ex
 
 ### Core Rendering
 
-The engine uses OpenGL 4.6 (loaded via GLAD) with a forward rendering pipeline:
+The engine uses OpenGL 4.6 (loaded via GLAD) with a **forward rendering pipeline** — each object is drawn once per frame with its final lighting and texturing applied in a single pass. This is the simplest rendering approach (as opposed to deferred rendering, which separates geometry and lighting into multiple passes) and is well-suited for a scene with a moderate number of objects:
 
 - **Shader** - Compiles GLSL vertex/fragment programs, caches uniform locations for performance
 - **Mesh** - GPU-resident vertex data (position, normal, UV, bone IDs/weights) with VAO/VBO/EBO
@@ -73,12 +75,12 @@ The engine uses OpenGL 4.6 (loaded via GLAD) with a forward rendering pipeline:
 
 ### Skeletal Animation
 
-Full skeletal animation support via Assimp model loading:
+Full skeletal animation support via Assimp model loading. Skeletal animation works by defining a hierarchy of "bones" inside a 3D model. Each vertex is bound to one or more bones with weights (e.g., a wrist vertex might be 80% influenced by the hand bone and 20% by the forearm bone). When bones move, the vertices follow — this is how a character mesh deforms when walking, attacking, or dying. The animation data (bone positions at each point in time) is loaded from GLB files alongside the model.
 
-- **Skeleton** - Bone hierarchy with parent-child relationships and offset matrices
-- **AnimationClip** - Named animation containing per-bone keyframes (position, rotation, scale)
-- **Animator** - Evaluates clips over time, interpolates between keyframes
-- **AnimationState** (component) - Tracks current clip, blend time, and outputs `FinalBoneMatrices[100]` to the vertex shader for GPU skinning
+- **Skeleton** - Tree of bones with parent-child relationships (e.g., shoulder → upper arm → forearm → hand) and offset matrices that transform from model space to bone space
+- **AnimationClip** - A named animation (e.g., "idle", "run", "attack1") containing keyframes for each bone's position, rotation, and scale at specific timestamps
+- **Animator** - Evaluates a clip at a given time by interpolating between the two nearest keyframes for each bone, producing smooth motion between poses
+- **AnimationState** (component) - Tracks which clip is playing, the current playback time, and outputs `FinalBoneMatrices[100]` — an array of 4x4 matrices uploaded to the vertex shader each frame for GPU skinning (the GPU applies bone transformations to vertices, which is much faster than doing it on the CPU)
 
 ### UI Rendering
 
@@ -87,7 +89,9 @@ Two specialized renderers handle 2D overlays:
 - **TextRenderer** - Rasterizes TrueType fonts into a glyph atlas (512x512, ASCII 32-126) using stb_truetype. Renders text as per-glyph textured quads with alpha blending.
 - **QuadRenderer** - Draws solid-color rectangles for UI backgrounds, slider tracks, and health bars.
 
-Both use orthographic projection (top-left origin) and save/restore GL state (depth test, cull face, blend) to coexist with the 3D renderer.
+Both use **orthographic projection** with a top-left origin, meaning screen coordinates map directly to pixels (e.g., `(100, 50)` means 100 pixels from the left, 50 pixels from the top). This differs from the **perspective projection** used by the 3D gameplay camera, where distant objects appear smaller. Orthographic projection is standard for 2D UI because text and buttons should always be the same size regardless of camera position.
+
+Because the 3D renderer leaves OpenGL in a specific state (depth testing enabled, face culling on, blending off), both UI renderers save the current GL state before drawing, disable depth testing and face culling, enable alpha blending, and then restore the previous state when done. This prevents UI rendering from interfering with subsequent 3D draws.
 
 ## Input System
 

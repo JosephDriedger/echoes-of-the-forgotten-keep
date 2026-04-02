@@ -18,6 +18,7 @@
 
 #include "engine/scene/Scene.h"
 #include "engine/rendering/TextRenderer.h"
+#include "engine/rendering/QuadRenderer.h"
 
 #include "game/ui/UIButton.h"
 
@@ -45,6 +46,7 @@ namespace game
         void LayoutButtons();
 
         engine::TextRenderer m_TextRenderer;
+        engine::QuadRenderer m_QuadRenderer;
 
         std::vector<UIButton> m_Buttons;
 

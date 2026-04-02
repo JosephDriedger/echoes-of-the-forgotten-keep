@@ -62,6 +62,7 @@ For detailed documentation, see the `docs/` folder:
 - [Engine Overview](docs/ENGINE_OVERVIEW.md) - Architecture, rendering pipeline, and build system
 - [ECS Architecture](docs/ECS_ARCHITECTURE.md) - Components, systems, and execution order
 - [Game Design](docs/GAME_DESIGN.md) - Gameplay mechanics, controls, and design decisions
+- [Sequence Flow](docs/SEQUENCE_FLOW.md) - Runtime flow from startup to shutdown, scene transitions, and per-frame execution order
 
 ## Requirements
 

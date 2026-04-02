@@ -37,6 +37,15 @@ namespace game
             return false;
         }
 
+        if (!m_QuadRenderer.Initialize(
+                "asset/shaders/quad_vertex.glsl",
+                "asset/shaders/quad_fragment.glsl",
+                m_ScreenWidth, m_ScreenHeight))
+        {
+            std::cerr << "[PauseMenuScene] Failed to initialize quad renderer\n";
+            return false;
+        }
+
         LayoutButtons();
 
         std::cout << "[PauseMenuScene] Created successfully\n";
@@ -46,6 +55,7 @@ namespace game
     void PauseMenuScene::OnDestroy()
     {
         m_TextRenderer.Destroy();
+        m_QuadRenderer.Destroy();
     }
 
     void PauseMenuScene::LayoutButtons()
@@ -156,6 +166,11 @@ namespace game
     void PauseMenuScene::OnRender(engine::Application& application)
     {
         (void)application;
+
+        // Dark overlay background
+        m_QuadRenderer.DrawFilledRect(0.0f, 0.0f,
+            static_cast<float>(m_ScreenWidth), static_cast<float>(m_ScreenHeight),
+            0.0f, 0.0f, 0.0f, 0.75f);
 
         // Title
         float titleScale = 1.2f;

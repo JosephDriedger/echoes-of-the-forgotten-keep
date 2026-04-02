@@ -28,10 +28,9 @@ Click → Attack 1 (Horizontal Slice)
        └─ Click during combo window → Attack 3 (Jump Chop)
 ```
 
-- Each attack has a damage value and animation
-- A combo window opens near the end of each attack animation
-- Missing the window resets the combo to the beginning
-- Enemies have their own AI-driven attack patterns
+- Each attack has a damage value and its own animation clip
+- A **combo window** is a brief time period near the end of each attack animation during which the player can click again to chain into the next attack. If the player clicks during this window, the next attack in the sequence begins immediately. If the player does not click before the window closes, the combo resets to the beginning (Attack 1).
+- Enemies have their own AI-driven attack patterns with cooldown timers
 
 ## Enemy AI
 
@@ -76,7 +75,7 @@ Dungeons are procedurally generated using the `DungeonSpawnSystem`:
 
 ### Pause Menu (ESC during gameplay)
 
-The pause menu is pushed as an overlay on top of the gameplay scene. The game world freezes (no updates) but remains visible behind the menu. All pause/settings overlays use a scene stack so resuming returns to the exact game state.
+The pause menu is pushed as an overlay on top of the gameplay scene. The game world freezes (no updates) but remains visible behind a dark semi-transparent overlay. All pause/settings overlays use a scene stack so resuming returns to the exact game state.
 
 - **Resume** - Pops the pause overlay, resuming gameplay
 - **Settings** - Pushes settings overlay on top of the pause menu
@@ -88,7 +87,7 @@ The pause menu is pushed as an overlay on top of the gameplay scene. The game wo
 - **VFX Volume** - Slider control (0-100%)
 - **Back** - Pops the settings overlay, returning to the previous screen
 
-Settings are stored in a singleton (`GameSettings`) and persist across scene transitions.
+Settings are stored in a **singleton** (`GameSettings`) — a class with a single global instance accessed via `GameSettings::Instance()`. This ensures that volume values persist across scene transitions. When the user adjusts the Music slider in SettingsScene, it writes directly to `GameSettings::Instance().MusicVolume`. When the scene is destroyed and recreated later, it reads from the same singleton, so the value is preserved without needing to save/load from a file.
 
 ## UI Components
 

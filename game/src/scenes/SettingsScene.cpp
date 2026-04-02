@@ -113,6 +113,11 @@ namespace game
     {
         (void)application;
 
+        // Dark overlay background
+        m_QuadRenderer.DrawFilledRect(0.0f, 0.0f,
+            static_cast<float>(m_ScreenWidth), static_cast<float>(m_ScreenHeight),
+            0.0f, 0.0f, 0.0f, 0.85f);
+
         // Title
         float titleScale = 1.2f;
         std::string title = "Settings";
