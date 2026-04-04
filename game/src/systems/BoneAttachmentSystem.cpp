@@ -1,8 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/BoneAttachmentSystem.h"
 
-#include "game/components/BoneAttachment.h"
-#include "game/components/Transform.h"
-#include "game/components/AnimationState.h"
+#include "game/components/Components.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

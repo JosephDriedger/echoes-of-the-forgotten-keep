@@ -1,6 +1,4 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+// Created by Joey Driedger
 
 #include "engine/core/Application.h"
 
@@ -57,10 +55,15 @@ namespace engine
         while (m_IsRunning)
         {
             const Uint64 currentCounter = SDL_GetPerformanceCounter();
-            const double deltaSeconds =
+            double deltaSeconds =
                 static_cast<double>(currentCounter - previousCounter) / performanceFrequency;
             previousCounter = currentCounter;
 
+            // Clamp to prevent physics explosions after pause or hitches
+            if (deltaSeconds > 0.1)
+                deltaSeconds = 0.1;
+
+            m_Input.BeginFrame();
             ProcessEvents(listener);
 
             const Timestep timestep(deltaSeconds);
@@ -82,6 +85,21 @@ namespace engine
     void Application::RequestQuit()
     {
         m_IsRunning = false;
+    }
+
+    void Application::RequestSceneChange(const std::string& sceneName)
+    {
+        m_RequestedScene = sceneName;
+    }
+
+    const std::string& Application::GetRequestedScene() const
+    {
+        return m_RequestedScene;
+    }
+
+    void Application::ClearSceneChangeRequest()
+    {
+        m_RequestedScene.clear();
     }
 
     Renderer& Application::GetRenderer()

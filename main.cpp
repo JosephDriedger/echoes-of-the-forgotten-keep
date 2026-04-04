@@ -1,6 +1,4 @@
-//
-// Created by adamd on 2026-03-11.
-//
+// Created by Adam Van Woerden
 
 #define SDL_MAIN_HANDLED
 

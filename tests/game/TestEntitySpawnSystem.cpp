@@ -1,13 +1,7 @@
 #include "game/systems/EntitySpawnSystem.h"
 
 #include "engine/ecs/Registry.h"
-#include "game/components/Collider.h"
-#include "game/components/EnemyAI.h"
-#include "game/components/Player.h"
-#include "game/components/Transform.h"
-#include "game/components/Render.h"
-#include "game/components/AnimationState.h"
-#include "game/components/BoneAttachment.h"
+#include "game/components/Components.h"
 
 #include <cassert>
 #include <iostream>

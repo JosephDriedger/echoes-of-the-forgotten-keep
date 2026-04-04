@@ -1,6 +1,4 @@
-//
-// Created by adamd on 2026-02-04.
-//
+// Created by Joey Driedger
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_EVENTMANAGER_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_EVENTMANAGER_H

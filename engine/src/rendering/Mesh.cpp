@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "engine/rendering/Mesh.h"
 
 #include <glad/gl.h>

@@ -1,6 +1,4 @@
-//
-// Created by scept on 2026-04-01.
-//
+// Created by Adam Van Woerden
 
 #include "game/ui/UIRenderer.h"
 

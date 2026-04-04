@@ -1,9 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/MovementSystem.h"
 
-#include "game/components/Transform.h"
-#include "game/components/Player.h"
-#include "game/components/AnimationState.h"
-#include "game/components/CombatState.h"
+#include "game/components/Components.h"
 
 #include <SDL3/SDL_keycode.h>
 

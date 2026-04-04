@@ -1,9 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/SwitchTriggerSystem.h"
 
-#include "game/components/Switch.h"
-#include "game/components/Collider.h"
-#include "game/components/Transform.h"
-#include "game/components/Player.h"
+#include "game/components/Components.h"
 
 #include <cmath>
 #include <iostream>

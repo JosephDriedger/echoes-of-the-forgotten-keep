@@ -1,6 +1,4 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+// Created by Joey Driedger
 
 #include "engine/input/Input.h"
 

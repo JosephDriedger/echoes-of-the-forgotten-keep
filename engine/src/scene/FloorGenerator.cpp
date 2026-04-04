@@ -1,6 +1,4 @@
-//
-// Created by adamd on 2026-03-28.
-//
+// Created by Joey Driedger
 
 #include "engine/scene/FloorGenerator.h"
 

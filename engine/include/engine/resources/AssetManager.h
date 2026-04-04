@@ -1,6 +1,4 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+// Created by Joey Driedger
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ASSETMANAGER_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_ASSETMANAGER_H

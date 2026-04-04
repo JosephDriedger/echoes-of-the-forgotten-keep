@@ -1,7 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/DamageSystem.h"
 
-#include "game/components/Health.h"
-#include "game/components/CombatState.h"
+#include "game/components/Components.h"
 
 namespace game
 {

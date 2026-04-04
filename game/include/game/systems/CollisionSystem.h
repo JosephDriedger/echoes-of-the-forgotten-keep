@@ -1,12 +1,11 @@
+// Created by Elijah Fabon
+
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_COLLISIONSYSTEM_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_COLLISIONSYSTEM_H
 
 #include "engine/ecs/Registry.h"
 
-#include "game/components/Collider.h"
-#include "game/components/Transform.h"
-#include "game/components/CombatState.h"
-#include "game/components/EnemyAI.h"
+#include "game/components/Components.h"
 
 namespace game
 {

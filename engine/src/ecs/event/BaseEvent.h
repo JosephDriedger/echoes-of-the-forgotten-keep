@@ -1,6 +1,4 @@
-//
-// Created by scept on 2026-03-04.
-//
+// Created by Joey Driedger
 
 #ifndef INC_8051TUTORIAL_BASEEVENT_H
 #define INC_8051TUTORIAL_BASEEVENT_H

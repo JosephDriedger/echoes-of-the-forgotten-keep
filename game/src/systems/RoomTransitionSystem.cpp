@@ -1,8 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/RoomTransitionSystem.h"
 
-#include "game/components/Player.h"
-#include "game/components/Transform.h"
-#include "game/components/Collider.h"
+#include "game/components/Components.h"
 
 namespace game
 {

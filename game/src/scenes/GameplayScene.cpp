@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "game/scenes/GameplayScene.h"
 
 #include "engine/core/Application.h"
@@ -10,16 +12,10 @@
 #include "game/systems/AnimationSystem.h"
 #include "game/systems/BoneAttachmentSystem.h"
 #include "game/systems/CombatInputSystem.h"
+#include "game/systems/DeathSystem.h"
 #include "game/systems/DoorSystem.h"
 #include "game/systems/DungeonSpawnSystem.h"
-#include "game/components/Transform.h"
-#include "game/components/Render.h"
-#include "game/components/AnimationState.h"
-#include "game/components/CombatState.h"
-#include "game/components/BoneAttachment.h"
-#include "game/components/Player.h"
-#include "game/components/Collider.h"
-#include "game/components/Health.h"
+#include "game/components/Components.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -71,6 +67,13 @@ namespace game
             std::cerr << "[GameplayScene] Failed to initialize debug collider renderer\n";
         }
 
+        const auto& spec = application.GetSpecification();
+        m_DebugTextRenderer.Initialize(
+            "asset/fonts/BreatheFireIi-2z9W.ttf", 32.0f,
+            "asset/shaders/text_vertex.glsl",
+            "asset/shaders/text_fragment.glsl",
+            spec.Width, spec.Height);
+
         return true;
     }
 
@@ -82,11 +85,12 @@ namespace game
         m_PlayerClips.reset();
         m_PlayerSkeleton.reset();
         m_DungeonSpawnSystem.reset();
+        m_DebugTextRenderer.Destroy();
     }
 
     void GameplayScene::LoadContent()
     {
-        std::string playerMeshPath = "asset/Knight.glb";
+        std::string playerMeshPath = "asset/characters/Knight.glb";
         engine::MeshLoader::Result playerResult = m_MeshManager.Load(playerMeshPath);
 
         if (playerResult.SkeletonPtr)
@@ -176,8 +180,8 @@ namespace game
         playerCollider.IsStatic = false;
 
         // Add render component
-        auto playerMesh = m_MeshManager.Get("asset/Knight.glb");
-        auto playerTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+        auto playerMesh = m_MeshManager.Get("asset/characters/Knight.glb");
+        auto playerTexture = m_AssetManager.GetTextureManager().Load("asset/characters/knight_texture.png");
         m_Registry.AddComponent(m_PlayerEntity, Render(playerMesh, playerTexture));
 
         // Add animation state
@@ -203,8 +207,8 @@ namespace game
 
         // Spawn sword (right hand)
         {
-            engine::MeshLoader::Result swordResult = m_MeshManager.Load("asset/sword_1handed.gltf");
-            auto swordTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+            engine::MeshLoader::Result swordResult = m_MeshManager.Load("asset/equipment/sword_1handed.gltf");
+            auto swordTexture = m_AssetManager.GetTextureManager().Load("asset/characters/knight_texture.png");
 
             if (swordResult.MeshPtr && swordTexture)
             {
@@ -218,8 +222,8 @@ namespace game
 
         // Spawn shield (left hand)
         {
-            engine::MeshLoader::Result shieldResult = m_MeshManager.Load("asset/shield_spikes.gltf");
-            auto shieldTexture = m_AssetManager.GetTextureManager().Load("asset/knight_texture.png");
+            engine::MeshLoader::Result shieldResult = m_MeshManager.Load("asset/equipment/shield_spikes.gltf");
+            auto shieldTexture = m_AssetManager.GetTextureManager().Load("asset/characters/knight_texture.png");
 
             if (shieldResult.MeshPtr && shieldTexture)
             {
@@ -248,21 +252,10 @@ namespace game
         m_DebugToggle.Update(input);
         m_FPSCounter.Update(timestep);
 
-        if (m_DebugToggle.ShowFPS())
-        {
-            std::string title = "Echoes of the Forgotten Keep - " + m_FPSCounter.GetDisplayString();
-            if (engine::Window* window = application.GetWindow())
-                SDL_SetWindowTitle(window->GetNativeWindow(), title.c_str());
-        }
-        else
-        {
-            if (engine::Window* window = application.GetWindow())
-                SDL_SetWindowTitle(window->GetNativeWindow(), "Echoes of the Forgotten Keep");
-        }
-
         if (input.IsKeyPressed(SDLK_ESCAPE))
         {
-            application.RequestQuit();
+            application.RequestSceneChange("PauseMenuScene");
+            return;
         }
 
         // ECS systems
@@ -272,9 +265,10 @@ namespace game
         AnimationSystem::Update(m_Registry, dt);
         BoneAttachmentSystem::Update(m_Registry);
         m_AttackHitboxSystem.Update(m_Registry);
+        m_DamageSystem.Update(m_Registry);
+        DeathSystem::Update(m_Registry);
         m_EnemyAISystem.Update(m_Registry, dt);
         m_CombatSystem.Update(m_Registry, dt);
-        m_DamageSystem.Update(m_Registry);
         SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt);
         DoorPuzzleSystem::Update(m_Registry, dt);
@@ -384,5 +378,16 @@ namespace game
         int w, h;
         SDL_GetWindowSize(application.GetWindow()->GetNativeWindow(), &w, &h);
         m_UISystem.Render(m_Registry, m_PlayerEntity, w, h);
+
+        // Debug FPS overlay (top-right corner)
+        if (m_DebugToggle.ShowFPS())
+        {
+            const std::string& fps = m_FPSCounter.GetDisplayString();
+            float scale = 0.5f;
+            float textW = m_DebugTextRenderer.MeasureTextWidth(fps, scale);
+            m_DebugTextRenderer.RenderText(fps,
+                static_cast<float>(w) - textW - 10.0f, 10.0f,
+                scale, 0.0f, 1.0f, 0.0f);
+        }
     }
 }

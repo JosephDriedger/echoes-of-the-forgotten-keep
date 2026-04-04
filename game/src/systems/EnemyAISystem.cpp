@@ -1,12 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/EnemyAISystem.h"
 
-#include "game/components/EnemyAI.h"
-#include "game/components/Transform.h"
-#include "game/components/CombatState.h"
-#include "game/components/Player.h"
-#include "game/components/Health.h"
-#include "game/components/AnimationState.h"
-#include "game/components/Lifetime.h"
+#include "game/components/Components.h"
 
 #include <cmath>
 
@@ -43,25 +39,11 @@ namespace game
 
             auto& ai = registry.GetComponent<EnemyAI>(entity);
 
-            // Skip dead enemies — add a corpse timer so they get cleaned up
-            if (registry.HasComponent<Health>(entity))
+            // Skip dead enemies (handled by DeathSystem)
+            if (registry.HasComponent<Health>(entity) &&
+                registry.GetComponent<Health>(entity).Current <= 0)
             {
-                auto& health = registry.GetComponent<Health>(entity);
-                if (health.Current <= 0)
-                {
-                    if (!registry.HasComponent<Lifetime>(entity))
-                    {
-                        registry.AddComponent(entity, Lifetime(3.0f));
-
-                        if (registry.HasComponent<AnimationState>(entity))
-                        {
-                            auto& anim = registry.GetComponent<AnimationState>(entity);
-                            anim.CurrentState = AnimState::Death;
-                            anim.IsMoving = false;
-                        }
-                    }
-                    continue;
-                }
+                continue;
             }
 
             // Decrease lose-target cooldown

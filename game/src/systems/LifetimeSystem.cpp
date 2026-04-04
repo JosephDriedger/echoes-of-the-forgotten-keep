@@ -1,6 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/LifetimeSystem.h"
 
-#include "game/components/Lifetime.h"
+#include "game/components/Components.h"
 
 namespace game
 {

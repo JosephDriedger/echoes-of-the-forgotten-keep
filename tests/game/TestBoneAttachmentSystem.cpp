@@ -1,8 +1,6 @@
 #include "game/systems/BoneAttachmentSystem.h"
 #include "game/systems/EntitySpawnSystem.h"
-#include "game/components/Transform.h"
-#include "game/components/AnimationState.h"
-#include "game/components/BoneAttachment.h"
+#include "game/components/Components.h"
 
 #include "engine/ecs/Registry.h"
 

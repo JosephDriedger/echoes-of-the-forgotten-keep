@@ -1,6 +1,4 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+// Created by Joey Driedger
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_APPLICATION_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_APPLICATION_H
@@ -44,6 +42,13 @@ namespace engine
 
         void RequestQuit();
 
+        /// Request a deferred scene change. The name is read by GameApp
+        /// after the current frame's Update() completes, so the active
+        /// scene is not destroyed mid-update.
+        void RequestSceneChange(const std::string& sceneName);
+        const std::string& GetRequestedScene() const;
+        void ClearSceneChangeRequest();
+
         Renderer& GetRenderer();
         Input& GetInput();
         Window* GetWindow();
@@ -60,6 +65,7 @@ namespace engine
         Renderer m_Renderer;
         Input m_Input;
         bool m_IsRunning;
+        std::string m_RequestedScene;
     };
 }
 

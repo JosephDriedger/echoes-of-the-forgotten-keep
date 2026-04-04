@@ -1,6 +1,8 @@
+// Created by Elijah Fabon
+
 #include "game/systems/CameraFollowSystem.h"
 
-#include "game/components/Transform.h"
+#include "game/components/Components.h"
 
 namespace game
 {

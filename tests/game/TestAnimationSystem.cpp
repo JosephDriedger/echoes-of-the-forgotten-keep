@@ -1,8 +1,6 @@
 #include "game/systems/AnimationSystem.h"
 #include "game/systems/EntitySpawnSystem.h"
-#include "game/components/AnimationState.h"
-#include "game/components/Transform.h"
-#include "game/components/Player.h"
+#include "game/components/Components.h"
 
 #include "engine/ecs/Registry.h"
 #include "engine/rendering/AnimationData.h"
@@ -94,6 +92,7 @@ namespace
             animState.CurrentClip = 0;
 
             Registry.AddComponent(PlayerEntity, animState);
+            Registry.AddComponent(PlayerEntity, game::CombatState());
         }
     };
 }
@@ -104,11 +103,12 @@ int RunAnimationSystemTests()
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
         assert(anim.CurrentState == game::AnimState::Idle);
         assert(anim.CurrentClip == 0); // IdleClipIndex
         assert(!anim.IsMoving);
-        assert(!anim.IsAttacking);
+        assert(!combat.IsAttacking);
     }
 
     // Test: Transition to Run state when IsMoving
@@ -147,55 +147,58 @@ int RunAnimationSystemTests()
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsAttacking = true;
-        anim.ComboIndex = 0;
+        combat.IsAttacking = true;
+        combat.ComboIndex = 0;
         anim.CurrentClip = anim.Attack1ClipIndex;
         anim.CurrentTime = 0.0f;
 
         game::AnimationSystem::Update(setup.Registry, 0.016f);
 
         assert(anim.CurrentState == game::AnimState::Attack1);
-        assert(anim.IsAttacking);
+        assert(combat.IsAttacking);
     }
 
     // Test: Combo window opens at 50% of clip duration
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsAttacking = true;
-        anim.ComboIndex = 0;
+        combat.IsAttacking = true;
+        combat.ComboIndex = 0;
         anim.CurrentClip = anim.Attack1ClipIndex;
 
         // Set time just past 50% of clip duration (10.0)
         // The system adds deltaTime * ticksPerSecond each frame
         anim.CurrentTime = 5.1f;
-        anim.ComboWindowOpen = false;
+        combat.ComboWindowOpen = false;
 
         game::AnimationSystem::Update(setup.Registry, 0.016f);
 
-        assert(anim.ComboWindowOpen);
-        assert(anim.ComboTimer > 0.0f);
+        assert(combat.ComboWindowOpen);
+        assert(combat.ComboTimer > 0.0f);
     }
 
     // Test: Queued attack advances combo
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsAttacking = true;
-        anim.ComboIndex = 0;
+        combat.IsAttacking = true;
+        combat.ComboIndex = 0;
         anim.CurrentClip = anim.Attack1ClipIndex;
-        anim.AttackQueued = true;
+        combat.AttackQueued = true;
 
         // Set time past clip duration to trigger combo advance
         anim.CurrentTime = 10.1f;
 
         game::AnimationSystem::Update(setup.Registry, 0.016f);
 
-        assert(anim.ComboIndex == 1);
-        assert(!anim.AttackQueued);
+        assert(combat.ComboIndex == 1);
+        assert(!combat.AttackQueued);
         assert(anim.CurrentClip == anim.Attack2ClipIndex);
     }
 
@@ -203,16 +206,17 @@ int RunAnimationSystemTests()
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsAttacking = true;
-        anim.ComboIndex = 2;
+        combat.IsAttacking = true;
+        combat.ComboIndex = 2;
         anim.CurrentClip = anim.Attack3ClipIndex;
-        anim.AttackQueued = true;
+        combat.AttackQueued = true;
         anim.CurrentTime = 10.1f;
 
         game::AnimationSystem::Update(setup.Registry, 0.016f);
 
-        assert(anim.ComboIndex == 0);
+        assert(combat.ComboIndex == 0);
         assert(anim.CurrentClip == anim.Attack1ClipIndex);
     }
 
@@ -220,25 +224,27 @@ int RunAnimationSystemTests()
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsAttacking = true;
-        anim.ComboIndex = 0;
+        combat.IsAttacking = true;
+        combat.ComboIndex = 0;
         anim.CurrentClip = anim.Attack1ClipIndex;
-        anim.AttackQueued = false;
+        combat.AttackQueued = false;
         anim.CurrentTime = 10.1f;
 
         game::AnimationSystem::Update(setup.Registry, 0.016f);
 
-        assert(!anim.IsAttacking);
-        assert(anim.ComboIndex == 0);
+        assert(!combat.IsAttacking);
+        assert(combat.ComboIndex == 0);
     }
 
     // Test: Death state
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsDead = true;
+        combat.IsDead = true;
         anim.CurrentClip = anim.DeathClipIndex;
         anim.CurrentTime = 0.0f;
 
@@ -251,8 +257,9 @@ int RunAnimationSystemTests()
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsDead = true;
+        combat.IsDead = true;
         anim.CurrentClip = anim.DeathClipIndex;
         anim.CurrentTime = 13.0f; // past duration of 12.0
 
@@ -266,29 +273,31 @@ int RunAnimationSystemTests()
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsHit = true;
+        combat.IncomingHit = game::PendingHit{1, engine::Entity(0)};
         anim.CurrentClip = anim.HitClipIndex;
         anim.CurrentTime = 0.0f;
 
         game::AnimationSystem::Update(setup.Registry, 0.016f);
 
         assert(anim.CurrentState == game::AnimState::HitReact);
-        assert(anim.IsHit);
+        assert(combat.IncomingHit.has_value());
     }
 
     // Test: Hit react ends when animation completes
     {
         TestSetup setup;
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
+        auto& combat = setup.Registry.GetComponent<game::CombatState>(setup.PlayerEntity);
 
-        anim.IsHit = true;
+        combat.IncomingHit = game::PendingHit{1, engine::Entity(0)};
         anim.CurrentClip = anim.HitClipIndex;
         anim.CurrentTime = 8.1f; // past hit clip duration
 
         game::AnimationSystem::Update(setup.Registry, 0.016f);
 
-        assert(!anim.IsHit);
+        assert(!combat.IncomingHit.has_value());
     }
 
     // Test: FinalBoneMatrices populated after update

@@ -1,6 +1,4 @@
-//
-// Created by Joseph Driedger on 3/8/2026.
-//
+// Created by Adam Van Woerden
 
 #include "engine/rendering/Material.h"
 

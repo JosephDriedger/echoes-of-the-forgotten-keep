@@ -1,3 +1,5 @@
+// Created by Adam Van Woerden
+
 #include "engine/rendering/Animator.h"
 
 #define GLM_ENABLE_EXPERIMENTAL

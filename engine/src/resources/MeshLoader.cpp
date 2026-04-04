@@ -1,3 +1,5 @@
+// Created by Joey Driedger
+
 #include "engine/resources/MeshLoader.h"
 
 #include <assimp/Importer.hpp>
