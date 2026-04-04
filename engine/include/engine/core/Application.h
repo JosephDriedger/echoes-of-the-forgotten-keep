@@ -11,6 +11,8 @@
 #include <SDL3/SDL_events.h>
 #include <memory>
 
+#include "engine/resources/AudioManager.h"
+
 namespace engine
 {
     class Application;
@@ -53,8 +55,10 @@ namespace engine
         Input& GetInput();
         Window* GetWindow();
         const ApplicationSpecification& GetSpecification() const;
+        AudioManager& GetAudioManager() { return m_AudioManager; }
 
     private:
+        AudioManager m_AudioManager;
         bool Initialize();
         void Shutdown();
         void ProcessEvents(IApplicationListener& listener);

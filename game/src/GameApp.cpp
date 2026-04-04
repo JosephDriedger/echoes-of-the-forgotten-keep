@@ -64,6 +64,13 @@ namespace game
 
         std::cout << "[GameApp] MainMenuScene activated.\n";
         std::cout << "[EFK] Entering main loop.\n";
+
+        // load audio
+        application.GetAudioManager().loadAudio("theme", "asset/audio/1 Exploration LOOP TomMusic.ogg");
+        application.GetAudioManager().loadAudio("attack1", "asset/audio/Sword Attack 1.ogg");
+
+        //start music
+        application.GetAudioManager().playMusic("theme");
         return true;
     }
 

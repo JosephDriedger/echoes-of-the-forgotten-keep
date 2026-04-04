@@ -6,9 +6,11 @@
 
 #include <SDL3/SDL_keycode.h>
 
+#include "engine/resources/AudioEventQueue.h"
+
 namespace game
 {
-    void CombatInputSystem::Update(engine::Registry& registry, const engine::Input& input)
+    void CombatInputSystem::Update(engine::Registry& registry, const engine::Input& input, engine::AudioEventQueue& audioEventQueue)
     {
         if (!input.IsKeyPressed(SDLK_SPACE))
             return;
@@ -35,6 +37,7 @@ namespace game
             }
             else
             {
+                audioEventQueue.push(std::make_unique<engine::AudioEvent>("attack1"));
                 combat.IsAttacking = true;
                 combat.ComboIndex = 0;
                 anim.CurrentTime = 0.0f;

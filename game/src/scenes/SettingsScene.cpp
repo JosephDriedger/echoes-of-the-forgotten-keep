@@ -98,9 +98,23 @@ namespace game
         int mouseX = input.GetMouseX();
         int mouseY = input.GetMouseY();
 
-        m_MusicSlider.Update(input);
-        m_VFXSlider.Update(input);
+        bool musicChanged = m_MusicSlider.Update(input);
+        bool vfxChanged   = m_VFXSlider.Update(input);
 
+        auto& settings = GameSettings::Instance();
+
+        // You need access to AudioManager (singleton or from Application)
+
+
+        if (musicChanged)
+        {
+            application.GetAudioManager().SetMusicVolume(settings.MusicVolume);
+        }
+
+        if (vfxChanged)
+        {
+            application.GetAudioManager().SetSFXVolume(settings.VFXVolume);
+        }
         m_BackButton.UpdateHover(mouseX, mouseY);
 
         if (m_BackButton.IsClicked(input) || input.IsKeyPressed(SDLK_ESCAPE))

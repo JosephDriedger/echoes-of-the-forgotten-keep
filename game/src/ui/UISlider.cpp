@@ -39,9 +39,11 @@ namespace game
         m_TrackOffsetX = m_LabelWidth + 20.0f;
     }
 
-    void UISlider::Update(const engine::Input& input)
+    bool UISlider::Update(const engine::Input &input)
     {
-        if (!m_ValuePtr) return;
+        if (!m_ValuePtr) return false;
+
+        float oldValue = *m_ValuePtr;
 
         float mx = static_cast<float>(input.GetMouseX());
         float my = static_cast<float>(input.GetMouseY());
@@ -70,6 +72,8 @@ namespace game
             normalized = std::clamp(normalized, 0.0f, 1.0f);
             *m_ValuePtr = m_MinVal + normalized * (m_MaxVal - m_MinVal);
         }
+
+        return (*m_ValuePtr != oldValue);
     }
 
     void UISlider::Render(engine::TextRenderer& textRenderer,

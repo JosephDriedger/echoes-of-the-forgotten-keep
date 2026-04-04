@@ -30,6 +30,8 @@
 
 #include <memory>
 
+#include "engine/resources/AudioEventQueue.h"
+
 namespace engine
 {
     class Mesh;
@@ -49,6 +51,10 @@ namespace game
         void OnDestroy() override;
         void OnUpdate(engine::Application& application, engine::Timestep timestep) override;
         void OnRender(engine::Application& application) override;
+
+        engine::AudioEventQueue& getAudioEventQueue() {
+            return audioEventQueue;
+        }
 
     private:
         void LoadContent();
@@ -84,6 +90,7 @@ namespace game
         DamageSystem m_DamageSystem;
         UISystem m_UISystem;
         engine::TextRenderer m_DebugTextRenderer;
+        engine::AudioEventQueue audioEventQueue;
     };
 }
 
