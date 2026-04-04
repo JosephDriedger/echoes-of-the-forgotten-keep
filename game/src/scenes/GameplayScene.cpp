@@ -195,6 +195,7 @@ namespace game
         animState.Attack3ClipIndex = FindClipIndex("Melee_1H_Attack_Jump_Chop");
         animState.HitClipIndex = FindClipIndex("Hit_A");
         animState.DeathClipIndex = FindClipIndex("Death_A");
+        animState.AnimationSpeed = 2.0f;
 
         if (animState.IdleClipIndex >= 0)
             animState.CurrentClip = animState.IdleClipIndex;

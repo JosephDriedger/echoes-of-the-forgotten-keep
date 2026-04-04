@@ -173,7 +173,7 @@ namespace game
         // Knockback
         bool IsKnockedBack = false;
         float KnockbackTimer = 0.0f;
-        float KnockbackDuration = 0.3f;
+        float KnockbackDuration = 0.7f;
         float KnockbackVX = 0.0f;
         float KnockbackVZ = 0.0f;
         float KnockbackSpeed = 4.0f;
@@ -283,6 +283,8 @@ namespace game
         bool IsBlending = false;
 
         bool IsMoving = false;
+
+        float AnimationSpeed = 1.0f;
 
         AnimState CurrentState = AnimState::Idle;
         AnimState PreviousState = AnimState::Idle;

@@ -77,7 +77,7 @@ namespace game
             }
 
             engine::AnimationClip& clip = (*anim.Clips)[anim.CurrentClip];
-            anim.CurrentTime += deltaTime * clip.TicksPerSecond;
+            anim.CurrentTime += deltaTime * clip.TicksPerSecond * anim.AnimationSpeed;
 
             if (isDead)
             {
@@ -116,7 +116,7 @@ namespace game
 
                 if (anim.CurrentTime >= clip.Duration)
                 {
-                    if (combat.AttackQueued)
+                    if (combat.AttackQueued && anim.CurrentTime / clip.Duration >= 0.1f)
                     {
                         combat.ComboIndex++;
                         combat.AttackQueued = false;
