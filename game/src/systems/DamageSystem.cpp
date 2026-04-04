@@ -1,7 +1,7 @@
 // Created by Elijah Fabon
 
 #include "game/systems/DamageSystem.h"
-
+#include <cmath>
 #include "game/components/Components.h"
 
 namespace game
@@ -20,6 +20,46 @@ namespace game
             if (combat.IncomingHit.has_value())
             {
                 health.Current -= combat.IncomingHit->Damage;
+
+                if (registry.HasComponent<EnemyAI>(entity) &&
+                    registry.HasComponent<Transform>(entity))
+                {
+                    engine::Entity source = combat.IncomingHit->Source;
+
+                    if (registry.IsAlive(source) && registry.HasComponent<Transform>(source))
+                    {
+                        const auto& selfT   = registry.GetComponent<Transform>(entity);
+                        const auto& sourceT = registry.GetComponent<Transform>(source);
+
+                        float dx = selfT.X - sourceT.X;
+                        float dz = selfT.Z - sourceT.Z;
+                        float len = std::sqrt(dx * dx + dz * dz);
+                        if (len > 0.01f) { dx /= len; dz /= len; }
+
+                        auto& ai = registry.GetComponent<EnemyAI>(entity);
+                        ai.IsKnockedBack    = true;
+                        ai.KnockbackTimer   = ai.KnockbackDuration;
+                        ai.KnockbackVX      = dx;
+                        ai.KnockbackVZ      = dz;
+
+                        // Interrupt AI state
+                        ai.State      = AIState::Idle;
+                        ai.StateTimer = 0.0f;
+                    }
+
+                    // Trigger hit animation
+                    if (registry.HasComponent<AnimationState>(entity))
+                    {
+                        auto& anim = registry.GetComponent<AnimationState>(entity);
+                        if (anim.HitClipIndex >= 0)
+                        {
+                            anim.CurrentClip  = anim.HitClipIndex;
+                            anim.CurrentTime  = 0.0f;
+                            anim.CurrentState = AnimState::HitReact;
+                        }
+                    }
+                }
+
                 combat.IncomingHit.reset();
 
                 if (health.Current <= 0)

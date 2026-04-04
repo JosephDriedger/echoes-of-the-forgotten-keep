@@ -170,6 +170,14 @@ namespace game
         bool MovingToB = true;
         float IdleBeforePatrol = 2.0f;
 
+        // Knockback
+        bool IsKnockedBack = false;
+        float KnockbackTimer = 0.0f;
+        float KnockbackDuration = 0.3f;
+        float KnockbackVX = 0.0f;
+        float KnockbackVZ = 0.0f;
+        float KnockbackSpeed = 4.0f;
+
         explicit EnemyAI(const float moveSpeed = 1.0f)
             : MoveSpeed(moveSpeed)
         {
