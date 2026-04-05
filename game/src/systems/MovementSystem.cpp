@@ -27,7 +27,7 @@ namespace game
             if (registry.HasComponent<CombatState>(entity))
             {
                 const auto& combat = registry.GetComponent<CombatState>(entity);
-                if (combat.IsAttacking || combat.IncomingHit.has_value())
+                if (combat.IncomingHit.has_value() || combat.IsDead)
                 {
                     if (registry.HasComponent<AnimationState>(entity))
                         registry.GetComponent<AnimationState>(entity).IsMoving = false;
@@ -52,9 +52,12 @@ namespace game
             float length = std::sqrt(moveX * moveX + moveZ * moveZ);
             bool isMoving = length > 0.0001f;
 
+            bool isAttacking = registry.HasComponent<CombatState>(entity) &&
+                   registry.GetComponent<CombatState>(entity).IsAttacking;
+
             if (registry.HasComponent<AnimationState>(entity))
             {
-                registry.GetComponent<AnimationState>(entity).IsMoving = isMoving;
+                registry.GetComponent<AnimationState>(entity).IsMoving = isMoving && !isAttacking;
             }
 
             if (isMoving)
@@ -72,8 +75,10 @@ namespace game
                     std::sin(transform.RotationY),
                     std::cos(transform.RotationY));
 
-                transform.X += moveX * speed * deltaTime;
-                transform.Z += moveZ * speed * deltaTime;
+                if (!isAttacking) {
+                    transform.X += moveX * speed * deltaTime;
+                    transform.Z += moveZ * speed * deltaTime;
+                }
             }
         }
     }
