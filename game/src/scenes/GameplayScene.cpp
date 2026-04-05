@@ -259,7 +259,7 @@ namespace game
         }
 
         // ECS systems
-        CombatInputSystem::Update(m_Registry, input);
+        CombatInputSystem::Update(m_Registry, input, audioEventQueue);
         MovementSystem::Update(m_Registry, input, dt);
         m_CollisionSystem.Update(m_Registry);
         AnimationSystem::Update(m_Registry, dt);
@@ -274,6 +274,7 @@ namespace game
         DoorPuzzleSystem::Update(m_Registry, dt);
         LifetimeSystem::Update(m_Registry, dt);
         m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);
+        audioEventQueue.process(); // process all the audio events
     }
 
     void GameplayScene::OnRender(engine::Application& application)

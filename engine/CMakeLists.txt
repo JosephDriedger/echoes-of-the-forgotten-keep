@@ -21,6 +21,7 @@ target_include_directories(efk_engine
         ${EFK_SDL3_IMAGE_DIR}/include
         ${EFK_ASSIMP_DIR}/include
         ${EFK_ASSIMP_DIR}/build/include
+        ${EFK_SDL3_MIXER_DIR}/include
         ${CMAKE_SOURCE_DIR}/third_party
 )
 
@@ -29,6 +30,7 @@ target_link_directories(efk_engine
         ${EFK_SDL3_DIR}/lib
         ${EFK_SDL3_IMAGE_DIR}/lib
         ${EFK_ASSIMP_DIR}/build/lib
+        ${EFK_SDL3_MIXER_DIR}/lib
 )
 
 target_link_libraries(efk_engine
@@ -37,6 +39,7 @@ target_link_libraries(efk_engine
         SDL3
         SDL3_image
         assimp
+        SDL3_mixer
 )
 
 target_compile_features(efk_engine PUBLIC cxx_std_20)

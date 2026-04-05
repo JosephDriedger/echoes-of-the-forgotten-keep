@@ -5,13 +5,14 @@
 
 #include "engine/ecs/Registry.h"
 #include "engine/input/Input.h"
+#include "engine/resources/AudioEventQueue.h"
 
 namespace game
 {
     class CombatInputSystem
     {
     public:
-        static void Update(engine::Registry& registry, const engine::Input& input);
+        static void Update(engine::Registry& registry, const engine::Input& input, engine::AudioEventQueue& audioEventQueue);
     };
 }
 

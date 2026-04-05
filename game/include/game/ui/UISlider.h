@@ -42,7 +42,7 @@ namespace game
         void Layout(engine::TextRenderer& textRenderer, float labelScale = 0.6f);
 
         /// Handle mouse click and drag interaction. Writes to *valuePtr.
-        void Update(const engine::Input& input);
+        bool Update(const engine::Input& input);
 
         /// Draw the label, track, filled portion, handle, and percentage text.
         void Render(engine::TextRenderer& textRenderer,

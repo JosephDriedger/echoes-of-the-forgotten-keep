@@ -20,6 +20,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(EFK_SDL3_DIR "${CMAKE_SOURCE_DIR}/third_party/sdl3")
 set(EFK_SDL3_IMAGE_DIR "${CMAKE_SOURCE_DIR}/third_party/sdl3_image")
 set(EFK_ASSIMP_DIR "${CMAKE_SOURCE_DIR}/third_party/assimp-6.0.4")
+set(EFK_SDL3_MIXER_DIR "${CMAKE_SOURCE_DIR}/third_party/sdl3_mixer 3.1.0")
 
 if(NOT EXISTS "${EFK_SDL3_DIR}")
     message(FATAL_ERROR "SDL3 directory not found: ${EFK_SDL3_DIR}")
@@ -31,6 +32,10 @@ endif()
 
 if(NOT EXISTS "${EFK_ASSIMP_DIR}")
     message(FATAL_ERROR "Assimp directory not found: ${EFK_ASSIMP_DIR}")
+endif()
+
+if(NOT EXISTS "${EFK_SDL3_MIXER_DIR}")
+    message(FATAL_ERROR "SDL3_mixer directory not found: ${EFK_SDL3_MIXER_DIR}")
 endif()
 
 # --------------------------------------------------
@@ -82,6 +87,7 @@ set(EFK_RUNTIME_DLLS
         "${EFK_SDL3_DIR}/bin/SDL3.dll"
         "${EFK_SDL3_IMAGE_DIR}/bin/SDL3_image.dll"
         "${EFK_ASSIMP_DIR}/build/bin/libassimp-6.dll"
+        "${EFK_SDL3_MIXER_DIR}/bin/SDL3_mixer.dll"
 )
 
 add_custom_command(TARGET echoes_of_the_forgotten_keep POST_BUILD

@@ -13,6 +13,7 @@
 #include "engine/scene/Scene.h"
 #include "engine/rendering/TextRenderer.h"
 #include "engine/rendering/QuadRenderer.h"
+#include "engine/resources/AudioManager.h"
 
 #include "game/ui/UIButton.h"
 #include "game/ui/UISlider.h"
