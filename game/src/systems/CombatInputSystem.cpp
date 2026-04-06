@@ -25,12 +25,22 @@ namespace game
             auto& combat = registry.GetComponent<CombatState>(entity);
             auto& anim = registry.GetComponent<AnimationState>(entity);
 
+            // get the current clip for progress check
+            const engine::AnimationClip* currentClip = nullptr;
+            if (anim.Clips && anim.CurrentClip >= 0 &&
+                anim.CurrentClip < (int)anim.Clips->size())
+            {
+                currentClip = &(*anim.Clips)[anim.CurrentClip];
+            }
+
             if (combat.IsDead)
                 continue;
 
             if (combat.IsAttacking)
             {
-                if (combat.ComboTimer > 0.0f && combat.ComboTimer <= combat.ComboWindow)
+                // Past the interruptible point — accept the next attack
+                float progress = (currentClip && currentClip->Duration > 0.0f) ? anim.CurrentTime / currentClip->Duration : 0.0f;
+                if (progress >= 0.3f)
                 {
                     combat.AttackQueued = true;
                 }

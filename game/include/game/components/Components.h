@@ -170,6 +170,14 @@ namespace game
         bool MovingToB = true;
         float IdleBeforePatrol = 2.0f;
 
+        // Knockback
+        bool IsKnockedBack = false;
+        float KnockbackTimer = 0.0f;
+        float KnockbackDuration = 0.7f;
+        float KnockbackVX = 0.0f;
+        float KnockbackVZ = 0.0f;
+        float KnockbackSpeed = 4.0f;
+
         explicit EnemyAI(const float moveSpeed = 1.0f)
             : MoveSpeed(moveSpeed)
         {
@@ -276,6 +284,8 @@ namespace game
 
         bool IsMoving = false;
 
+        float AnimationSpeed = 1.0f;
+
         AnimState CurrentState = AnimState::Idle;
         AnimState PreviousState = AnimState::Idle;
 
@@ -303,6 +313,7 @@ namespace game
     {
         int Damage = 0;
         engine::Entity Source;
+        float KnockbackMultiplier = 1.0f;
     };
 
     struct CombatState
@@ -315,6 +326,7 @@ namespace game
         int ComboIndex = 0;
         float ComboWindow = 0.5f;
         float ComboTimer = 0.0f;
+        float FinalHitKnockbackMultiplier = 2.5f;
 
         std::optional<PendingHit> IncomingHit;
         bool IsDead = false;

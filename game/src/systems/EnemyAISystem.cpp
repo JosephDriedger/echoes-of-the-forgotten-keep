@@ -38,12 +38,31 @@ namespace game
             }
 
             auto& ai = registry.GetComponent<EnemyAI>(entity);
+            auto& et = registry.GetComponent<Transform>(entity);
 
             // Skip dead enemies (handled by DeathSystem)
             if (registry.HasComponent<Health>(entity) &&
                 registry.GetComponent<Health>(entity).Current <= 0)
             {
                 continue;
+            }
+
+            if (ai.IsKnockedBack)
+            {
+                ai.KnockbackTimer -= deltaTime;
+
+                float t = ai.KnockbackTimer / ai.KnockbackDuration; // 1→0
+                et.X += ai.KnockbackVX * ai.KnockbackSpeed * t * deltaTime;
+                et.Z += ai.KnockbackVZ * ai.KnockbackSpeed * t * deltaTime;
+
+                if (ai.KnockbackTimer <= 0.0f)
+                {
+                    ai.IsKnockedBack = false;
+                    ai.State         = AIState::Chase; // resume chasing after recovery
+                    ai.StateTimer    = 0.0f;
+                }
+
+                continue; // skip all AI state logic this frame
             }
 
             // Decrease lose-target cooldown

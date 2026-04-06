@@ -77,7 +77,7 @@ namespace game
             }
 
             engine::AnimationClip& clip = (*anim.Clips)[anim.CurrentClip];
-            anim.CurrentTime += deltaTime * clip.TicksPerSecond;
+            anim.CurrentTime += deltaTime * clip.TicksPerSecond * anim.AnimationSpeed;
 
             if (isDead)
             {
@@ -98,6 +98,31 @@ namespace game
                 if (combat.ComboTimer > 0.0f)
                     combat.ComboTimer -= deltaTime;
 
+                if (combat.AttackQueued)
+                {
+                    float progress = clip.Duration > 0.0f ? anim.CurrentTime / clip.Duration : 0.0f;
+                    bool isLastHit = (combat.ComboIndex == 2);
+
+                    if (!isLastHit && progress >= 0.3f)
+                    {
+                        combat.ComboIndex++;
+                        if (combat.ComboIndex > 2) combat.ComboIndex = 0;
+
+                        combat.AttackQueued    = false;
+                        combat.ComboWindowOpen = false;
+                        combat.ComboTimer      = 0.0f;
+                        anim.CurrentTime       = 0.0f;
+
+                        int nextClip = GetComboClipIndex(anim, combat.ComboIndex);
+                        if (nextClip >= 0)
+                            anim.CurrentClip = nextClip;
+
+                        // Update local so state machine below sees new index
+                        comboIndex = combat.ComboIndex;
+                    }
+                }
+
+                // --- Combo window ---
                 float comboStart = clip.Duration * 0.5f;
 
                 if (anim.CurrentTime >= comboStart &&
@@ -114,12 +139,14 @@ namespace game
                     combat.ComboWindowOpen = false;
                 }
 
+                // --- End of clip ---
                 if (anim.CurrentTime >= clip.Duration)
                 {
                     if (combat.AttackQueued)
                     {
                         combat.ComboIndex++;
                         combat.AttackQueued = false;
+                        combat.ComboWindowOpen = false;
                         anim.CurrentTime = 0.0f;
 
                         if (combat.ComboIndex > 2)
@@ -134,6 +161,8 @@ namespace game
                         combat.IsAttacking = false;
                         combat.ComboIndex = 0;
                         combat.ComboTimer = 0.0f;
+                        isAttacking = false;
+                        comboIndex = 0;
                     }
                 }
             }

@@ -28,11 +28,23 @@ namespace game
                 stillAttacking.insert(id);
 
                 // Spawn hitbox if not already active
-                if (m_ActiveHitboxes.find(id) == m_ActiveHitboxes.end() ||
-                    !registry.IsAlive(m_ActiveHitboxes[id]))
-                {
-                    engine::Entity hitbox = registry.CreateEntity();
+                bool hitboxExists = m_ActiveHitboxes.find(id) != m_ActiveHitboxes.end()
+                        && registry.IsAlive(m_ActiveHitboxes[id]);
 
+                bool newSwing = !hitboxExists
+                                || m_LastComboIndex[id] != combat.ComboIndex;
+
+                if (newSwing)
+                {
+                    // Destroy old hitbox if there is one
+                    if (hitboxExists)
+                    {
+                        registry.DestroyEntity(m_ActiveHitboxes[id]);
+                        m_ActiveHitboxes.erase(id);
+                    }
+
+                    // Spawn fresh hitbox
+                    engine::Entity hitbox = registry.CreateEntity();
                     Collider hitboxCollider(2.0f, 1.5f, 2.0f);
                     hitboxCollider.IsTrigger = true;
                     hitboxCollider.IsStatic = false;
@@ -41,6 +53,7 @@ namespace game
 
                     m_ActiveHitboxes[id] = hitbox;
                     m_HitThisSwing[id].clear();
+                    m_LastComboIndex[id] = combat.ComboIndex;
                 }
 
                 // Position hitbox in front of the attacker
@@ -87,7 +100,10 @@ namespace game
                         auto& targetCombat = registry.GetComponent<CombatState>(target);
                         if (!targetCombat.IsDead)
                         {
-                            targetCombat.IncomingHit = PendingHit{ combat.AttackDamage, entity };
+                            bool isLastHit = (combat.ComboIndex == 2);
+                            float knockbackMult = isLastHit ? combat.FinalHitKnockbackMultiplier : 1.0f;
+
+                            targetCombat.IncomingHit = PendingHit{ combat.AttackDamage, entity, knockbackMult };
                             m_HitThisSwing[id].insert(targetId);
                         }
                     }
@@ -104,6 +120,7 @@ namespace game
                     registry.DestroyEntity(it->second);
 
                 m_HitThisSwing.erase(it->first);
+                m_LastComboIndex.erase(it->first);
                 it = m_ActiveHitboxes.erase(it);
             }
             else

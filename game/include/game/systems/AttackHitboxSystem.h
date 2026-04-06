@@ -21,6 +21,7 @@ namespace game
         std::unordered_map<uint32_t, engine::Entity> m_ActiveHitboxes;
         // Entities already hit this swing, per attacker
         std::unordered_map<uint32_t, std::unordered_set<uint32_t>> m_HitThisSwing;
+        std::unordered_map<uint32_t, int> m_LastComboIndex;
     };
 }
 
