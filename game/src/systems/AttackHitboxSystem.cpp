@@ -100,7 +100,10 @@ namespace game
                         auto& targetCombat = registry.GetComponent<CombatState>(target);
                         if (!targetCombat.IsDead)
                         {
-                            targetCombat.IncomingHit = PendingHit{ combat.AttackDamage, entity };
+                            bool isLastHit = (combat.ComboIndex == 2);
+                            float knockbackMult = isLastHit ? combat.FinalHitKnockbackMultiplier : 1.0f;
+
+                            targetCombat.IncomingHit = PendingHit{ combat.AttackDamage, entity, knockbackMult };
                             m_HitThisSwing[id].insert(targetId);
                         }
                     }

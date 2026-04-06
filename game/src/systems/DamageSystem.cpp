@@ -36,11 +36,14 @@ namespace game
                         float len = std::sqrt(dx * dx + dz * dz);
                         if (len > 0.01f) { dx /= len; dz /= len; }
 
+                        float knockbackMult = combat.IncomingHit->KnockbackMultiplier;
+
                         auto& ai = registry.GetComponent<EnemyAI>(entity);
                         ai.IsKnockedBack    = true;
                         ai.KnockbackTimer   = ai.KnockbackDuration;
                         ai.KnockbackVX      = dx;
                         ai.KnockbackVZ      = dz;
+                        ai.KnockbackSpeed   = ai.KnockbackSpeed * knockbackMult;
 
                         // Interrupt AI state
                         ai.State      = AIState::Idle;

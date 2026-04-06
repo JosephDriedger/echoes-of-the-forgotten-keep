@@ -101,7 +101,9 @@ namespace game
                 if (combat.AttackQueued)
                 {
                     float progress = clip.Duration > 0.0f ? anim.CurrentTime / clip.Duration : 0.0f;
-                    if (progress >= 0.3f)
+                    bool isLastHit = (combat.ComboIndex == 2);
+
+                    if (!isLastHit && progress >= 0.3f)
                     {
                         combat.ComboIndex++;
                         if (combat.ComboIndex > 2) combat.ComboIndex = 0;

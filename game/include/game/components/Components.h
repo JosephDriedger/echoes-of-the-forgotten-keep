@@ -313,6 +313,7 @@ namespace game
     {
         int Damage = 0;
         engine::Entity Source;
+        float KnockbackMultiplier = 1.0f;
     };
 
     struct CombatState
@@ -325,6 +326,7 @@ namespace game
         int ComboIndex = 0;
         float ComboWindow = 0.5f;
         float ComboTimer = 0.0f;
+        float FinalHitKnockbackMultiplier = 2.5f;
 
         std::optional<PendingHit> IncomingHit;
         bool IsDead = false;
