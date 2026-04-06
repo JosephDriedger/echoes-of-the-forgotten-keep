@@ -328,6 +328,11 @@ namespace game
         float ComboTimer = 0.0f;
         float FinalHitKnockbackMultiplier = 2.5f;
 
+        bool IsLunging = false;
+        float LungeDuration = 0.7f;
+        float LungeTimer = 0.0f;
+        float LungeSpeed = 7.0f;
+
         std::optional<PendingHit> IncomingHit;
         bool IsDead = false;
         float HitTimer = 0.0f;
