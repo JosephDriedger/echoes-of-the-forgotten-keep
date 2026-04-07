@@ -6,7 +6,7 @@
 
 namespace game
 {
-    void DeathSystem::Update(engine::Registry& registry)
+    void DeathSystem::Update(engine::Registry& registry, engine::AudioEventQueue &audioEventQueue)
     {
         for (const engine::Entity entity : registry.GetActiveEntities())
         {
@@ -29,6 +29,13 @@ namespace game
             if (registry.HasComponent<AnimationState>(entity))
             {
                 auto& anim = registry.GetComponent<AnimationState>(entity);
+                if (registry.HasComponent<Collider>(entity)) {
+                    auto& col = registry.GetComponent<Collider>(entity);
+                    if (col.IsTrigger == false) {
+                        audioEventQueue.push(std::make_unique<engine::AudioEvent>("death"));
+                    }
+                    col.IsTrigger = true;
+                }
                 anim.IsMoving = false;
             }
 
