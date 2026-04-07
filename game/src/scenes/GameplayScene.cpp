@@ -272,7 +272,6 @@ namespace game
         m_CombatSystem.Update(m_Registry, dt);
         SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt);
-        DoorPuzzleSystem::Update(m_Registry, dt);
         LifetimeSystem::Update(m_Registry, dt);
         m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);
         audioEventQueue.process(); // process all the audio events

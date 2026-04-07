@@ -1,12 +1,12 @@
 // Created by Elijah Fabon
 
-#include "game/systems/CombatSystem.h"
+#include "game/systems/HitTimerSystem.h"
 
 #include "game/components/Components.h"
 
 namespace game
 {
-    void CombatSystem::Update(engine::Registry& registry, float deltaTime)
+    void HitTimerSystem::Update(engine::Registry& registry, float deltaTime)
     {
         for (const engine::Entity entity : registry.GetActiveEntities())
         {

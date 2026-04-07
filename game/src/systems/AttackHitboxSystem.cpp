@@ -103,6 +103,7 @@ namespace game
                             bool isLastHit = (combat.ComboIndex == 2);
                             float knockbackMult = isLastHit ? combat.FinalHitKnockbackMultiplier : 1.0f;
 
+                            if (targetCombat.HitTimer > 0.0f) continue; // still invincible
                             targetCombat.IncomingHit = PendingHit{ combat.AttackDamage, entity, knockbackMult };
                             m_HitThisSwing[id].insert(targetId);
                         }

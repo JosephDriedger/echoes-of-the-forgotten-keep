@@ -237,9 +237,8 @@ GameplayScene::OnUpdate(dt)
       ├── 10. CombatSystem          — process attack timing, combo windows
       ├── 11. SwitchTriggerSystem   — detect player on switches
       ├── 12. DoorSystem            — proximity-based door opening
-      ├── 13. DoorPuzzleSystem      — switch-triggered door opening
-      ├── 14. LifetimeSystem        — decrement timers, destroy expired entities
-      └── 15. CameraFollowSystem    — smooth camera follow + zoom
+      ├── 13. LifetimeSystem        — decrement timers, destroy expired entities
+      └── 14. CameraFollowSystem    — smooth camera follow + zoom
 ```
 
 ### Why This Order Matters
@@ -253,8 +252,8 @@ GameplayScene::OnUpdate(dt)
 - **Death after damage** (8): Entities killed this frame are marked before AI runs
 - **AI after death** (9): Dead entities are skipped by the AI state machine
 - **Combat after AI** (10): Both player and enemy attack timing is resolved together
-- **World systems** (11-14): Switches, doors, and cleanup run after all combat
-- **Camera last** (15): Camera captures the final state of everything
+- **World systems** (11-13): Switches, doors, and cleanup run after all combat
+- **Camera last** (14): Camera captures the final state of everything
 
 ## Gameplay Render (GameplayScene::OnRender)
 

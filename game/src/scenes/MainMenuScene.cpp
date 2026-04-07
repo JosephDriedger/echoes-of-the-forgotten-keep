@@ -211,7 +211,7 @@ namespace game
             std::vector<std::string> credits = {
                 "Credits",
                 "",
-                "Joey Driedger - Engine Lead",
+                "Joey Driedger - Architecture Lead",
                 "Adam Van Woerden - Rendering Lead",
                 "Elijah Fabon - Game Design Lead",
             };

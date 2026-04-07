@@ -20,9 +20,8 @@
 #include "game/systems/CameraFollowSystem.h"
 #include "game/systems/DungeonSpawnSystem.h"
 #include "game/systems/EnemyAISystem.h"
-#include "game/systems/CombatSystem.h"
+#include "game/systems/HitTimerSystem.h"
 #include "game/systems/DamageSystem.h"
-#include "game/systems/DoorPuzzleSystem.h"
 #include "game/systems/LifetimeSystem.h"
 #include "game/systems/SwitchTriggerSystem.h"
 #include "game/systems/UISystem.h"
@@ -86,7 +85,7 @@ namespace game
         std::unique_ptr<DungeonSpawnSystem> m_DungeonSpawnSystem;
 
         EnemyAISystem m_EnemyAISystem;
-        CombatSystem m_CombatSystem;
+        HitTimerSystem m_CombatSystem;
         DamageSystem m_DamageSystem;
         UISystem m_UISystem;
         engine::TextRenderer m_DebugTextRenderer;
