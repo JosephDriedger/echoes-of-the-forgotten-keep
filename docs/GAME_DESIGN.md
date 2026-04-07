@@ -38,7 +38,7 @@ Enemies use a state machine with four states:
 - **Idle** - Stationary, waiting for the player to enter vision range
 - **Patrol** - Walks between two waypoints (if configured)
 - **Chase** - Moves toward the player when within vision range
-- **Attack** - Attacks the player when within attack range, with cooldown between strikes
+- **Attack** - Attacks the player when within attack range, with cooldown between strikes. Enemies attack immediately upon first entering attack range without waiting for the cooldown timer.
 
 ## Dungeon Generation
 
@@ -48,6 +48,7 @@ Dungeons are procedurally generated using the `DungeonSpawnSystem`:
 - Each room contains walls, floors, and decorative elements from the prefab library
 - Doors connect rooms and open automatically when the player approaches
 - Enemies are spawned within rooms
+- Floor switches can be linked to doors via trigger IDs for puzzle mechanics
 
 ### Prefab Types
 
@@ -61,6 +62,12 @@ Dungeons are procedurally generated using the `DungeonSpawnSystem`:
 | Door | `door.gltf` | Openable doors |
 | FloorLarge | `floor_tile_large.gltf` | Main floor tiles |
 | FloorSmall | `floor_tile_small.gltf` | Detail floor tiles |
+| FloorLarge (variant) | `floor_tile_big_grate.gltf` | Grate-style large floor tile |
+| Wall (variant) | `wall_broken.gltf` | Broken/damaged wall section |
+| Wall (variant) | `wall_pillar.gltf` | Wall with pillar detail |
+| Wall (variant) | `wall_shelves.gltf` | Wall with shelving |
+| Wall (variant) | `wall_scaffold.gltf` | Wall with scaffolding |
+| Wall (variant) | `wall_window_closed.gltf` | Wall with closed window |
 | Stairs | `stairs_walled.gltf` | Level transitions |
 | WallCornerSmall | `wall_corner_small.gltf` | Small corner fills |
 
@@ -94,6 +101,17 @@ The game uses two reusable UI widget classes:
 
 - **UIButton** - Text button with hover highlighting (gold on hover, white default). Supports centering and hit-testing.
 - **UISlider** - Labeled slider with track, fill, and handle. Binds directly to a `float*` in GameSettings for immediate value updates.
+
+## Audio / Sound Effects
+
+The game uses an event-driven audio system where gameplay systems queue sound effects via an `AudioEventQueue`, which is processed at the end of each frame. This decouples audio playback from game logic.
+
+| Sound | Trigger | Asset |
+|-------|---------|-------|
+| Background Music | Game start (loops) | `1 Exploration LOOP TomMusic.ogg` |
+| Sword Attack | Each hit in the combo chain | `Sword Attack 1.ogg` |
+| Enemy Death | Enemy health reaches zero | `Goblin_00.mp3` |
+| Door Open | Player approaches a proximity door | `Door Open 1.ogg` |
 
 ## Controls
 

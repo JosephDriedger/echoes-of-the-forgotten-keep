@@ -112,6 +112,8 @@ Three manager classes handle asset caching:
 - **MeshManager** - Loads and caches 3D models (GLB/GLTF via Assimp), extracts skeleton data
 - **AnimationLoader** - Loads animation clips from GLB files, appends to shared clip vectors
 - **AssetManager** - Aggregates ShaderManager and TextureManager for convenient access
+- **AudioManager** - Loads and plays audio assets (music and sound effects) via SDL3_mixer. Provides `loadAudio()`, `playMusic()`, and `playSfx()` static methods.
+- **AudioEventQueue** - A frame-buffered queue of `AudioEvent` objects. Gameplay systems push sound effect requests into the queue during the update phase, and all queued events are processed (played) at the end of the frame. This decouples audio playback from game logic and ensures sounds are played in a consistent order.
 
 All managers use path-based deduplication to avoid loading the same asset twice.
 
@@ -122,7 +124,7 @@ All managers use path-based deduplication to avoid loading the same asset twice.
 - **Compiler**: MinGW (GCC)
 - **Output**: `libengine.a` + `libgame.a` + `echoes_of_the_forgotten_keep.exe`
 - **Assets**: Copied post-build to the output directory
-- **DLLs**: SDL3.dll, SDL3_image.dll, libassimp-6.dll copied alongside the executable
+- **DLLs**: SDL3.dll, SDL3_image.dll, SDL3_mixer.dll, libassimp-6.dll copied alongside the executable
 
 ### Third-Party Dependencies
 
@@ -134,6 +136,7 @@ All managers use path-based deduplication to avoid loading the same asset twice.
 | GLAD          | OpenGL function loader                     |
 | GLM           | Math library (vectors, matrices, quaternions) |
 | Assimp 6.0.4  | 3D model and animation loading (GLB/GLTF) |
+| SDL3_mixer    | Audio mixing and playback (music + SFX)    |
 | stb_truetype  | TrueType font rasterization                |
 
 SDL3 and GLM are fetched automatically via CMake `FetchContent` if not found on the system.
@@ -167,7 +170,7 @@ echoes-of-the-forgotten-keep/
 │   ├── equipment/              Weapons and shields
 │   ├── fonts/                  TrueType font files
 │   ├── shaders/                GLSL shader source files
-│   ├── sounds/                 Audio files
+│   ├── audio/                  Audio files (music, SFX)
 │   └── ui/                     UI element assets
 ├── third_party/                External libraries (Assimp, GLAD, stb)
 ├── tests/                      Unit tests

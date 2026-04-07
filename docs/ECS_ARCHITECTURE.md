@@ -205,7 +205,7 @@ All game systems are in `game/include/game/systems/`. Systems come in two styles
 | **MovementSystem** | Static | Reads keyboard input (WASD), moves entities with `Player` + `Transform` components, updates facing direction |
 | **CollisionSystem** | Instance | AABB collision detection between all `Collider` + `Transform` entities, resolves overlaps for non-static entities |
 | **CameraFollowSystem** | Instance | Smoothly follows the player entity, handles mouse wheel zoom (range 8-60) |
-| **AnimationSystem** | Static | Advances animation time, evaluates bone keyframes, writes `FinalBoneMatrices` |
+| **AnimationSystem** | Static | Advances animation time, evaluates bone keyframes, writes `FinalBoneMatrices`, fires attack sound effects via `AudioEventQueue` |
 | **BoneAttachmentSystem** | Static | Updates `Transform` of entities with `BoneAttachment` to follow parent bones (e.g., sword in hand) |
 
 ### Combat Systems
@@ -216,7 +216,7 @@ All game systems are in `game/include/game/systems/`. Systems come in two styles
 | **CombatSystem** | Instance | Processes attack timing, combo windows, animation state transitions |
 | **AttackHitboxSystem** | Instance | Tracks active attack hitboxes, prevents multi-hit per swing |
 | **DamageSystem** | Instance | Processes `IncomingHit` on `CombatState`, applies damage to `Health` |
-| **DeathSystem** | Static | Marks dead entities (Health <= 0) with `IsDead`, clears movement, adds corpse `Lifetime` |
+| **DeathSystem** | Static | Marks dead entities (Health <= 0) with `IsDead`, converts their collider to a trigger (so corpses don't block movement), plays death sound via `AudioEventQueue`, clears movement, adds corpse `Lifetime` |
 
 ### AI Systems
 
@@ -230,8 +230,9 @@ All game systems are in `game/include/game/systems/`. Systems come in two styles
 |--------|-------|---------|
 | **DungeonSpawnSystem** | Instance | Procedurally generates dungeon rooms with walls, floors, doors, enemies |
 | **EntitySpawnSystem** | Static | Registers component types and provides `SpawnPlayer()` prefab function |
-| **DoorSystem** | Static | Proximity-based door opening (detects player, sets swing direction) |
-| **DoorAnimationHelper** | Static | Shared door swing animation and collider update (used by DoorSystem) |
+| **DoorSystem** | Static | Proximity-based door opening (detects player, sets swing direction), plays door sound via `AudioEventQueue` |
+| **DoorPuzzleSystem** | Static | Opens/closes doors linked to floor switches via `TriggerId` matching |
+| **DoorAnimationHelper** | Static | Shared door swing animation and collider update (used by DoorSystem and DoorPuzzleSystem) |
 | **SwitchTriggerSystem** | Static | Detects `Player` collisions with `Switch` entities, sets `Pressed = true` |
 | **RoomTransitionSystem** | Defined | Manages loading/unloading of room contents |
 | **LifetimeSystem** | Static | Decrements `Lifetime::Duration`, destroys entities when expired |
@@ -262,8 +263,9 @@ Systems are executed in a specific order each frame in `GameplayScene::OnUpdate(
 10. CombatSystem        (process attacks)
 11. SwitchTriggerSystem (check switches)
 12. DoorSystem          (proximity doors)
-13. LifetimeSystem      (destroy expired entities)
-14. CameraFollowSystem  (update camera)
+13. DoorPuzzleSystem    (switch-linked doors)
+14. LifetimeSystem      (destroy expired entities)
+15. CameraFollowSystem  (update camera)
 ```
 
 This ordering ensures that input is processed first, physics resolves before rendering, and the camera captures the final state.

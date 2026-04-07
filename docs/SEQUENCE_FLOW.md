@@ -232,13 +232,15 @@ GameplayScene::OnUpdate(dt)
       ├──  5. BoneAttachmentSystem  — position sword/shield on bones
       ├──  6. AttackHitboxSystem    — track active hitboxes, prevent multi-hit
       ├──  7. DamageSystem          — apply IncomingHit to Health
-      ├──  8. DeathSystem           — mark dead entities, add corpse Lifetime
+      ├──  8. DeathSystem           — mark dead, convert collider to trigger, play death SFX
       ├──  9. EnemyAISystem         — Idle/Patrol/Chase/Attack state machine
       ├── 10. CombatSystem          — process attack timing, combo windows
       ├── 11. SwitchTriggerSystem   — detect player on switches
-      ├── 12. DoorSystem            — proximity-based door opening
-      ├── 13. LifetimeSystem        — decrement timers, destroy expired entities
-      └── 14. CameraFollowSystem    — smooth camera follow + zoom
+      ├── 12. DoorSystem            — proximity-based door opening, play door SFX
+      ├── 13. DoorPuzzleSystem      — open/close doors linked to switches via TriggerId
+      ├── 14. LifetimeSystem        — decrement timers, destroy expired entities
+      ├── 15. CameraFollowSystem    — smooth camera follow + zoom
+      └──     AudioEventQueue::process() — play all queued sound effects
 ```
 
 ### Why This Order Matters
@@ -252,8 +254,9 @@ GameplayScene::OnUpdate(dt)
 - **Death after damage** (8): Entities killed this frame are marked before AI runs
 - **AI after death** (9): Dead entities are skipped by the AI state machine
 - **Combat after AI** (10): Both player and enemy attack timing is resolved together
-- **World systems** (11-13): Switches, doors, and cleanup run after all combat
-- **Camera last** (14): Camera captures the final state of everything
+- **World systems** (11-14): Switches, proximity doors, puzzle doors, and cleanup run after all combat
+- **Camera last** (15): Camera captures the final state of everything
+- **Audio last**: All sound effects queued during the frame are played together at the end, ensuring consistent audio timing
 
 ## Gameplay Render (GameplayScene::OnRender)
 
