@@ -255,7 +255,7 @@ namespace game
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
-        m_DungeonSpawnSystem->SpawnDungeon(15, 42, 0.5f);
+        m_DungeonSpawnSystem->SpawnDungeon(10, 42, 0.5f);
     }
 
     void GameplayScene::OnUpdate(engine::Application& application, const engine::Timestep timestep)

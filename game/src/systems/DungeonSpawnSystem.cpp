@@ -194,21 +194,21 @@ namespace game
 
             int rot = static_cast<int>(normRot + 0.5f) % 360;
             if (rot < 45 || rot >= 315) {
-                dx1 = -halfArm; dz1 = 0;
-                dx2 = 0;        dz2 = halfArm;
+                dx1 = -halfArm+1; dz1 = 0;
+                dx2 = 0;        dz2 = halfArm-1;
             } else if (rot < 135) {
-                dx1 = halfArm;  dz1 = 0;
-                dx2 = 0;        dz2 = halfArm;
+                dx1 = halfArm-1;  dz1 = 0;
+                dx2 = 0;        dz2 = halfArm-1;
             } else if (rot < 225) {
-                dx1 = halfArm;  dz1 = 0;
-                dx2 = 0;        dz2 = -halfArm;
+                dx1 = halfArm-1;  dz1 = 0;
+                dx2 = 0;        dz2 = -halfArm+1;
             } else {
-                dx1 = -halfArm; dz1 = 0;
-                dx2 = 0;        dz2 = -halfArm;
+                dx1 = -halfArm+1; dz1 = 0;
+                dx2 = 0;        dz2 = -halfArm+1;
             }
 
-            SpawnColliderEntity(position + glm::vec3(dx1, 0, 0), armLength, wallH, armThick);
-            SpawnColliderEntity(position + glm::vec3(0, 0, dz2), armThick, wallH, armLength);
+            SpawnColliderEntity(position + glm::vec3(dx1, 0, 0), halfArm, wallH, armThick);
+            SpawnColliderEntity(position + glm::vec3(0, 0, dz2), armThick, wallH, halfArm);
         }
         else if (type == engine::PrefabType::WallTsplit)
         {
