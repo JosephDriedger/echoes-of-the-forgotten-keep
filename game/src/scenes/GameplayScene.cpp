@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+#include "game/systems/DoorPuzzleSystem.h"
+
 namespace game
 {
     GameplayScene::GameplayScene()
