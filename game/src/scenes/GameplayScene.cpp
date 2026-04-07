@@ -148,6 +148,18 @@ namespace game
             {"asset/dungeon/stairs_walled.gltf", dungeonTexPath});
         engine::PrefabManager::Register(engine::PrefabType::WallCornerSmall,
             {"asset/dungeon/wall_corner_small.gltf", dungeonTexPath});
+        engine::PrefabManager::Register(engine::PrefabType::FloorLarge,
+            {"asset/dungeon/floor_tile_big_grate.gltf", dungeonTexPath, 0.05});
+        engine::PrefabManager::Register(engine::PrefabType::Wall,
+            {"asset/dungeon/wall_broken.gltf", dungeonTexPath, 0.01});
+        engine::PrefabManager::Register(engine::PrefabType::Wall,
+            {"asset/dungeon/wall_pillar.gltf", dungeonTexPath, 0.1});
+        engine::PrefabManager::Register(engine::PrefabType::Wall,
+            {"asset/dungeon/wall_shelves.gltf", dungeonTexPath, 0.01});
+        engine::PrefabManager::Register(engine::PrefabType::Wall,
+            {"asset/dungeon/wall_scaffold.gltf", dungeonTexPath, 0.1});
+        engine::PrefabManager::Register(engine::PrefabType::Wall,
+            {"asset/dungeon/wall_window_closed.gltf", dungeonTexPath, 0.1});
     }
 
     int GameplayScene::FindClipIndex(const std::string& name) const
@@ -263,15 +275,15 @@ namespace game
         CombatInputSystem::Update(m_Registry, input, audioEventQueue);
         MovementSystem::Update(m_Registry, input, dt);
         m_CollisionSystem.Update(m_Registry);
-        AnimationSystem::Update(m_Registry, dt);
+        AnimationSystem::Update(m_Registry, dt, audioEventQueue);
         BoneAttachmentSystem::Update(m_Registry);
         m_AttackHitboxSystem.Update(m_Registry);
         m_DamageSystem.Update(m_Registry);
-        DeathSystem::Update(m_Registry);
+        DeathSystem::Update(m_Registry, audioEventQueue);
         m_EnemyAISystem.Update(m_Registry, dt);
         m_CombatSystem.Update(m_Registry, dt);
         SwitchTriggerSystem::Update(m_Registry);
-        DoorSystem::Update(m_Registry, dt);
+        DoorSystem::Update(m_Registry, dt, audioEventQueue);
         DoorPuzzleSystem::Update(m_Registry, dt);
         LifetimeSystem::Update(m_Registry, dt);
         m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);

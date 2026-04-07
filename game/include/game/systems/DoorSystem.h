@@ -4,13 +4,14 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_DOORSYSTEM_H
 
 #include "engine/ecs/Registry.h"
+#include "engine/resources/AudioEventQueue.h"
 
 namespace game
 {
     class DoorSystem
     {
     public:
-        static void Update(engine::Registry& registry, float deltaTime);
+        static void Update(engine::Registry& registry, float deltaTime, engine::AudioEventQueue &audioEventQueue);
     };
 }
 

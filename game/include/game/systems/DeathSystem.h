@@ -4,6 +4,7 @@
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_DEATHSYSTEM_H
 
 #include "engine/ecs/Registry.h"
+#include "engine/resources/AudioEventQueue.h"
 
 namespace game
 {
@@ -13,7 +14,7 @@ namespace game
     class DeathSystem
     {
     public:
-        static void Update(engine::Registry& registry);
+        static void Update(engine::Registry& registry, engine::AudioEventQueue &audioEventQueue);
     };
 }
 

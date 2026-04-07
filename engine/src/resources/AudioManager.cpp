@@ -51,7 +51,10 @@ namespace engine {
             return;
         }
 
-        MIX_PlayTrack(musicTrack, -1); // means loop endless
+        SDL_PropertiesID prop = SDL_CreateProperties();
+        SDL_SetNumberProperty(prop, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
+
+        MIX_PlayTrack(musicTrack, prop);
         std::cout << "Playing Music: " << name << std::endl;
     }
 
