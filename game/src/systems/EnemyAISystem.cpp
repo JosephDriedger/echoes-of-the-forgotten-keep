@@ -185,6 +185,7 @@ namespace game
         {
             ai.State = AIState::Attack;
             ai.StateTimer = 0.0f;
+            ai.AttackTimer = ai.AttackCooldown; // fire immediately on first frame
             return;
         }
 
