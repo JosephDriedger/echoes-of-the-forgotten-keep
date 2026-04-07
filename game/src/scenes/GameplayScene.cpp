@@ -159,7 +159,7 @@ namespace game
         engine::PrefabManager::Register(engine::PrefabType::Wall,
             {"asset/dungeon/wall_pillar.gltf", dungeonTexPath, 0.1});
         engine::PrefabManager::Register(engine::PrefabType::Wall,
-            {"asset/dungeon/wall_shelves.gltf", dungeonTexPath, 0.01});
+            {"asset/dungeon/wall_shelves.gltf", dungeonTexPath, 0.1});
         engine::PrefabManager::Register(engine::PrefabType::Wall,
             {"asset/dungeon/wall_scaffold.gltf", dungeonTexPath, 0.1});
         engine::PrefabManager::Register(engine::PrefabType::Wall,
