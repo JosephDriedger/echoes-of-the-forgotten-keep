@@ -152,6 +152,8 @@ namespace game
             {"asset/dungeon/wall_corner_small.gltf", dungeonTexPath});
         engine::PrefabManager::Register(engine::PrefabType::FloorLarge,
             {"asset/dungeon/floor_tile_big_grate.gltf", dungeonTexPath, 0.05});
+        engine::PrefabManager::Register(engine::PrefabType::FloorLarge,
+            {"asset/dungeon/floor_tile_large_rocks.gltf", dungeonTexPath, 0.1});
         engine::PrefabManager::Register(engine::PrefabType::Wall,
             {"asset/dungeon/wall_broken.gltf", dungeonTexPath, 0.01});
         engine::PrefabManager::Register(engine::PrefabType::Wall,
