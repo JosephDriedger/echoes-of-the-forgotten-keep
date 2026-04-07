@@ -152,6 +152,8 @@ namespace game
             {"asset/dungeon/wall_corner_small.gltf", dungeonTexPath});
         engine::PrefabManager::Register(engine::PrefabType::FloorLarge,
             {"asset/dungeon/floor_tile_big_grate.gltf", dungeonTexPath, 0.05});
+        engine::PrefabManager::Register(engine::PrefabType::FloorLarge,
+            {"asset/dungeon/floor_tile_large_rocks.gltf", dungeonTexPath, 0.1});
         engine::PrefabManager::Register(engine::PrefabType::Wall,
             {"asset/dungeon/wall_broken.gltf", dungeonTexPath, 0.01});
         engine::PrefabManager::Register(engine::PrefabType::Wall,
@@ -255,7 +257,7 @@ namespace game
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
-        m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
+        m_DungeonSpawnSystem->SpawnDungeon(10, 42, 0.5f);
     }
 
     void GameplayScene::OnUpdate(engine::Application& application, const engine::Timestep timestep)

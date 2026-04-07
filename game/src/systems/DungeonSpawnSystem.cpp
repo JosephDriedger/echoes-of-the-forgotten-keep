@@ -90,6 +90,14 @@ namespace game
             SpawnWallColliders(type, position, rotY);
         }
 
+        if (type == engine::PrefabType::Stairs)
+        {
+            Collider col(5.0f, 4.5f, 4.0f);
+            col.IsStatic = true;
+            col.OffsetZ += 2;
+            m_Registry.AddComponent(e, col);
+        }
+
         if (type == engine::PrefabType::WallDoorway)
         {
             SpawnDoorwayPillarColliders(position, rotY);
@@ -194,21 +202,21 @@ namespace game
 
             int rot = static_cast<int>(normRot + 0.5f) % 360;
             if (rot < 45 || rot >= 315) {
-                dx1 = -halfArm; dz1 = 0;
-                dx2 = 0;        dz2 = halfArm;
+                dx1 = -halfArm+1; dz1 = 0;
+                dx2 = 0;        dz2 = halfArm-1;
             } else if (rot < 135) {
-                dx1 = halfArm;  dz1 = 0;
-                dx2 = 0;        dz2 = halfArm;
+                dx1 = halfArm-1;  dz1 = 0;
+                dx2 = 0;        dz2 = halfArm-1;
             } else if (rot < 225) {
-                dx1 = halfArm;  dz1 = 0;
-                dx2 = 0;        dz2 = -halfArm;
+                dx1 = halfArm-1;  dz1 = 0;
+                dx2 = 0;        dz2 = -halfArm+1;
             } else {
-                dx1 = -halfArm; dz1 = 0;
-                dx2 = 0;        dz2 = -halfArm;
+                dx1 = -halfArm+1; dz1 = 0;
+                dx2 = 0;        dz2 = -halfArm+1;
             }
 
-            SpawnColliderEntity(position + glm::vec3(dx1, 0, 0), armLength, wallH, armThick);
-            SpawnColliderEntity(position + glm::vec3(0, 0, dz2), armThick, wallH, armLength);
+            SpawnColliderEntity(position + glm::vec3(dx1, 0, 0), halfArm, wallH, armThick);
+            SpawnColliderEntity(position + glm::vec3(0, 0, dz2), armThick, wallH, halfArm);
         }
         else if (type == engine::PrefabType::WallTsplit)
         {
@@ -227,13 +235,13 @@ namespace game
                 SpawnColliderEntity(position, armThick, wallH, armLength);
 
             if (hasE && !hasW)
-                SpawnColliderEntity(position + glm::vec3(halfArm, 0, 0), armLength, wallH, armThick);
+                SpawnColliderEntity(position + glm::vec3(halfArm-1, 0, 0), halfArm, wallH, armThick);
             if (hasW && !hasE)
-                SpawnColliderEntity(position + glm::vec3(-halfArm, 0, 0), armLength, wallH, armThick);
+                SpawnColliderEntity(position + glm::vec3(-halfArm+1, 0, 0), halfArm, wallH, armThick);
             if (hasS && !hasN)
-                SpawnColliderEntity(position + glm::vec3(0, 0, halfArm), armThick, wallH, armLength);
+                SpawnColliderEntity(position + glm::vec3(0, 0, halfArm-1), armThick, wallH, halfArm);
             if (hasN && !hasS)
-                SpawnColliderEntity(position + glm::vec3(0, 0, -halfArm), armThick, wallH, armLength);
+                SpawnColliderEntity(position + glm::vec3(0, 0, -halfArm+1), armThick, wallH, halfArm);
         }
         else if (type == engine::PrefabType::WallCrossing)
         {
@@ -319,7 +327,7 @@ namespace game
         std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
 
         int count = static_cast<int>(floorPositions.size()) / 1;
-        count = std::max(1, std::min(count, 30));
+        count = std::max(1, std::min(count, 100));
 
         // Load skeleton enemy mesh (randomly pick from available skeleton types)
         std::vector<std::string> skeletonModels = {
