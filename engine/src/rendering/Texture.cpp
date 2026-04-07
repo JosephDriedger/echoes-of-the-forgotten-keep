@@ -58,6 +58,8 @@ namespace engine
         return *this;
     }
 
+    // Loads an image via SDL_image, converts to RGBA32, uploads to an OpenGL
+    // texture with trilinear filtering (LINEAR_MIPMAP_LINEAR) and repeat wrapping.
     bool Texture::LoadFromFile(const std::string& path)
     {
         Destroy();
@@ -99,6 +101,7 @@ namespace engine
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        // Ensure byte-aligned rows for images with non-power-of-two widths.
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         glTexImage2D(

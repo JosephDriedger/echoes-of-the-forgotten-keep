@@ -19,6 +19,18 @@
 
 namespace engine
 {
+    // Central ECS coordinator that owns all entities, component storage, and signatures.
+    //
+    // Entity management uses a recycling pool: destroyed entity IDs are pushed onto
+    // a stack and reused by future CreateEntity() calls. Active entities are tracked
+    // in a dense vector (m_ActiveEntities) with swap-and-pop removal for O(1) destroy.
+    //
+    // Component registration maps C++ types to sequential ComponentType IDs at runtime
+    // via std::type_index, then stores components in type-specific packed arrays
+    // (ComponentStorage<T>) accessed through the type-erased IComponentStorage interface.
+    //
+    // Each entity's signature bitset is updated automatically when components are
+    // added or removed, enabling systems to efficiently query matching entities.
     class Registry
     {
     public:
@@ -30,6 +42,8 @@ namespace engine
 
         [[nodiscard]] bool IsAlive(Entity entity) const;
 
+        // Fully resets the registry: destroys all entities, clears all component
+        // storage, and re-populates the available entity ID pool.
         void Reset();
 
         [[nodiscard]] std::size_t GetAliveCount() const;
@@ -41,9 +55,12 @@ namespace engine
 
         [[nodiscard]] const std::vector<Entity>& GetActiveEntities() const;
 
+        // Assigns a new ComponentType ID to TComponent and creates its storage.
+        // Safe to call multiple times; subsequent calls for the same type are no-ops.
         template <typename TComponent>
         void RegisterComponent();
 
+        // Returns the ComponentType ID previously assigned to TComponent.
         template <typename TComponent>
         [[nodiscard]] ComponentType GetComponentType() const;
 
@@ -76,22 +93,23 @@ namespace engine
         void RemoveAllComponentsFromEntity(Entity entity) const;
         void ResetEntityState(EntityId entityId);
 
+        // Downcasts the type-erased IComponentStorage to the concrete typed storage.
         template <typename TComponent>
         ComponentStorage<TComponent>& GetComponentStorage();
 
         template <typename TComponent>
         const ComponentStorage<TComponent>& GetComponentStorage() const;
 
-        std::stack<EntityId> m_AvailableEntityIds;
-        std::array<bool, MAX_ENTITIES + 1> m_Alive;
-        std::array<Signature, MAX_ENTITIES + 1> m_Signatures;
-        std::array<std::size_t, MAX_ENTITIES + 1> m_ActiveEntityIndices;
-        std::vector<Entity> m_ActiveEntities;
+        std::stack<EntityId> m_AvailableEntityIds;                      // Recycled IDs ready for reuse.
+        std::array<bool, MAX_ENTITIES + 1> m_Alive;                     // Indexed by EntityId; true if entity is alive.
+        std::array<Signature, MAX_ENTITIES + 1> m_Signatures;           // Indexed by EntityId; tracks owned components.
+        std::array<std::size_t, MAX_ENTITIES + 1> m_ActiveEntityIndices; // EntityId -> index in m_ActiveEntities (for O(1) removal).
+        std::vector<Entity> m_ActiveEntities;                           // Dense list of all currently alive entities.
         std::size_t m_AliveEntityCount;
 
-        std::unordered_map<std::type_index, ComponentType> m_ComponentTypes;
-        std::array<std::shared_ptr<IComponentStorage>, MAX_COMPONENTS> m_ComponentStorages;
-        ComponentType m_NextComponentType;
+        std::unordered_map<std::type_index, ComponentType> m_ComponentTypes; // C++ type -> ComponentType ID mapping.
+        std::array<std::shared_ptr<IComponentStorage>, MAX_COMPONENTS> m_ComponentStorages; // Indexed by ComponentType.
+        ComponentType m_NextComponentType;                              // Next ID to assign on RegisterComponent().
     };
 
     template <typename TComponent>
@@ -165,6 +183,7 @@ namespace engine
         return static_cast<const ComponentStorage<TComponent>&>(*storage);
     }
 
+    // Adds a component and sets the corresponding bit in the entity's signature.
     template <typename TComponent>
     void Registry::AddComponent(Entity entity, const TComponent& component)
     {
@@ -194,6 +213,7 @@ namespace engine
         return component;
     }
 
+    // Removes the component and clears the corresponding bit in the entity's signature.
     template <typename TComponent>
     void Registry::RemoveComponent(Entity entity)
     {

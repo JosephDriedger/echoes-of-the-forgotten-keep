@@ -1,3 +1,10 @@
+/// @file TestAnimationSystem.cpp
+/// @brief Tests for AnimationSystem state transitions, combo attacks, and blending.
+///
+/// Covers idle/run transitions, 3-hit combo advancement and wrapping,
+/// combo window timing, hit-react and death states, blend completion,
+/// and FinalBoneMatrices population. Uses a minimal one-bone skeleton.
+
 #include "game/systems/AnimationSystem.h"
 #include "game/systems/EntitySpawnSystem.h"
 #include "game/components/Components.h"
@@ -16,7 +23,7 @@
 
 namespace
 {
-    // Build a minimal skeleton with a root node
+    /// Build a minimal skeleton with a single root bone for testing.
     std::shared_ptr<engine::Skeleton> MakeMinimalSkeleton()
     {
         auto skeleton = std::make_shared<engine::Skeleton>();
@@ -38,7 +45,7 @@ namespace
         return skeleton;
     }
 
-    // Build a clip with a specified name and duration
+    /// Build an animation clip with one bone channel spanning the given duration.
     engine::AnimationClip MakeClip(const std::string& name, float duration)
     {
         engine::AnimationClip clip;
@@ -58,6 +65,8 @@ namespace
         return clip;
     }
 
+    /// Creates a Registry with a player entity that has all animation and combat
+    /// components pre-configured with 7 clips (idle, run, 3 attacks, hit, death).
     struct TestSetup
     {
         engine::Registry Registry;

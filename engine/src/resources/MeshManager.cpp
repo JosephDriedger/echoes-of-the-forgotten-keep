@@ -6,6 +6,8 @@
 
 namespace engine
 {
+    // Loads a mesh from disk on first request; subsequent calls for the same
+    // path return the cached result without hitting the filesystem again.
     MeshLoader::Result MeshManager::Load(const std::string& path)
     {
         auto existing = m_Cache.find(path);
@@ -25,6 +27,7 @@ namespace engine
         return result;
     }
 
+    // Returns the cached Mesh pointer, or nullptr if the path has not been loaded yet.
     std::shared_ptr<Mesh> MeshManager::Get(const std::string& path) const
     {
         auto it = m_Cache.find(path);
@@ -35,6 +38,7 @@ namespace engine
         return it->second.MeshPtr;
     }
 
+    // Releases all cached meshes. Existing shared_ptrs held elsewhere remain valid.
     void MeshManager::Clear()
     {
         m_Cache.clear();

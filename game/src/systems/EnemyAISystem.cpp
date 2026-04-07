@@ -47,11 +47,13 @@ namespace game
                 continue;
             }
 
+            // Knockback override: linearly decelerate the enemy away from
+            // the damage source. Skips all AI state logic until recovery.
             if (ai.IsKnockedBack)
             {
                 ai.KnockbackTimer -= deltaTime;
 
-                float t = ai.KnockbackTimer / ai.KnockbackDuration; // 1→0
+                float t = ai.KnockbackTimer / ai.KnockbackDuration; // 1->0 deceleration
                 et.X += ai.KnockbackVX * ai.KnockbackSpeed * t * deltaTime;
                 et.Z += ai.KnockbackVZ * ai.KnockbackSpeed * t * deltaTime;
 
@@ -181,14 +183,18 @@ namespace game
 
         float dist = Distance(et.X, et.Z, pt.X, pt.Z);
 
+        // Close enough to attack -- set timer to cooldown so the first
+        // attack fires immediately upon entering Attack state.
         if (dist < ai.AttackRange)
         {
             ai.State = AIState::Attack;
             ai.StateTimer = 0.0f;
-            ai.AttackTimer = ai.AttackCooldown; // fire immediately on first frame
+            ai.AttackTimer = ai.AttackCooldown;
             return;
         }
 
+        // Give up chasing after MaxChaseTime; apply a cooldown before
+        // the enemy can re-detect the player (prevents instant re-aggro).
         if (ai.StateTimer > ai.MaxChaseTime)
         {
             ai.State = AIState::Idle;
@@ -251,6 +257,7 @@ namespace game
             }
         }
 
+        // Hysteresis buffer (+1 unit) prevents flickering between Attack and Chase.
         if (dist > ai.AttackRange + 1.0f)
         {
             ai.State = AIState::Chase;

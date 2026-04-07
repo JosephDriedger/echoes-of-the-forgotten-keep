@@ -7,6 +7,10 @@
 
 namespace game
 {
+    /// Processes pending hits queued by AttackHitboxSystem.
+    /// Subtracts damage from Health, applies directional knockback to enemies,
+    /// triggers the hit-react animation, grants a brief invincibility window,
+    /// and marks entities with zero HP as dead.
     class DamageSystem
     {
     public:

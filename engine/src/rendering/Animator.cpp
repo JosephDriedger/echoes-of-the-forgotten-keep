@@ -1,4 +1,7 @@
 // Created by Adam Van Woerden
+/// @file Animator.cpp
+/// @brief Skeletal animation evaluation: keyframe interpolation, pose sampling,
+///        pose blending, and final bone matrix computation for GPU skinning.
 
 #include "engine/rendering/Animator.h"
 
@@ -10,11 +13,15 @@
 
 namespace engine
 {
+    // Linear interpolation between the two keyframes surrounding 'time'.
+    // Performs a linear scan to find the bracketing pair, then lerps by the
+    // normalized time factor within that interval.
     glm::vec3 Animator::InterpolatePosition(const std::vector<KeyPosition>& positions, float time)
     {
         if (positions.empty()) return glm::vec3(0.0f);
         if (positions.size() == 1) return positions[0].Position;
 
+        // Find the last keyframe at or before 'time'.
         int i = 0;
         for (; i < static_cast<int>(positions.size()) - 1; i++)
         {
@@ -33,6 +40,8 @@ namespace engine
         return glm::mix(p0.Position, p1.Position, factor);
     }
 
+    // Spherical linear interpolation (slerp) between bracketing rotation keyframes.
+    // The result is normalized to prevent quaternion drift over many frames.
     glm::quat Animator::InterpolateRotation(const std::vector<KeyRotation>& rotations, float time)
     {
         if (rotations.empty()) return glm::quat(1, 0, 0, 0);
@@ -79,6 +88,8 @@ namespace engine
         return glm::mix(s0.Scale, s1.Scale, factor);
     }
 
+    // Build a full skeleton pose by evaluating every bone channel at the given time.
+    // Bones not present in the clip default to identity (pos=0, rot=identity, scale=1).
     Pose Animator::SamplePose(const Skeleton& skeleton, const AnimationClip& clip, float time)
     {
         Pose pose;
@@ -111,6 +122,8 @@ namespace engine
         return pose;
     }
 
+    // Per-bone blend of two poses. Positions and scales use lerp; rotations use
+    // slerp to stay on the unit quaternion manifold. t=0 yields pose a, t=1 yields pose b.
     Pose Animator::BlendPoses(const Pose& a, const Pose& b, float t)
     {
         Pose result;
@@ -128,6 +141,10 @@ namespace engine
         return result;
     }
 
+    // Traverse the skeleton hierarchy in topological order (parents before children)
+    // to accumulate world-space transforms. For each bone, the final matrix sent to the
+    // GPU shader is: globalTransform * inverseBindPose (the "offset" matrix).
+    // This transforms vertices from bind-pose model space into the current animated pose.
     void Animator::ApplyPose(
         const Skeleton& skeleton,
         const Pose& pose,
@@ -140,6 +157,7 @@ namespace engine
         {
             const BoneNode& node = skeleton.Nodes[i];
 
+            // Compose local transform as T * R * S (translation, rotation, scale).
             glm::mat4 nodeTransform =
                 glm::translate(glm::mat4(1.0f), pose.Positions[i]) *
                 glm::toMat4(pose.Rotations[i]) *
@@ -164,6 +182,7 @@ namespace engine
                     offset = skeleton.Bones[node.BoneId].Offset;
                 }
 
+                // globalTransform * inverseBindPose: moves vertices from bind space to world space.
                 finalBoneMatrices[node.BoneId] = global * offset;
             }
         }

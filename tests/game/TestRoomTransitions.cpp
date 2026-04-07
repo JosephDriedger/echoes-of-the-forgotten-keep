@@ -1,6 +1,12 @@
 //
 // Created by Joseph Driedger on 3/23/2026.
 //
+/// @file TestRoomTransitions.cpp
+/// @brief Tests for RoomTransitionSystem dungeon room changes.
+///
+/// Sets up two rooms with a pending transition target, then verifies that
+/// after Update the current room changes, the transition target is cleared,
+/// and the player's position is reset to the new room's origin.
 
 #include "game/systems/RoomTransitionSystem.h"
 

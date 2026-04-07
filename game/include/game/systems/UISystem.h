@@ -1,5 +1,8 @@
 // Created by Adam Van Woerden
 
+// UISystem -- Initializes and renders the in-game HUD (health bar,
+// crosshair, etc.) using the UIRenderer for 2D screen-space drawing.
+
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_UISYSTEM_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_UISYSTEM_H
 #include "game/ui/HUD.h"

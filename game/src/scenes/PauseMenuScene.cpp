@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file PauseMenuScene.cpp
+/// @brief Implementation of the in-game pause menu overlay.
 
 #include "game/scenes/PauseMenuScene.h"
 
@@ -20,6 +22,7 @@ namespace game
     {
     }
 
+    /// Initializes text and quad renderers, then lays out menu buttons.
     bool PauseMenuScene::OnCreate(engine::Application& application)
     {
         const auto& spec = application.GetSpecification();
@@ -91,6 +94,7 @@ namespace game
         m_QuitNoButton.SetPosition(startX + m_QuitYesButton.GetWidth() + gap, confirmY);
     }
 
+    /// Processes button hover/click. ESC resumes gameplay by popping this scene.
     void PauseMenuScene::OnUpdate(engine::Application& application, engine::Timestep timestep)
     {
         (void)timestep;
@@ -163,6 +167,7 @@ namespace game
         }
     }
 
+    /// Draws a semi-transparent dark overlay, then the pause title and buttons.
     void PauseMenuScene::OnRender(engine::Application& application)
     {
         (void)application;

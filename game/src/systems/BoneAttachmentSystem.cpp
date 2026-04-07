@@ -40,7 +40,7 @@ namespace game
 
             glm::mat4 boneTransform = it->second;
 
-            // Build parent world matrix
+            // Build parent world matrix (translate -> rotate Y -> scale)
             glm::mat4 parentMatrix = glm::mat4(1.0f);
             parentMatrix = glm::translate(parentMatrix,
                 glm::vec3(parentTransform.X, parentTransform.Y, parentTransform.Z));
@@ -49,11 +49,12 @@ namespace game
             parentMatrix = glm::scale(parentMatrix,
                 glm::vec3(parentTransform.ScaleX, parentTransform.ScaleY, parentTransform.ScaleZ));
 
+            // Final world-space transform: parent world * bone local * attachment offset
             glm::mat4 finalTransform = parentMatrix * boneTransform * attach.Offset;
 
             auto& transform = registry.GetComponent<Transform>(entity);
             transform.ModelMatrix = finalTransform;
-            transform.UseModelMatrix = true;
+            transform.UseModelMatrix = true; // bypass normal TRS; use precomputed matrix
         }
     }
 }

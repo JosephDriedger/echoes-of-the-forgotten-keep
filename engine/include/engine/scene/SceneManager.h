@@ -12,6 +12,9 @@ namespace engine
     class Application;
     class Timestep;
 
+    // Manages an ordered stack of scenes. Only the topmost scene receives
+    // Update calls, but all scenes Render bottom-to-top so overlays (e.g. pause
+    // menu) can draw on top of the gameplay scene beneath them.
     class SceneManager
     {
     public:

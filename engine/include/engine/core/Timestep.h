@@ -1,5 +1,9 @@
 // Created by Joey Driedger
 
+// Timestep -- lightweight value type representing a frame's elapsed
+// duration. Stored internally in seconds (double) with convenience
+// accessors for milliseconds and float conversions.
+
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_TIMESTEP_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_TIMESTEP_H
 

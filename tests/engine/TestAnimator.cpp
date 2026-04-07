@@ -1,3 +1,8 @@
+//
+// Tests for the skeletal animation Animator: keyframe interpolation (position,
+// rotation, scale), pose sampling, pose blending, and final bone matrix computation.
+//
+
 #include "engine/rendering/Animator.h"
 #include "engine/rendering/AnimationData.h"
 
@@ -15,6 +20,7 @@
 
 namespace
 {
+    // Floating-point comparison helpers for animation value verification
     bool NearEqual(float a, float b, float epsilon = 0.001f)
     {
         return std::fabs(a - b) < epsilon;
@@ -125,7 +131,7 @@ namespace
 
 int RunAnimatorTests()
 {
-    // Test InterpolatePosition
+    // Test position interpolation at midpoint, start, and end of two keyframes
     {
         std::vector<engine::KeyPosition> positions = {
             {glm::vec3(0.0f, 0.0f, 0.0f), 0.0f},
@@ -142,7 +148,7 @@ int RunAnimatorTests()
         assert(Vec3Near(end, glm::vec3(10.0f, 0.0f, 0.0f)));
     }
 
-    // Test InterpolatePosition with single keyframe
+    // Test that a single keyframe returns its value regardless of query time
     {
         std::vector<engine::KeyPosition> positions = {
             {glm::vec3(3.0f, 4.0f, 5.0f), 0.0f}
@@ -151,14 +157,14 @@ int RunAnimatorTests()
         assert(Vec3Near(result, glm::vec3(3.0f, 4.0f, 5.0f)));
     }
 
-    // Test InterpolatePosition with empty keyframes
+    // Test that empty keyframes return zero vector (safe default)
     {
         std::vector<engine::KeyPosition> positions;
         glm::vec3 result = engine::Animator::InterpolatePosition(positions, 5.0f);
         assert(Vec3Near(result, glm::vec3(0.0f)));
     }
 
-    // Test InterpolateRotation
+    // Test quaternion slerp interpolation between identity and 90-degree Y rotation
     {
         glm::quat q0 = glm::quat(1, 0, 0, 0); // identity
         glm::quat q1 = glm::angleAxis(glm::radians(90.0f), glm::vec3(0, 1, 0));
@@ -171,11 +177,12 @@ int RunAnimatorTests()
         glm::quat mid = engine::Animator::InterpolateRotation(rotations, 5.0f);
         // At midpoint, should be ~45 degree rotation around Y
         glm::quat expected = glm::normalize(glm::slerp(q0, q1, 0.5f));
+        // Verify quaternions are equivalent (dot product near 1.0)
         float dot = std::fabs(glm::dot(mid, expected));
         assert(dot > 0.999f);
     }
 
-    // Test InterpolateScale
+    // Test scale interpolation: (1,1,1) to (3,3,3) at midpoint should yield (2,2,2)
     {
         std::vector<engine::KeyScale> scales = {
             {glm::vec3(1.0f), 0.0f},
@@ -186,28 +193,25 @@ int RunAnimatorTests()
         assert(Vec3Near(mid, glm::vec3(2.0f)));
     }
 
-    // Test SamplePose
+    // Test SamplePose: samples all bone channels at a given time across the skeleton
     {
         engine::Skeleton skeleton = MakeTestSkeleton();
         engine::AnimationClip clip = MakeTestClip();
 
         engine::Pose pose = engine::Animator::SamplePose(skeleton, clip, 5.0f);
 
-        assert(pose.Positions.size() == 3); // Root + Bone0 + Bone1
+        // Pose should contain one entry per skeleton node (Root + Bone0 + Bone1)
+        assert(pose.Positions.size() == 3);
         assert(pose.Rotations.size() == 3);
         assert(pose.Scales.size() == 3);
 
-        // Bone0 at time 5.0: position should be (5, 0, 0)
+        // Verify per-bone interpolated values at the midpoint of the clip
         assert(Vec3Near(pose.Positions[1], glm::vec3(5.0f, 0.0f, 0.0f)));
-
-        // Bone1 at time 5.0: position should be (0, 2.5, 0)
         assert(Vec3Near(pose.Positions[2], glm::vec3(0.0f, 2.5f, 0.0f)));
-
-        // Bone1 at time 5.0: scale should be (1.5, 1.5, 1.5)
         assert(Vec3Near(pose.Scales[2], glm::vec3(1.5f)));
     }
 
-    // Test BlendPoses
+    // Test BlendPoses at 50% blend factor between two poses
     {
         engine::Pose poseA;
         poseA.Positions = {glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 0.0f)};
@@ -221,11 +225,12 @@ int RunAnimatorTests()
 
         engine::Pose blended = engine::Animator::BlendPoses(poseA, poseB, 0.5f);
 
+        // Position and scale should be halfway between poseA and poseB
         assert(Vec3Near(blended.Positions[1], glm::vec3(5.0f, 0.0f, 0.0f)));
         assert(Vec3Near(blended.Scales[1], glm::vec3(1.5f)));
     }
 
-    // Test BlendPoses at extremes
+    // Test BlendPoses at extremes: factor 0.0 yields poseA, factor 1.0 yields poseB
     {
         engine::Pose poseA;
         poseA.Positions = {glm::vec3(1.0f, 2.0f, 3.0f)};
@@ -244,7 +249,7 @@ int RunAnimatorTests()
         assert(Vec3Near(at1.Positions[0], glm::vec3(4.0f, 5.0f, 6.0f)));
     }
 
-    // Test ApplyPose
+    // Test ApplyPose: converts a sampled pose into final bone matrices and node transforms
     {
         engine::Skeleton skeleton = MakeTestSkeleton();
         engine::AnimationClip clip = MakeTestClip();
@@ -255,15 +260,14 @@ int RunAnimatorTests()
 
         engine::Animator::ApplyPose(skeleton, pose, finalBoneMatrices, finalNodeTransforms);
 
-        // All 3 nodes should have transforms
+        // Verify every skeleton node received a world-space transform
         assert(finalNodeTransforms.count("Root") == 1);
         assert(finalNodeTransforms.count("Bone0") == 1);
         assert(finalNodeTransforms.count("Bone1") == 1);
 
-        // Bone0's final bone matrix should be modified (not identity)
-        // Since Bone0 translates to (5,0,0) and offset is identity,
-        // finalBoneMatrices[0] should have translation component
-        glm::vec4 bone0Col3 = finalBoneMatrices[0][3]; // translation column
+        // Bone0 translates to (5,0,0) with identity offset, so the final
+        // bone matrix translation column should reflect that position
+        glm::vec4 bone0Col3 = finalBoneMatrices[0][3];
         assert(NearEqual(bone0Col3.x, 5.0f));
     }
 

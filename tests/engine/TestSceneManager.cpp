@@ -1,6 +1,13 @@
 //
 // Created by Joseph Driedger on 3/17/2026.
 //
+/// @file TestSceneManager.cpp
+/// @brief Tests for SceneManager construction and safe shutdown.
+///
+/// Full scene lifecycle tests (ChangeScene, PushScene, PopScene) require a
+/// running Application with an OpenGL context. This file verifies that a
+/// SceneManager can be constructed and shut down without crashing, using a
+/// stub TestScene to track lifecycle callback counts.
 
 #include "engine/scene/Scene.h"
 #include "engine/scene/SceneManager.h"
@@ -11,6 +18,7 @@
 
 namespace
 {
+    /// Tracks how many times each Scene callback is invoked during a test.
     struct SceneCallData
     {
         int CreateCalls = 0;
@@ -24,6 +32,7 @@ namespace
     SceneCallData* g_ActiveCallData = nullptr;
     bool g_ShouldCreate = true;
 
+    /// Minimal Scene subclass that records lifecycle calls into SceneCallData.
     class TestScene final : public engine::Scene
     {
     public:

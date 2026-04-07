@@ -1,3 +1,10 @@
+/// @file TestBoneAttachmentSystem.cpp
+/// @brief Tests for BoneAttachmentSystem, which parents child entities to skeleton bones.
+///
+/// Verifies that a child entity's ModelMatrix is computed as
+/// parentWorldMatrix * boneTransform * offset. Also tests edge cases:
+/// missing AnimationState on parent, nonexistent bone name, and parent rotation.
+
 #include "game/systems/BoneAttachmentSystem.h"
 #include "game/systems/EntitySpawnSystem.h"
 #include "game/components/Components.h"
@@ -13,6 +20,7 @@
 
 namespace
 {
+    /// Returns true if two floats are within epsilon of each other.
     bool NearEqual(float a, float b, float epsilon = 0.01f)
     {
         return std::fabs(a - b) < epsilon;

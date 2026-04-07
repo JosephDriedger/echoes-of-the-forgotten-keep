@@ -1,3 +1,2 @@
 // Created by Joey Driedger
-
-#include "game/GameState.h"
+// GameState is a pure enum; no method implementations are needed.

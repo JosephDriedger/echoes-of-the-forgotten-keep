@@ -38,6 +38,8 @@ namespace engine
             return false;
         }
 
+        // Set up a top-left origin orthographic projection so screen-space pixel
+        // coordinates map directly to NDC (z range -1..1 is unused for 2D).
         m_Shader->Bind();
         glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(screenWidth),
                                            static_cast<float>(screenHeight), 0.0f,
@@ -45,6 +47,8 @@ namespace engine
         m_Shader->SetMat4("projection", glm::value_ptr(projection));
         m_Shader->Unbind();
 
+        // Allocate a dynamic VBO for a single quad (two triangles, 6 vertices).
+        // Data is uploaded per-draw via glBufferSubData.
         glGenVertexArrays(1, &m_VAO);
         glGenBuffers(1, &m_VBO);
 
@@ -84,6 +88,8 @@ namespace engine
     {
         if (!m_Shader) return;
 
+        // Save current GL state so we can restore it after drawing the UI quad.
+        // This prevents the 2D overlay from corrupting the 3D scene's pipeline state.
         GLboolean depthTestEnabled;
         GLboolean cullFaceEnabled;
         GLboolean blendEnabled;
@@ -100,6 +106,7 @@ namespace engine
         int colorLoc = m_Shader->GetCachedUniformLocation("quadColor");
         glUniform4f(colorLoc, r, g, b, a);
 
+        // Two-triangle quad in screen-space (CCW winding, top-left origin).
         float vertices[6][2] = {
             { x,         y          },
             { x + width, y          },
@@ -120,6 +127,7 @@ namespace engine
         glBindVertexArray(0);
         m_Shader->Unbind();
 
+        // Restore the GL state that was active before this draw call.
         if (depthTestEnabled) glEnable(GL_DEPTH_TEST);
         else glDisable(GL_DEPTH_TEST);
         if (cullFaceEnabled) glEnable(GL_CULL_FACE);

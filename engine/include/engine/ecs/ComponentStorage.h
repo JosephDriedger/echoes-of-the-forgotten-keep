@@ -13,6 +13,8 @@
 
 namespace engine
 {
+    // Type-erased interface for component storage, allowing the Registry to
+    // manage heterogeneous component arrays through a uniform pointer type.
     class IComponentStorage
     {
     public:
@@ -22,6 +24,13 @@ namespace engine
         virtual void Clear() = 0;
     };
 
+    // Dense, cache-friendly storage for a single component type.
+    //
+    // Uses a "packed array" pattern: components are stored contiguously in
+    // m_Components, with a parallel m_Entities vector and a hash map
+    // (m_EntityToIndex) for O(1) lookup by EntityId.
+    //
+    // Removal uses swap-and-pop to maintain density without leaving holes.
     template <typename TComponent>
     class ComponentStorage final : public IComponentStorage
     {
@@ -42,6 +51,7 @@ namespace engine
             m_EntityToIndex.emplace(entityId, newIndex);
         }
 
+        // Constructs a component in-place, forwarding args to TComponent's constructor.
         template <typename... TArgs>
         TComponent& Emplace(Entity entity, TArgs&&... args)
         {
@@ -61,6 +71,8 @@ namespace engine
             return m_Components.back();
         }
 
+        // Removes a component using swap-and-pop: the last element is moved into
+        // the gap left by the removed element, keeping the array dense.
         void Remove(Entity entity) override
         {
             const EntityId entityId = entity.GetId();
@@ -128,9 +140,9 @@ namespace engine
         }
 
     private:
-        std::vector<TComponent> m_Components;
-        std::vector<Entity> m_Entities;
-        std::unordered_map<EntityId, std::size_t> m_EntityToIndex;
+        std::vector<TComponent> m_Components;   // Dense array of component data.
+        std::vector<Entity> m_Entities;          // Parallel array: entity owning each component.
+        std::unordered_map<EntityId, std::size_t> m_EntityToIndex; // Sparse lookup: entity -> dense index.
     };
 }
 

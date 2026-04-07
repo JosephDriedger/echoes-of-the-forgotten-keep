@@ -8,6 +8,7 @@ namespace engine
 {
     std::shared_ptr<Texture> TextureManager::Load(const std::string& path)
     {
+        // Return the cached texture if it was already loaded from this path.
         const auto existing = m_Textures.find(path);
 
         if (existing != m_Textures.end())

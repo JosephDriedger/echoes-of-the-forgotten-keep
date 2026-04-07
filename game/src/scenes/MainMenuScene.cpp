@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file MainMenuScene.cpp
+/// @brief Implementation of the title screen with Play, Settings, Credits, Quit.
 
 #include "game/scenes/MainMenuScene.h"
 
@@ -22,6 +24,7 @@ namespace game
     {
     }
 
+    /// Initializes the text renderer and lays out all menu buttons.
     bool MainMenuScene::OnCreate(engine::Application& application)
     {
         const auto& spec = application.GetSpecification();
@@ -50,6 +53,8 @@ namespace game
         m_TextRenderer.Destroy();
     }
 
+    /// Creates and positions the main menu buttons, credit-screen Back button,
+    /// and quit-confirmation Yes/No buttons.
     void MainMenuScene::LayoutButtons()
     {
         m_Buttons.clear();
@@ -88,6 +93,8 @@ namespace game
         m_QuitNoButton.SetPosition(startX + m_QuitYesButton.GetWidth() + gap, confirmY);
     }
 
+    /// Handles input for the active overlay (quit confirm or credits) or the
+    /// main button list. Button clicks request scene changes via the application.
     void MainMenuScene::OnUpdate(engine::Application& application, engine::Timestep timestep)
     {
         (void)timestep;
@@ -169,6 +176,8 @@ namespace game
         }
     }
 
+    /// Renders either the main menu, quit confirmation, or credits overlay
+    /// depending on current state. Only one overlay is visible at a time.
     void MainMenuScene::OnRender(engine::Application& application)
     {
         (void)application;

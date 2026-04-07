@@ -6,6 +6,8 @@
 
 namespace engine
 {
+    // Anonymous namespace: hand-rolled 3D math utilities to avoid pulling in
+    // a math library dependency for the Camera class. All matrices are column-major.
     namespace
     {
         void SetIdentity(float* matrix)
@@ -132,6 +134,9 @@ namespace engine
         return m_ProjectionMatrix;
     }
 
+    // Builds a look-at view matrix from position, target, and up vector.
+    // Column-major layout: columns 0-2 hold the right/up/(-forward) axes,
+    // column 3 holds the translation (dot products with the eye position).
     void Camera::RecalculateViewMatrix()
     {
         float forward[3] =
@@ -168,6 +173,9 @@ namespace engine
         m_ViewMatrix[14] = Dot(forward, m_Position);
     }
 
+    // Builds either an orthographic or symmetric perspective projection matrix.
+    // Perspective uses the standard OpenGL infinite-frustum formulation with
+    // a negative near-plane mapping (depth range [-1, 1]).
     void Camera::RecalculateProjectionMatrix()
     {
         for (float& value : m_ProjectionMatrix)

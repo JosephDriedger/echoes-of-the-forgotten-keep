@@ -6,6 +6,8 @@
 
 namespace game
 {
+    // Register every game-specific component type with the ECS registry.
+    // Must be called once at startup before any entities are created.
     void EntitySpawnSystem::RegisterComponents(engine::Registry& registry)
     {
         registry.RegisterComponent<Transform>();

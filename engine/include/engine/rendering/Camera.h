@@ -5,6 +5,9 @@
 
 namespace engine
 {
+    // Look-at camera supporting both perspective and orthographic projection.
+    // Stores raw float[16] matrices in column-major order (OpenGL convention).
+    // View and projection matrices are recalculated automatically on parameter change.
     class Camera
     {
     public:
@@ -23,12 +26,12 @@ namespace engine
         void RecalculateProjectionMatrix();
 
     private:
-        float m_Position[3];
-        float m_Target[3];
-        float m_Up[3];
+        float m_Position[3];  // Eye position in world space
+        float m_Target[3];    // Look-at target in world space
+        float m_Up[3];        // World up vector (typically +Y)
 
-        float m_ViewMatrix[16];
-        float m_ProjectionMatrix[16];
+        float m_ViewMatrix[16];       // Column-major 4x4 view matrix
+        float m_ProjectionMatrix[16]; // Column-major 4x4 projection matrix
 
         bool m_IsOrthographic;
 

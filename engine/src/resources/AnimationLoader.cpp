@@ -13,6 +13,7 @@ namespace engine
     std::shared_ptr<std::vector<AnimationClip>> AnimationLoader::LoadFromFile(const std::string& path) const
     {
         Assimp::Importer importer;
+        // Minimal post-processing -- we only need animation channels, not geometry.
         const aiScene* scene = importer.ReadFile(
             path,
             aiProcess_Triangulate |
@@ -34,9 +35,11 @@ namespace engine
             AnimationClip clip;
             clip.Name = anim->mName.C_Str();
             clip.Duration = static_cast<float>(anim->mDuration);
+            // Default to 25 ticks/sec if the file does not specify a rate.
             clip.TicksPerSecond = static_cast<float>(
                 anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
 
+            // Each channel maps to one bone and holds position, rotation, and scale keyframes.
             for (unsigned int c = 0; c < anim->mNumChannels; c++)
             {
                 aiNodeAnim* channel = anim->mChannels[c];

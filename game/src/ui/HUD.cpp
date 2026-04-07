@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file HUD.cpp
+/// @brief HUD rendering -- reads player Health and delegates to HealthBar.
 
 #include "game/ui/HUD.h"
 #include "game/components/Components.h"

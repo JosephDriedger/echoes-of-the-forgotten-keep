@@ -1,3 +1,10 @@
+/// @file TestEntitySpawnSystem.cpp
+/// @brief Tests for EntitySpawnSystem component registration and player spawning.
+///
+/// Verifies that Register() makes all game component types available in
+/// the Registry, that SpawnPlayer creates an entity with the expected
+/// components and default values, and that multiple players can coexist.
+
 #include "game/systems/EntitySpawnSystem.h"
 
 #include "engine/ecs/Registry.h"

@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file HealthBar.cpp
+/// @brief Renders a row of layered heart icons for the player's health.
 
 #include "game/ui/HealthBar.h"
 
@@ -13,6 +15,8 @@ namespace game
         m_Border = border;
     }
 
+    /// Each heart slot is drawn as three layers: empty bg, filled heart (if
+    /// this slot is within current HP), and a border overlay on top.
     void HealthBar::Render(UIRenderer& renderer, int current, int max,
                             float x, float y, float heartSize, float spacing,
                             int screenWidth, int screenHeight)

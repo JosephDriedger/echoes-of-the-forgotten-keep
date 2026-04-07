@@ -21,6 +21,7 @@ namespace game
             {
                 health.Current -= combat.IncomingHit->Damage;
 
+                // Enemy-specific: compute knockback direction and interrupt AI
                 if (registry.HasComponent<EnemyAI>(entity) &&
                     registry.HasComponent<Transform>(entity))
                 {
@@ -28,6 +29,7 @@ namespace game
 
                     if (registry.IsAlive(source) && registry.HasComponent<Transform>(source))
                     {
+                        // Knockback direction: normalized vector from attacker to victim
                         const auto& selfT   = registry.GetComponent<Transform>(entity);
                         const auto& sourceT = registry.GetComponent<Transform>(source);
 
@@ -45,7 +47,7 @@ namespace game
                         ai.KnockbackVZ      = dz;
                         ai.KnockbackSpeed   = ai.KnockbackSpeed * knockbackMult;
 
-                        // Interrupt AI state
+                        // Force AI back to Idle so it re-evaluates after recovering
                         ai.State      = AIState::Idle;
                         ai.StateTimer = 0.0f;
                     }
@@ -63,7 +65,7 @@ namespace game
                     }
                 }
 
-                combat.HitTimer = 0.5f; // half a second of invincibility
+                combat.HitTimer = 0.5f; // i-frame window (seconds); ticked down by HitTimerSystem
                 combat.IncomingHit.reset();
 
                 if (health.Current <= 0)

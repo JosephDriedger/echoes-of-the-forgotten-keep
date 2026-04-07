@@ -64,6 +64,8 @@ namespace engine
         }
 
         // Set up orthographic projection
+        // Top-left origin orthographic projection: (0,0) is top-left of the screen.
+        // textAtlas is bound to GL_TEXTURE0 (sampler unit 0).
         m_Shader->Bind();
         glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(screenWidth),
                                            static_cast<float>(screenHeight), 0.0f,
@@ -81,6 +83,8 @@ namespace engine
         // 6 vertices * 4 floats (x, y, u, v)
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
 
+        // Vertex layout: [position.xy, texcoord.uv] interleaved, 4 floats per vertex.
+        // Attribute 0 = position (xy), attribute 1 = UV (offset by 2 floats).
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
 
@@ -143,8 +147,11 @@ namespace engine
         }
 
         m_FontSize = fontSize;
+        // ScaleFactor converts font design units to the requested pixel height.
         m_ScaleFactor = stbtt_ScaleForPixelHeight(&fontInfo, fontSize);
 
+        // Vertical metrics in design units, scaled to pixels.
+        // Ascent is positive (above baseline), descent is negative (below baseline).
         int ascent, descent, lineGap;
         stbtt_GetFontVMetrics(&fontInfo, &ascent, &descent, &lineGap);
         m_Ascent = ascent * m_ScaleFactor;
@@ -156,6 +163,8 @@ namespace engine
         m_AtlasHeight = 512;
         std::vector<unsigned char> atlasData(m_AtlasWidth * m_AtlasHeight, 0);
 
+        // Pack glyphs left-to-right, top-to-bottom with 1px padding to avoid
+        // texture filtering bleed between adjacent glyphs in the atlas.
         int penX = 1;
         int penY = 1;
         int rowHeight = 0;
@@ -191,6 +200,7 @@ namespace engine
             }
 
             GlyphInfo glyph{};
+            // Normalize pixel coords to [0,1] UVs for the atlas texture.
             glyph.TexX0 = static_cast<float>(penX) / m_AtlasWidth;
             glyph.TexY0 = static_cast<float>(penY) / m_AtlasHeight;
             glyph.TexX1 = static_cast<float>(penX + w) / m_AtlasWidth;
@@ -212,7 +222,8 @@ namespace engine
             stbtt_FreeBitmap(bitmap, nullptr);
         }
 
-        // Upload atlas to GPU
+        // Upload atlas as a single-channel (GL_RED) texture. UNPACK_ALIGNMENT=1
+        // because each row is tightly packed (no 4-byte row padding).
         glGenTextures(1, &m_AtlasTexture);
         glBindTexture(GL_TEXTURE_2D, m_AtlasTexture);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -324,6 +335,8 @@ namespace engine
 
     float TextRenderer::GetLineHeight(float scale) const
     {
+        // Total line height = ascent + |descent| + lineGap.
+        // m_Descent is negative, so subtracting it adds its absolute value.
         return (m_Ascent - m_Descent + m_LineGap) * scale;
     }
 }

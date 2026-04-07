@@ -5,6 +5,8 @@
 
 namespace engine
 {
+    // Represents a point light source with position, RGB color, and intensity.
+    // Values are uploaded to the shader as uniforms for forward lighting calculations.
     class Light
     {
     public:

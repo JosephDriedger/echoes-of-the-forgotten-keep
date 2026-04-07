@@ -1,4 +1,8 @@
 // Created by Joey Driedger
+//
+// Procedural dungeon floor generator.
+// Uses a room-placement + corridor-carving algorithm to produce a 2D FloorLayout
+// that BuildRoomSystem later converts into 3D geometry.
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_FLOORGENERATOR_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_FLOORGENERATOR_H
@@ -8,16 +12,19 @@
 #include <glm/glm.hpp>
 
 namespace engine {
+
+    // Tile types used throughout the dungeon generation pipeline.
     enum class CellType {
-        Empty,
-        Floor,
-        Wall,
-        Door,
-        Start,
-        End
+        Empty,  // Void / unused space
+        Floor,  // Walkable surface
+        Wall,   // Solid boundary (added by BuildRoomSystem::FromFloor)
+        Door,   // Doorway between corridor and room
+        Start,  // Player spawn / floor entry point
+        End     // Stairs down to the next floor
     };
 
-    // Final layout grid (logic only)
+    // Row-major 2D grid of CellType values representing a single dungeon floor.
+    // Contains only logical tile data; BuildRoomSystem handles 3D conversion.
     struct FloorLayout {
         int width = 0;
         int height = 0;
@@ -32,7 +39,7 @@ namespace engine {
         }
     };
 
-    // Room definition
+    // Axis-aligned rectangle representing a single room in the dungeon.
     struct Room {
         int x, y;
         int width, height;
@@ -42,15 +49,15 @@ namespace engine {
         }
     };
 
-
+    // Spatial configuration for converting MapGrid cells to world-space positions.
     struct BuildRoomConfig {
-        float tileSize = 4.0f;
-        float floorOffset = 2.0f;
-        float floorY = -0.1f;
-        float doorOffset = 0.82f;
+        float tileSize = 4.0f;      // World units per grid cell
+        float floorOffset = 2.0f;   // Half-tile offset for centering large floor tiles
+        float floorY = -0.1f;       // Vertical position of floor geometry
+        float doorOffset = 0.82f;   // How far the door prop is offset from the wall center
     };
 
-    // Config for generation
+    // Parameters controlling procedural floor generation.
     struct FloorConfig {
         int width = 25;
         int height = 25;
@@ -60,6 +67,7 @@ namespace engine {
         int maxRoomSize = 5;
 
         float corridorChance = 0.2f;
+        // Fraction of extra corridors added between random room pairs to create loops.
         float mazeFactor = 0.3f;
 
         unsigned int seed = 12345;
@@ -67,6 +75,11 @@ namespace engine {
         BuildRoomConfig buildConfig;
     };
 
+    // Generates a FloorLayout by:
+    //   1. Placing non-overlapping rooms at random positions
+    //   2. Connecting consecutive rooms with L-shaped corridors
+    //   3. Adding extra corridors (mazeFactor) for loop complexity
+    //   4. Marking the first room's center as Start and the last as End
     class FloorGenerator {
     public:
         static FloorLayout Generate(FloorConfig& config);
@@ -74,6 +87,8 @@ namespace engine {
     private:
         static bool Overlaps(const Room& a, const Room& b);
         static void CarveRoom(FloorLayout& layout, const Room& room);
+        // Carves an L-shaped corridor between two points.
+        // Randomly chooses horizontal-first or vertical-first order.
         static void CarveCorridor(FloorLayout& layout,
                                  const glm::ivec2& a,
                                  const glm::ivec2& b,

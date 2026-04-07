@@ -12,6 +12,7 @@ namespace game
         m_FrameCount++;
         m_AccumulatedTime += timestep.GetSeconds();
 
+        // Average over the accumulation window to reduce jitter in the readout
         if (m_AccumulatedTime >= UPDATE_INTERVAL)
         {
             m_FPS = static_cast<float>(m_FrameCount) / m_AccumulatedTime;

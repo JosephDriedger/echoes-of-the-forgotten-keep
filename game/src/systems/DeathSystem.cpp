@@ -25,7 +25,8 @@ namespace game
                 combat.IsAttacking = false;
             }
 
-            // Set death animation
+            // Disable physics (make trigger) and play death sound once.
+            // The IsTrigger check prevents replaying the sound on subsequent frames.
             if (registry.HasComponent<AnimationState>(entity))
             {
                 auto& anim = registry.GetComponent<AnimationState>(entity);
@@ -34,12 +35,12 @@ namespace game
                     if (col.IsTrigger == false) {
                         audioEventQueue.push(std::make_unique<engine::AudioEvent>("death"));
                     }
-                    col.IsTrigger = true;
+                    col.IsTrigger = true; // corpse no longer blocks movement
                 }
                 anim.IsMoving = false;
             }
 
-            // Add corpse timer so the entity gets cleaned up
+            // Attach a Lifetime component so the entity is destroyed after 3 seconds
             if (!registry.HasComponent<Lifetime>(entity))
             {
                 registry.AddComponent(entity, Lifetime(3.0f));

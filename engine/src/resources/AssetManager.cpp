@@ -1,4 +1,5 @@
 // Created by Joey Driedger
+// AssetManager -- delegates accessors and cleanup to owned sub-managers.
 
 #include "engine/resources/AssetManager.h"
 

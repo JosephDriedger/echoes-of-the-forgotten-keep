@@ -48,7 +48,9 @@ namespace game
             float distSq = dx * dx + dz * dz;
             bool playerNear = distSq < 2.5f * 2.5f;
 
-            // Determine swing direction based on which side player approaches from
+            // Determine swing direction on first approach using the dot product
+            // of the player-to-door vector against the door's forward axis.
+            // This swings the door away from the player so it never hits them.
             if (playerNear && door.SwingDirection == 0)
             {
                 float doorForwardX = std::sin(door.BaseRotationY);
