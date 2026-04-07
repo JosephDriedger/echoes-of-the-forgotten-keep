@@ -8,7 +8,7 @@
 
 namespace game
 {
-    class CombatSystem
+    class HitTimerSystem
     {
     public:
         void Update(engine::Registry& registry, float deltaTime);

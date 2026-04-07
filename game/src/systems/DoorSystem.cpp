@@ -40,9 +40,6 @@ namespace game
 
             auto& door = registry.GetComponent<Door>(entity);
 
-            // Skip trigger-based doors — handled by DoorPuzzleSystem
-            if (!door.TriggerId.empty()) continue;
-
             auto& doorT = registry.GetComponent<Transform>(entity);
 
             // Check if player is within trigger distance

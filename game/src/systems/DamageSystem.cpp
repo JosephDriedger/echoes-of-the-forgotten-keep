@@ -63,6 +63,7 @@ namespace game
                     }
                 }
 
+                combat.HitTimer = 0.5f; // half a second of invincibility
                 combat.IncomingHit.reset();
 
                 if (health.Current <= 0)

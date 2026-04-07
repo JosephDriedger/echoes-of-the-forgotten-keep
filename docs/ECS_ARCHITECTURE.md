@@ -155,16 +155,12 @@ HasPatrol       - Whether this enemy patrols
 ```
 
 ### Door
-Door state and swing animation.
+Door state and swing animation. Doors open automatically when the player approaches.
 ```
 BaseRotationY    - Rotation when fully closed
 CurrentAngle     - Current swing angle
 SwingSpeed       - Degrees per second
 SwingDirection   - +1 or -1
-TriggerId        - ID of the switch that opens this door
-Open             - Whether the door should be open
-TargetAngle      - Angle the door is animating toward
-OpenAngle, CloseAngle - Angle limits
 ColliderEntity   - Entity with the door's collider
 PanelLength, PanelThickness - Physical dimensions for collider updates
 ```
@@ -183,9 +179,9 @@ Offset        - mat4 offset relative to the bone (adjusts position/rotation)
 ```
 
 ### Switch
-Trigger mechanism for puzzles and doors.
+Floor trigger mechanism.
 ```
-Id       - String identifier matching a Door's TriggerId
+Id       - String identifier
 Pressed  - Whether the switch has been activated
 ```
 
@@ -235,8 +231,7 @@ All game systems are in `game/include/game/systems/`. Systems come in two styles
 | **DungeonSpawnSystem** | Instance | Procedurally generates dungeon rooms with walls, floors, doors, enemies |
 | **EntitySpawnSystem** | Static | Registers component types and provides `SpawnPlayer()` prefab function |
 | **DoorSystem** | Static | Proximity-based door opening (detects player, sets swing direction) |
-| **DoorPuzzleSystem** | Static | Links `Switch` presses to `Door` opens via matching trigger IDs |
-| **DoorAnimationHelper** | Static | Shared door swing animation and collider update (used by DoorSystem and DoorPuzzleSystem) |
+| **DoorAnimationHelper** | Static | Shared door swing animation and collider update (used by DoorSystem) |
 | **SwitchTriggerSystem** | Static | Detects `Player` collisions with `Switch` entities, sets `Pressed = true` |
 | **RoomTransitionSystem** | Defined | Manages loading/unloading of room contents |
 | **LifetimeSystem** | Static | Decrements `Lifetime::Duration`, destroys entities when expired |
@@ -267,9 +262,8 @@ Systems are executed in a specific order each frame in `GameplayScene::OnUpdate(
 10. CombatSystem        (process attacks)
 11. SwitchTriggerSystem (check switches)
 12. DoorSystem          (proximity doors)
-13. DoorPuzzleSystem    (trigger doors)
-14. LifetimeSystem      (destroy expired entities)
-15. CameraFollowSystem  (update camera)
+13. LifetimeSystem      (destroy expired entities)
+14. CameraFollowSystem  (update camera)
 ```
 
 This ordering ensures that input is processed first, physics resolves before rendering, and the camera captures the final state.

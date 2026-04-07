@@ -80,6 +80,22 @@ namespace game
                     transform.Z += moveZ * speed * deltaTime;
                 }
             }
+
+            if (isAttacking)
+            {
+                auto& combat = registry.GetComponent<CombatState>(entity);
+                if (combat.IsLunging && combat.LungeTimer > 0.0f)
+                {
+                    combat.LungeTimer -= deltaTime;
+
+                    float t = combat.LungeTimer / combat.LungeDuration; // 1 to 0 decelerate
+                    transform.X += std::sin(transform.RotationY) * combat.LungeSpeed * t * deltaTime;
+                    transform.Z += std::cos(transform.RotationY) * combat.LungeSpeed * t * deltaTime;
+
+                    if (combat.LungeTimer <= 0.0f)
+                        combat.IsLunging = false;
+                }
+            }
         }
     }
 }

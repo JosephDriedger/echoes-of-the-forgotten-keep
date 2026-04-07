@@ -113,6 +113,13 @@ namespace game
                         combat.ComboTimer      = 0.0f;
                         anim.CurrentTime       = 0.0f;
 
+                        // Trigger lunge when reaching final hit
+                        if (combat.ComboIndex == 2)
+                        {
+                            combat.IsLunging  = true;
+                            combat.LungeTimer = combat.LungeDuration;
+                        }
+
                         int nextClip = GetComboClipIndex(anim, combat.ComboIndex);
                         if (nextClip >= 0)
                             audioEventQueue.push(std::make_unique<engine::AudioEvent>("attack1"));
@@ -153,13 +160,24 @@ namespace game
                         if (combat.ComboIndex > 2)
                             combat.ComboIndex = 0;
 
+                        // Trigger lunge on final hit
+                        if (combat.ComboIndex == 2)
+                        {
+                            combat.IsLunging  = true;
+                            combat.LungeTimer = combat.LungeDuration;
+                        }
+
                         int nextAttackClip = GetComboClipIndex(anim, combat.ComboIndex);
                         if (nextAttackClip >= 0)
                             anim.CurrentClip = nextAttackClip;
+
+                        comboIndex = combat.ComboIndex;
                     }
                     else
                     {
                         combat.IsAttacking = false;
+                        combat.IsLunging = false;
+                        combat.LungeTimer = 0.0f;
                         combat.ComboIndex = 0;
                         combat.ComboTimer = 0.0f;
                         isAttacking = false;
