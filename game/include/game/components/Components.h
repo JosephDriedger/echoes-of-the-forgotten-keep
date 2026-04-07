@@ -12,7 +12,7 @@
 #include "engine/rendering/AnimationData.h"
 #include "engine/rendering/Mesh.h"
 #include "engine/rendering/Texture.h"
-
+#include "ComponentEnum.h"
 #include <glm/glm.hpp>
 
 #include <memory>
@@ -142,10 +142,7 @@ namespace game
         }
     };
 
-    // -----------------------------------------------------------------------
-    // EnemyAI -- state machine for enemy behavior.
-    // -----------------------------------------------------------------------
-    enum class AIState { Idle, Patrol, Chase, Attack };
+
 
     struct EnemyAI
     {
@@ -251,20 +248,6 @@ namespace game
 
         Lifetime() = default;
         explicit Lifetime(float duration) : Duration(duration) {}
-    };
-
-    // -----------------------------------------------------------------------
-    // AnimationState -- skeletal animation playback and blending.
-    // -----------------------------------------------------------------------
-    enum class AnimState
-    {
-        Idle,
-        Run,
-        Attack1,
-        Attack2,
-        Attack3,
-        HitReact,
-        Death
     };
 
     struct AnimationState
