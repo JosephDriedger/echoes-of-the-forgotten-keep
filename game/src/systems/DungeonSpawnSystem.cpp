@@ -227,13 +227,13 @@ namespace game
                 SpawnColliderEntity(position, armThick, wallH, armLength);
 
             if (hasE && !hasW)
-                SpawnColliderEntity(position + glm::vec3(halfArm, 0, 0), armLength, wallH, armThick);
+                SpawnColliderEntity(position + glm::vec3(halfArm-1, 0, 0), halfArm, wallH, armThick);
             if (hasW && !hasE)
-                SpawnColliderEntity(position + glm::vec3(-halfArm, 0, 0), armLength, wallH, armThick);
+                SpawnColliderEntity(position + glm::vec3(-halfArm+1, 0, 0), halfArm, wallH, armThick);
             if (hasS && !hasN)
-                SpawnColliderEntity(position + glm::vec3(0, 0, halfArm), armThick, wallH, armLength);
+                SpawnColliderEntity(position + glm::vec3(0, 0, halfArm-1), armThick, wallH, halfArm);
             if (hasN && !hasS)
-                SpawnColliderEntity(position + glm::vec3(0, 0, -halfArm), armThick, wallH, armLength);
+                SpawnColliderEntity(position + glm::vec3(0, 0, -halfArm+1), armThick, wallH, halfArm);
         }
         else if (type == engine::PrefabType::WallCrossing)
         {
@@ -319,7 +319,7 @@ namespace game
         std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
 
         int count = static_cast<int>(floorPositions.size()) / 1;
-        count = std::max(1, std::min(count, 30));
+        count = std::max(1, std::min(count, 100));
 
         // Load skeleton enemy mesh (randomly pick from available skeleton types)
         std::vector<std::string> skeletonModels = {
