@@ -40,7 +40,7 @@ namespace game
         }
     }
 
-    void AnimationSystem::Update(engine::Registry& registry, float deltaTime)
+    void AnimationSystem::Update(engine::Registry& registry, float deltaTime, engine::AudioEventQueue &audioEventQueue)
     {
         for (const engine::Entity entity : registry.GetActiveEntities())
         {
@@ -122,6 +122,7 @@ namespace game
 
                         int nextClip = GetComboClipIndex(anim, combat.ComboIndex);
                         if (nextClip >= 0)
+                            audioEventQueue.push(std::make_unique<engine::AudioEvent>("attack1"));
                             anim.CurrentClip = nextClip;
 
                         // Update local so state machine below sees new index

@@ -318,15 +318,15 @@ namespace game
         std::mt19937 rng(seed);
         std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
 
-        int count = static_cast<int>(floorPositions.size()) / 8;
-        count = std::max(1, std::min(count, 5));
+        int count = static_cast<int>(floorPositions.size()) / 1;
+        count = std::max(1, std::min(count, 30));
 
         // Load skeleton enemy mesh (randomly pick from available skeleton types)
         std::vector<std::string> skeletonModels = {
             "asset/characters/Skeleton_Minion.glb",
-            "asset/characters/Skeleton_Warrior.glb",
-            "asset/characters/Skeleton_Rogue.glb",
-            "asset/characters/Skeleton_Mage.glb"
+            // "asset/characters/Skeleton_Warrior.glb",
+            // "asset/characters/Skeleton_Rogue.glb",
+            // "asset/characters/Skeleton_Mage.glb"
         };
         auto texture = m_AssetManager.GetTextureManager().Load("asset/characters/skeleton_texture.png");
 
@@ -374,8 +374,8 @@ namespace game
             ai.HasPatrol = true;
             ai.PatrolAX = pos.x;
             ai.PatrolAZ = pos.z;
-            ai.PatrolBX = pos.x + patrolOffX;
-            ai.PatrolBZ = pos.z + patrolOffZ;
+            ai.PatrolBX = pos.x - patrolOffX;
+            ai.PatrolBZ = pos.z - patrolOffZ;
             m_Registry.AddComponent(e, ai);
             m_Registry.AddComponent(e, Health(3, 3));
             m_Registry.AddComponent(e, CombatState());
@@ -394,7 +394,7 @@ namespace game
                     if (name == "Skeletons_Idle") anim.IdleClipIndex = c;
                     else if (name == "Skeletons_Walking") anim.RunClipIndex = c;
                     else if (name == "Skeletons_Death") anim.DeathClipIndex = c;
-                    else if (name == "Skeletons_Attack") anim.Attack1ClipIndex = c;
+                    else if (name == "Melee_Unarmed_Attack_Punch_A") anim.Attack1ClipIndex = c;
                 }
 
                 // If no skeleton-specific clips, fall back to generic ones
@@ -497,7 +497,8 @@ namespace game
             if (m_Registry.IsAlive(doorEntity) && m_Registry.HasComponent<Door>(doorEntity))
             {
                 auto& door = m_Registry.GetComponent<Door>(doorEntity);
-                door.SwingDirection = 1;
+                // door.TriggerId = switchId;
+                door.SwingDirection = 1; // always open one direction for puzzle doors
             }
         }
 

@@ -68,6 +68,8 @@ namespace game
         // load audio
         application.GetAudioManager().loadAudio("theme", "asset/audio/1 Exploration LOOP TomMusic.ogg");
         application.GetAudioManager().loadAudio("attack1", "asset/audio/Sword Attack 1.ogg");
+        application.GetAudioManager().loadAudio("death", "asset/audio/Goblin_00.mp3");
+        application.GetAudioManager().loadAudio("door", "asset/audio/Door Open 1.ogg");
 
         //start music
         application.GetAudioManager().playMusic("theme");

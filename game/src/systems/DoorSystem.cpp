@@ -9,7 +9,7 @@
 
 namespace game
 {
-    void DoorSystem::Update(engine::Registry& registry, float deltaTime)
+    void DoorSystem::Update(engine::Registry& registry, float deltaTime, engine::AudioEventQueue &audioEventQueue)
     {
         // Find the player position
         float playerX = 0.0f;
@@ -56,6 +56,7 @@ namespace game
 
                 float dot = dx * doorForwardX + dz * doorForwardZ;
                 door.SwingDirection = (dot > 0.0f) ? 1 : -1;
+                audioEventQueue.push(std::make_unique<engine::AudioEvent>("door"));
             }
 
             // Reset swing direction when door fully closes
