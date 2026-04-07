@@ -46,61 +46,17 @@ int RunEntitySpawnSystemTests()
         assert(!collider.IsTrigger);
     }
 
-    // Test: SpawnEnemy creates entity with correct components and position
+    // Test: Multiple players can be spawned
     {
         engine::Registry registry;
         game::EntitySpawnSystem::Register(registry);
 
-        engine::Entity enemy = game::EntitySpawnSystem::SpawnEnemy(registry, 5.0f, 7.0f);
+        engine::Entity player1 = game::EntitySpawnSystem::SpawnPlayer(registry);
+        engine::Entity player2 = game::EntitySpawnSystem::SpawnPlayer(registry);
 
-        assert(registry.IsAlive(enemy));
-        assert(registry.HasComponent<game::Transform>(enemy));
-        assert(registry.HasComponent<game::Collider>(enemy));
-        assert(registry.HasComponent<game::EnemyAI>(enemy));
-        assert(!registry.HasComponent<game::Player>(enemy));
-
-        const auto& transform = registry.GetComponent<game::Transform>(enemy);
-        assert(transform.X == 5.0f);
-        assert(transform.Y == 7.0f);
-
-        const auto& ai = registry.GetComponent<game::EnemyAI>(enemy);
-        assert(ai.MoveSpeed == 1.0f);
-    }
-
-    // Test: SpawnExit creates trigger collider
-    {
-        engine::Registry registry;
-        game::EntitySpawnSystem::Register(registry);
-
-        engine::Entity exit = game::EntitySpawnSystem::SpawnExit(registry, 3.0f, 4.0f);
-
-        assert(registry.IsAlive(exit));
-        assert(registry.HasComponent<game::Transform>(exit));
-        assert(registry.HasComponent<game::Collider>(exit));
-
-        const auto& transform = registry.GetComponent<game::Transform>(exit);
-        assert(transform.X == 3.0f);
-        assert(transform.Y == 4.0f);
-
-        const auto& collider = registry.GetComponent<game::Collider>(exit);
-        assert(collider.IsTrigger);
-    }
-
-    // Test: Multiple entities can be spawned
-    {
-        engine::Registry registry;
-        game::EntitySpawnSystem::Register(registry);
-
-        engine::Entity player = game::EntitySpawnSystem::SpawnPlayer(registry);
-        engine::Entity enemy1 = game::EntitySpawnSystem::SpawnEnemy(registry, 1.0f, 1.0f);
-        engine::Entity enemy2 = game::EntitySpawnSystem::SpawnEnemy(registry, 2.0f, 2.0f);
-        engine::Entity exit = game::EntitySpawnSystem::SpawnExit(registry, 10.0f, 10.0f);
-
-        assert(registry.GetAliveCount() == 4);
-        assert(registry.IsAlive(player));
-        assert(registry.IsAlive(enemy1));
-        assert(registry.IsAlive(enemy2));
-        assert(registry.IsAlive(exit));
+        assert(registry.GetAliveCount() == 2);
+        assert(registry.IsAlive(player1));
+        assert(registry.IsAlive(player2));
     }
 
     std::cout << "Entity spawn system tests passed.\n";

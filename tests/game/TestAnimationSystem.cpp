@@ -4,6 +4,7 @@
 
 #include "engine/ecs/Registry.h"
 #include "engine/rendering/AnimationData.h"
+#include "engine/resources/AudioEventQueue.h"
 
 #include <glm/glm.hpp>
 
@@ -60,6 +61,7 @@ namespace
     struct TestSetup
     {
         engine::Registry Registry;
+        engine::AudioEventQueue AudioQueue;
         engine::Entity PlayerEntity;
 
         TestSetup()
@@ -117,7 +119,7 @@ int RunAnimationSystemTests()
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
 
         anim.IsMoving = true;
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(anim.CurrentState == game::AnimState::Run);
         assert(anim.IsBlending); // should blend to run clip
@@ -130,7 +132,7 @@ int RunAnimationSystemTests()
 
         // Move first
         anim.IsMoving = true;
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
         assert(anim.CurrentState == game::AnimState::Run);
 
         // Complete the blend
@@ -139,7 +141,7 @@ int RunAnimationSystemTests()
 
         // Stop moving
         anim.IsMoving = false;
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
         assert(anim.CurrentState == game::AnimState::Idle);
     }
 
@@ -154,7 +156,7 @@ int RunAnimationSystemTests()
         anim.CurrentClip = anim.Attack1ClipIndex;
         anim.CurrentTime = 0.0f;
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(anim.CurrentState == game::AnimState::Attack1);
         assert(combat.IsAttacking);
@@ -175,7 +177,7 @@ int RunAnimationSystemTests()
         anim.CurrentTime = 5.1f;
         combat.ComboWindowOpen = false;
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(combat.ComboWindowOpen);
         assert(combat.ComboTimer > 0.0f);
@@ -195,7 +197,7 @@ int RunAnimationSystemTests()
         // Set time past clip duration to trigger combo advance
         anim.CurrentTime = 10.1f;
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(combat.ComboIndex == 1);
         assert(!combat.AttackQueued);
@@ -214,7 +216,7 @@ int RunAnimationSystemTests()
         combat.AttackQueued = true;
         anim.CurrentTime = 10.1f;
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(combat.ComboIndex == 0);
         assert(anim.CurrentClip == anim.Attack1ClipIndex);
@@ -232,7 +234,7 @@ int RunAnimationSystemTests()
         combat.AttackQueued = false;
         anim.CurrentTime = 10.1f;
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(!combat.IsAttacking);
         assert(combat.ComboIndex == 0);
@@ -248,7 +250,7 @@ int RunAnimationSystemTests()
         anim.CurrentClip = anim.DeathClipIndex;
         anim.CurrentTime = 0.0f;
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(anim.CurrentState == game::AnimState::Death);
     }
@@ -263,7 +265,7 @@ int RunAnimationSystemTests()
         anim.CurrentClip = anim.DeathClipIndex;
         anim.CurrentTime = 13.0f; // past duration of 12.0
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         // Time should be clamped to clip duration
         assert(anim.CurrentTime <= 12.1f);
@@ -279,7 +281,7 @@ int RunAnimationSystemTests()
         anim.CurrentClip = anim.HitClipIndex;
         anim.CurrentTime = 0.0f;
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(anim.CurrentState == game::AnimState::HitReact);
         assert(combat.IncomingHit.has_value());
@@ -295,7 +297,7 @@ int RunAnimationSystemTests()
         anim.CurrentClip = anim.HitClipIndex;
         anim.CurrentTime = 8.1f; // past hit clip duration
 
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         assert(!combat.IncomingHit.has_value());
     }
@@ -303,7 +305,7 @@ int RunAnimationSystemTests()
     // Test: FinalBoneMatrices populated after update
     {
         TestSetup setup;
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
 
         auto& anim = setup.Registry.GetComponent<game::AnimationState>(setup.PlayerEntity);
         assert(anim.FinalBoneMatrices.size() == 100);
@@ -317,14 +319,14 @@ int RunAnimationSystemTests()
 
         // Start a blend
         anim.IsMoving = true;
-        game::AnimationSystem::Update(setup.Registry, 0.016f);
+        game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
         assert(anim.IsBlending);
 
         // Advance past blend duration (0.2s default)
         // Each update adds deltaTime to BlendTime
         for (int i = 0; i < 20; i++)
         {
-            game::AnimationSystem::Update(setup.Registry, 0.016f);
+            game::AnimationSystem::Update(setup.Registry, 0.016f, setup.AudioQueue);
         }
 
         assert(!anim.IsBlending);
