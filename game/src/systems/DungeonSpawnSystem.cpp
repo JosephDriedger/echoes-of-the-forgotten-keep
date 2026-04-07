@@ -90,6 +90,14 @@ namespace game
             SpawnWallColliders(type, position, rotY);
         }
 
+        if (type == engine::PrefabType::Stairs)
+        {
+            Collider col(5.0f, 4.5f, 4.0f);
+            col.IsStatic = true;
+            col.OffsetZ += 2;
+            m_Registry.AddComponent(e, col);
+        }
+
         if (type == engine::PrefabType::WallDoorway)
         {
             SpawnDoorwayPillarColliders(position, rotY);
