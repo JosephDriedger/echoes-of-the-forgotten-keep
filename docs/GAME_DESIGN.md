@@ -2,20 +2,19 @@
 
 ## Game Concept
 
-**Echoes of the Forgotten Keep** is a 3D dungeon-crawler action game where the player controls a knight exploring procedurally generated dungeons. The game features real-time melee combat with a combo system, enemy AI, interactive puzzle elements (switches and doors), and skeletal animation.
+**Echoes of the Forgotten Keep** is a 3D dungeon-crawler action game where the player controls a knight exploring procedurally generated dungeons. The game features real-time melee combat with a combo system, enemy AI, interactive doors, and skeletal animation.
 
 ## Gameplay Loop
 
 1. **Explore** - Navigate through procedurally generated dungeon rooms
 2. **Fight** - Engage skeleton enemies in melee combat using a 3-hit combo system
-3. **Solve** - Step on floor switches to open doors and progress through rooms
-4. **Survive** - Manage health while fighting enemies and navigating the dungeon
+3. **Survive** - Manage health while fighting enemies and navigating the dungeon
 
 ## Player Character
 
 - **Model**: Knight with sword (right hand) and shield (left hand)
-- **Movement**: WASD keyboard controls with automatic facing direction
-- **Combat**: Left-click to attack, 3-hit combo chain (horizontal slice, stab, jump chop)
+- **Movement**: WASD or Arrow Keys with automatic facing direction
+- **Combat**: Space to attack, 3-hit combo chain (horizontal slice, stab, jump chop)
 - **Health**: 10 HP, displayed as a health bar HUD element
 
 ## Combat System
@@ -47,7 +46,7 @@ Dungeons are procedurally generated using the `DungeonSpawnSystem`:
 
 - Rooms are placed on a grid with configurable count and seed
 - Each room contains walls, floors, and decorative elements from the prefab library
-- Doors connect rooms, opened by floor switches
+- Doors connect rooms and open automatically when the player approaches
 - Enemies are spawned within rooms
 
 ### Prefab Types
@@ -100,8 +99,8 @@ The game uses two reusable UI widget classes:
 
 | Input | Action |
 |-------|--------|
-| W/A/S/D | Move player |
-| Left Mouse Button | Attack (combo chain) |
+| W/A/S/D or Arrow Keys | Move player |
+| Space | Attack (combo chain) |
 | Mouse Wheel | Camera zoom in/out |
 | ESC | Pause menu (during gameplay) |
 | F3 | Toggle debug mode (enables F4/F5) |
@@ -110,6 +109,6 @@ The game uses two reusable UI widget classes:
 
 ## Team
 
-- **Joey Driedger** - Engine Lead
+- **Joey Driedger** - Architecture Lead
 - **Adam Van Woerden** - Rendering Lead
 - **Elijah Fabon** - Game Design Lead

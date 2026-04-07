@@ -30,7 +30,7 @@ The engine follows a modular architecture with a clean separation between the `e
 | AnimationState | Skeletal animation playback and bone matrices |
 | CombatState | Attack state, combo chain, incoming damage |
 | EnemyAI | AI behavior state machine (Idle/Patrol/Chase/Attack) |
-| Door | Door swing state and puzzle trigger linkage |
+| Door | Door swing state and proximity-based opening |
 | Switch | Floor switch for puzzle interactions |
 | BoneAttachment | Attaches entity to a parent's skeleton bone |
 | Room | Room membership identifier |
@@ -50,7 +50,7 @@ The engine follows a modular architecture with a clean separation between the `e
 | DamageSystem | Applies incoming hits to health |
 | EnemyAISystem | AI state machine execution |
 | DungeonSpawnSystem | Procedural room and entity generation |
-| DoorSystem / DoorPuzzleSystem | Door animation and switch-to-door linkage |
+| DoorSystem | Proximity-based door animation |
 | SwitchTriggerSystem | Player-switch collision detection |
 | CameraFollowSystem | Smooth camera tracking with zoom |
 | UISystem | HUD rendering (health bar) |
@@ -94,8 +94,8 @@ cmake --build build
 
 | Input | Action |
 |-------|--------|
-| W/A/S/D | Move player |
-| Left Mouse Button | Attack (3-hit combo chain) |
+| W/A/S/D or Arrow Keys | Move player |
+| Space | Attack (3-hit combo chain) |
 | Mouse Wheel | Camera zoom |
 | ESC | Pause menu |
 | F3 | Toggle debug mode (enables F4/F5) |
@@ -104,6 +104,6 @@ cmake --build build
 
 ## Team
 
-- **Joey Driedger** - Engine Lead
+- **Joey Driedger** - Architecture Lead
 - **Adam Van Woerden** - Rendering Lead
 - **Elijah Fabon** - Game Design Lead

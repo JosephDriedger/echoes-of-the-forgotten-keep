@@ -497,8 +497,7 @@ namespace game
             if (m_Registry.IsAlive(doorEntity) && m_Registry.HasComponent<Door>(doorEntity))
             {
                 auto& door = m_Registry.GetComponent<Door>(doorEntity);
-                door.TriggerId = switchId;
-                door.SwingDirection = 1; // always open one direction for puzzle doors
+                door.SwingDirection = 1;
             }
         }
 
