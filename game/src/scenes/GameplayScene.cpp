@@ -259,7 +259,7 @@ namespace game
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
-        m_DungeonSpawnSystem->SpawnDungeon(10, 42, 0.5f);
+        m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
     }
 
     /// Runs the full ECS pipeline each frame. Order matters: input -> movement
