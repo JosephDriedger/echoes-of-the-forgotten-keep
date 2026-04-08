@@ -154,11 +154,11 @@ echoes-of-the-forgotten-keep/
 │   │   ├── platform/           Platform-specific (Window)
 │   │   ├── rendering/          Shader, Mesh, Texture, Camera, Renderers, Animation
 │   │   ├── resources/          Asset/Shader/Texture/Mesh managers
-│   │   └── scene/              Scene, SceneManager, PrefabManager
+│   │   └── scene/              Scene, SceneManager, PrefabManager, BuildRoomSystem, FloorGenerator
 │   └── src/                    Implementation files (mirrors include structure)
 ├── game/                       Game library
 │   ├── include/game/
-│   │   ├── components/         ECS components (all in Components.h)
+│   │   ├── components/         ECS components (Components.h + ComponentEnum.h)
 │   │   ├── scenes/             Scene implementations
 │   │   ├── systems/            ECS systems (Movement, Combat, etc.)
 │   │   └── ui/                 UI widgets (UIButton, UISlider)
