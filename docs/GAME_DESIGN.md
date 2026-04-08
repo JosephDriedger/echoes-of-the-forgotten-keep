@@ -29,6 +29,9 @@ Click → Attack 1 (Horizontal Slice)
 
 - Each attack has a damage value and its own animation clip
 - A **combo window** is a brief time period near the end of each attack animation during which the player can click again to chain into the next attack. If the player clicks during this window, the next attack in the sequence begins immediately. If the player does not click before the window closes, the combo resets to the beginning (Attack 1).
+- The player **lunges forward** during attacks, closing distance to enemies (configurable speed and duration)
+- The final hit in a combo chain applies a **knockback multiplier** (default 2.5x), sending enemies flying back further
+- After being hit, entities receive **invincibility frames** (i-frames) during which they cannot take additional damage, preventing multi-hit per swing
 - Enemies have their own AI-driven attack patterns with cooldown timers
 
 ## Enemy AI
@@ -39,6 +42,8 @@ Enemies use a state machine with four states:
 - **Patrol** - Walks between two waypoints (if configured)
 - **Chase** - Moves toward the player when within vision range
 - **Attack** - Attacks the player when within attack range, with cooldown between strikes. Enemies attack immediately upon first entering attack range without waiting for the cooldown timer.
+
+Enemies are also subject to **knockback** — when hit, they are pushed away from the attacker for a brief duration (default 0.7s). During knockback, the enemy's AI is suspended and they cannot attack or chase. The final hit in the player's combo chain applies extra knockback force.
 
 ## Dungeon Generation
 

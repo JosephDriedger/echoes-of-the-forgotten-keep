@@ -234,7 +234,7 @@ GameplayScene::OnUpdate(dt)
       ├──  7. DamageSystem          — apply IncomingHit to Health
       ├──  8. DeathSystem           — mark dead, convert collider to trigger, play death SFX
       ├──  9. EnemyAISystem         — Idle/Patrol/Chase/Attack state machine
-      ├── 10. CombatSystem          — process attack timing, combo windows
+      ├── 10. HitTimerSystem        — count down i-frame timers
       ├── 11. SwitchTriggerSystem   — detect player on switches
       ├── 12. DoorSystem            — proximity-based door opening, play door SFX
       ├── 13. DoorPuzzleSystem      — open/close doors linked to switches via TriggerId
@@ -253,7 +253,7 @@ GameplayScene::OnUpdate(dt)
 - **Damage after hitbox** (7): Hits detected this frame are applied immediately
 - **Death after damage** (8): Entities killed this frame are marked before AI runs
 - **AI after death** (9): Dead entities are skipped by the AI state machine
-- **Combat after AI** (10): Both player and enemy attack timing is resolved together
+- **Hit timers after AI** (10): Invincibility frame countdowns tick after all damage and AI processing
 - **World systems** (11-14): Switches, proximity doors, puzzle doors, and cleanup run after all combat
 - **Camera last** (15): Camera captures the final state of everything
 - **Audio last**: All sound effects queued during the frame are played together at the end, ensuring consistent audio timing

@@ -28,12 +28,11 @@ The engine follows a modular architecture with a clean separation between the `e
 | Health | Current and maximum hit points |
 | Collider | AABB collision volume with trigger/static flags |
 | AnimationState | Skeletal animation playback and bone matrices |
-| CombatState | Attack state, combo chain, incoming damage |
-| EnemyAI | AI behavior state machine (Idle/Patrol/Chase/Attack) |
+| CombatState | Attack state, combo chain, incoming damage, lunge, knockback |
+| EnemyAI | AI behavior state machine (Idle/Patrol/Chase/Attack), knockback |
 | Door | Door swing state and proximity-based opening |
 | Switch | Floor switch for puzzle interactions |
 | BoneAttachment | Attaches entity to a parent's skeleton bone |
-| Room | Room membership identifier |
 | Lifetime | Auto-destroy timer |
 
 ### ECS Systems
@@ -45,10 +44,10 @@ The engine follows a modular architecture with a clean separation between the `e
 | AnimationSystem | Skeleton evaluation and bone matrix computation |
 | BoneAttachmentSystem | Positions bone-attached entities (sword, shield) |
 | CombatInputSystem | Mouse input to attack/combo requests |
-| CombatSystem | Attack timing, combo windows, state transitions |
 | AttackHitboxSystem | Active hitbox tracking, multi-hit prevention |
 | DamageSystem | Applies incoming hits to health |
 | EnemyAISystem | AI state machine execution |
+| HitTimerSystem | Invincibility frame countdown after taking damage |
 | DungeonSpawnSystem | Procedural room and entity generation |
 | DoorSystem | Proximity-based door animation |
 | SwitchTriggerSystem | Player-switch collision detection |

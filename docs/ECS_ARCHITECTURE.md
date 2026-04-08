@@ -78,7 +78,7 @@ Base class providing a `std::set<Entity> m_Entities` member for systems that nee
 
 ## Components
 
-Game components are defined across two headers: `game/include/game/components/Components.h` (structs) and `game/include/game/components/ComponentEnum.h` (shared enums and small types like `AnimState`, `AIState`, and `PendingHit` that are used by multiple systems). They are plain structs with public members.
+Game components are defined across two headers: `game/include/game/components/Components.h` (structs) and `game/include/game/components/ComponentEnum.h` (shared enums and small types like `AnimState`, `AIState`, and `PendingHit` that are used by multiple systems). `PendingHit` includes a `KnockbackMultiplier` field used to scale knockback force on the final combo hit. They are plain structs with public members.
 
 ### Transform
 Position, rotation, and scale in 3D space.
@@ -117,50 +117,83 @@ IsStatic                   - If true, doesn't get pushed by collisions (used for
 ```
 
 ### AnimationState
-Skeletal animation playback state.
+Skeletal animation playback state and blending.
 ```
-SkeletonPtr         - Shared pointer to bone hierarchy
-Clips               - Shared pointer to animation clip library
-CurrentClip         - Index of the currently playing clip
-CurrentTime         - Playback position within the clip
-BlendTime           - Duration of cross-fade between clips
-FinalBoneMatrices   - Array of 100 mat4 values uploaded to the vertex shader
-AnimState           - Current state (Idle, Running, Attacking, Hit, Dead)
+SkeletonPtr          - Shared pointer to bone hierarchy
+Clips                - Shared pointer to animation clip library
+CurrentClip          - Index of the currently playing clip
+NextClip             - Index of the clip being blended into (-1 if none)
+CurrentTime          - Playback position within the current clip
+NextTime             - Playback position within the next clip (during blending)
+BlendTime            - Elapsed blend time
+BlendDuration        - Duration of cross-fade between clips (default 0.2s)
+IsBlending           - Whether a cross-fade blend is in progress
+IsMoving             - Whether the entity is currently moving
+AnimationSpeed       - Playback speed multiplier (default 1.0)
+CurrentState         - Current animation state (Idle, Run, Attack1-3, HitReact, Death)
+PreviousState        - Previous animation state (for detecting transitions)
+FinalBoneMatrices    - Array of 100 mat4 values uploaded to the vertex shader
+FinalNodeTransforms  - Map of bone name to world-space transform (used by BoneAttachmentSystem)
 IdleClipIndex, RunClipIndex, Attack1-3ClipIndex, HitClipIndex, DeathClipIndex
 ```
 
 ### CombatState
-Combat mechanics and combo system.
+Combat mechanics, combo system, lunge, and hit recovery.
 ```
-AttackDamage     - Damage per hit
-IsAttacking      - Currently in an attack animation
-AttackQueued     - Player queued a follow-up attack
-ComboWindowOpen  - Combo input window is active
-ComboIndex       - Current position in combo chain (0-2)
-ComboWindow      - Duration of the combo input window
-IncomingHit      - Optional pending damage from an enemy
-IsDead           - Entity has been killed
+AttackDamage                - Damage per hit
+IsAttacking                 - Currently in an attack animation
+AttackQueued                - Player queued a follow-up attack
+ComboWindowOpen             - Combo input window is active
+ComboIndex                  - Current position in combo chain (0-2)
+ComboWindow                 - Duration of the combo input window
+ComboTimer                  - Time remaining in the current combo window
+FinalHitKnockbackMultiplier - Knockback multiplier for the last hit in a combo (default 2.5)
+IsLunging                   - Whether the entity is lunging forward during an attack
+LungeDuration               - How long the lunge lasts (default 0.7s)
+LungeTimer                  - Time remaining in the current lunge
+LungeSpeed                  - Forward speed during lunge (default 7.0)
+IncomingHit                 - Optional pending damage (includes knockback multiplier)
+IsDead                      - Entity has been killed
+HitTimer                    - Invincibility frame timer (>0 means immune to new hits)
 ```
 
 ### EnemyAI
-Enemy behavior state machine.
+Enemy behavior state machine with knockback support.
 ```
-MoveSpeed       - Movement speed
-State           - Current AI state (Idle, Patrol, Chase, Attack)
-VisionRange     - Distance at which the enemy detects the player
-AttackRange     - Distance at which the enemy attacks
-AttackCooldown  - Time between attacks
-PatrolA, PatrolB - Waypoint positions for patrol behavior
-HasPatrol       - Whether this enemy patrols
+MoveSpeed            - Movement speed
+State                - Current AI state (Idle, Patrol, Chase, Attack)
+StateTimer           - Time spent in current state
+VisionRange          - Distance at which the enemy detects the player
+AttackRange          - Distance at which the enemy attacks
+AttackCooldown       - Time between attacks
+AttackTimer          - Cooldown timer between attacks
+MaxChaseTime         - Maximum time to chase before giving up
+LoseTargetCooldown   - Delay before returning to idle after losing sight
+LoseTargetTimer      - Timer for losing target
+HasPatrol            - Whether this enemy patrols
+PatrolAX, PatrolAZ   - First waypoint position
+PatrolBX, PatrolBZ   - Second waypoint position
+MovingToB            - Currently moving toward waypoint B
+IdleBeforePatrol     - Idle duration before starting patrol
+IsKnockedBack        - Currently being knocked back
+KnockbackTimer       - Time remaining in knockback
+KnockbackDuration    - How long knockback lasts (default 0.7s)
+KnockbackVX, VZ     - Knockback velocity direction
+KnockbackSpeed       - Knockback movement speed (default 4.0)
 ```
 
 ### Door
-Door state and swing animation. Doors open automatically when the player approaches.
+Door state, swing animation, and puzzle trigger linkage. Proximity doors open automatically when the player approaches. Puzzle doors are linked to floor switches via `TriggerId`.
 ```
 BaseRotationY    - Rotation when fully closed
-CurrentAngle     - Current swing angle
+CurrentAngle     - Current swing angle in degrees (0 = closed)
 SwingSpeed       - Degrees per second
-SwingDirection   - +1 or -1
+SwingDirection   - +1 or -1, determined by player approach side
+TriggerId        - Links to Switch::Id; empty string = proximity door
+Open             - Whether the door is currently open
+TargetAngle      - Target swing angle for animation
+OpenAngle        - Angle when fully open (default 90)
+CloseAngle       - Angle when fully closed (default 0)
 ColliderEntity   - Entity with the door's collider
 PanelLength, PanelThickness - Physical dimensions for collider updates
 ```
@@ -208,9 +241,9 @@ All game systems are in `game/include/game/systems/`. Systems come in two styles
 | System | Style | Purpose |
 |--------|-------|---------|
 | **CombatInputSystem** | Static | Translates mouse clicks into `CombatState` attack requests, manages combo queuing |
-| **CombatSystem** | Instance | Processes attack timing, combo windows, animation state transitions |
 | **AttackHitboxSystem** | Instance | Tracks active attack hitboxes, prevents multi-hit per swing |
 | **DamageSystem** | Instance | Processes `IncomingHit` on `CombatState`, applies damage to `Health` |
+| **HitTimerSystem** | Instance | Counts down `HitTimer` on `CombatState` each frame; while >0, entity has invincibility frames (i-frames) and cannot receive new hits |
 | **DeathSystem** | Static | Marks dead entities (Health <= 0) with `IsDead`, converts their collider to a trigger (so corpses don't block movement), plays death sound via `AudioEventQueue`, clears movement, adds corpse `Lifetime` |
 
 ### AI Systems
@@ -254,7 +287,7 @@ Systems are executed in a specific order each frame in `GameplayScene::OnUpdate(
 7. DamageSystem         (apply damage)
 8. DeathSystem          (mark dead entities, add corpse timer)
 9. EnemyAISystem        (run AI behavior, skip dead)
-10. CombatSystem        (process attacks)
+10. HitTimerSystem      (count down i-frame timers)
 11. SwitchTriggerSystem (check switches)
 12. DoorSystem          (proximity doors)
 13. DoorPuzzleSystem    (switch-linked doors)
