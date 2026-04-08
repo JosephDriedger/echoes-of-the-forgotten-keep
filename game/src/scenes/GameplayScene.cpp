@@ -289,7 +289,7 @@ namespace game
         m_DamageSystem.Update(m_Registry);
         DeathSystem::Update(m_Registry, audioEventQueue);
         m_EnemyAISystem.Update(m_Registry, dt);
-        m_CombatSystem.Update(m_Registry, dt);
+        m_HitTimerSystem.Update(m_Registry, dt);
         SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt, audioEventQueue);
         DoorPuzzleSystem::Update(m_Registry, dt);

@@ -99,7 +99,7 @@ namespace game
         std::unique_ptr<DungeonSpawnSystem> m_DungeonSpawnSystem;
 
         EnemyAISystem m_EnemyAISystem;
-        HitTimerSystem m_CombatSystem;
+        HitTimerSystem m_HitTimerSystem;
         DamageSystem m_DamageSystem;
         UISystem m_UISystem;
         engine::TextRenderer m_DebugTextRenderer;
