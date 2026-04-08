@@ -18,6 +18,7 @@ namespace engine
         return true;
     }
 
+    // Tears down every scene from top to bottom, then releases the application pointer.
     void SceneManager::Shutdown()
     {
         while (!m_SceneStack.empty())

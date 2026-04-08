@@ -10,6 +10,9 @@
 
 namespace game
 {
+    /// Top-down camera that tracks a target entity with mouse-wheel zoom.
+    /// The camera is positioned directly above the target, offset slightly
+    /// along +Z proportional to the zoom level to create a mild angle.
     class CameraFollowSystem
     {
     public:
@@ -17,7 +20,7 @@ namespace game
                     engine::Camera& camera, const engine::Input& input);
 
     private:
-        float m_Zoom = 20.0f;
+        float m_Zoom = 20.0f;              // current zoom distance (camera Y height)
         static constexpr float kZoomMin = 8.0f;
         static constexpr float kZoomMax = 60.0f;
         static constexpr float kZoomSpeed = 0.8f;

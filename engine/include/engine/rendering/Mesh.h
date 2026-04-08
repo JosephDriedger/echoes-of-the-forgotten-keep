@@ -9,6 +9,12 @@
 
 namespace engine
 {
+    // Interleaved vertex data matching the VAO layout:
+    //   location 0: position (vec3)
+    //   location 1: normal   (vec3)
+    //   location 2: texcoord (vec2)
+    //   location 3: bone IDs (ivec4) -- for GPU skinning
+    //   location 4: bone weights (vec4) -- for GPU skinning
     struct Vertex
     {
         float PositionX = 0.0f;
@@ -22,10 +28,14 @@ namespace engine
         float TextureU = 0.0f;
         float TextureV = 0.0f;
 
+        // Up to MAX_BONE_INFLUENCE bones per vertex; -1 means unused slot.
         int BoneIDs[MAX_BONE_INFLUENCE] = {-1, -1, -1, -1};
         float Weights[MAX_BONE_INFLUENCE] = {0.0f, 0.0f, 0.0f, 0.0f};
     };
 
+    // Manages an indexed OpenGL mesh (VAO + VBO + EBO).
+    // Uploads vertex/index data to the GPU and issues indexed draw calls.
+    // Non-copyable; ownership transfers via move semantics.
     class Mesh
     {
     public:

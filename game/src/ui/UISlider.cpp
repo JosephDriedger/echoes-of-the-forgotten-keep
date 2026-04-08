@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file UISlider.cpp
+/// @brief Horizontal slider that writes directly to a bound float pointer.
 
 #include "game/ui/UISlider.h"
 
@@ -39,6 +41,9 @@ namespace game
         m_TrackOffsetX = m_LabelWidth + 20.0f;
     }
 
+    /// Returns true if the value changed this frame. Supports click-to-set and
+    /// click-and-drag interaction. Dragging continues even if the mouse leaves
+    /// the track area, until the button is released.
     bool UISlider::Update(const engine::Input &input)
     {
         if (!m_ValuePtr) return false;
@@ -50,8 +55,6 @@ namespace game
 
         float trackX = m_X + m_TrackOffsetX;
         float trackCenterY = m_Y + m_HandleHeight / 2.0f;
-
-        // Check if click is on track/handle area
         if (input.IsMouseButtonPressed(1))
         {
             if (mx >= trackX && mx <= trackX + m_TrackWidth &&

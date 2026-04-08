@@ -8,6 +8,9 @@ namespace engine
     class Window;
     class Camera;
 
+    // Core rendering context that manages per-frame GL state.
+    // Sets up depth testing, back-face culling (CCW winding), and clears
+    // the color/depth buffers each frame. Holds a reference to the active camera.
     class Renderer
     {
     public:

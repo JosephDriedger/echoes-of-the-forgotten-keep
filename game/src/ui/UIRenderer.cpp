@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file UIRenderer.cpp
+/// @brief OpenGL textured-quad renderer for screen-space UI icons.
 
 #include "game/ui/UIRenderer.h"
 

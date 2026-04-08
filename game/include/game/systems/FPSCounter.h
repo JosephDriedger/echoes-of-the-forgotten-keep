@@ -1,5 +1,9 @@
 // Created by Elijah Fabon
 
+// FPSCounter -- Accumulates frame times and computes a smoothed FPS
+// reading every UPDATE_INTERVAL seconds. Provides a pre-formatted
+// display string for the debug HUD overlay.
+
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_FPSCOUNTER_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_FPSCOUNTER_H
 

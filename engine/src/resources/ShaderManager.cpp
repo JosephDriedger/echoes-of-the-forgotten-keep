@@ -11,6 +11,7 @@ namespace engine
         const std::string& vertexPath,
         const std::string& fragmentPath)
     {
+        // Return the cached shader if it was already loaded under this key.
         const auto existing = m_Shaders.find(key);
 
         if (existing != m_Shaders.end())

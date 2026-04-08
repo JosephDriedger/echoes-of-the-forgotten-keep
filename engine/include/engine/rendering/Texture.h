@@ -7,6 +7,9 @@
 
 namespace engine
 {
+    // Wraps an OpenGL 2D texture loaded from an image file via SDL_image.
+    // Converts images to RGBA32 and generates mipmaps on upload.
+    // Non-copyable; ownership transfers via move semantics.
     class Texture
     {
     public:
@@ -22,6 +25,7 @@ namespace engine
         bool LoadFromFile(const std::string& path);
         void Destroy();
 
+        // Binds this texture to the given texture unit (GL_TEXTURE0 + slot).
         void Bind(unsigned int slot = 0) const;
         void Unbind() const;
 

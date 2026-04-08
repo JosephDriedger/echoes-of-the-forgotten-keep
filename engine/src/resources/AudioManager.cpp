@@ -26,7 +26,7 @@ namespace engine {
 
         musicTrack = MIX_CreateTrack(mixer);
         sfxTrack = MIX_CreateTrack(mixer);
-        MIX_SetTrackGain(musicTrack, 0.75f);
+        MIX_SetTrackGain(musicTrack, 0.75f); // Default music volume at 75%.
     }
 
     void AudioManager::loadAudio(const std::string &name, const char *path) const {
@@ -51,6 +51,7 @@ namespace engine {
             return;
         }
 
+        // -1 loops means infinite looping for background music.
         SDL_PropertiesID prop = SDL_CreateProperties();
         SDL_SetNumberProperty(prop, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
 

@@ -1,6 +1,11 @@
 //
 // Created by Joseph Driedger on 3/23/2026.
 //
+/// @file TestCollision.cpp
+/// @brief Tests for AABB collision detection and resolution.
+///
+/// Places two overlapping entities with box colliders and verifies that
+/// CollisionSystem::Update separates them so they no longer overlap.
 
 #include "game/systems/CollisionSystem.h"
 

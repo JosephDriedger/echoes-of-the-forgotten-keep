@@ -147,6 +147,7 @@ namespace game
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, camera.GetViewMatrix());
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, camera.GetProjectionMatrix());
 
+        // Disable depth so wireframes are always visible on top of geometry
         glDisable(GL_DEPTH_TEST);
         glLineWidth(2.0f);
 
@@ -163,7 +164,8 @@ namespace game
             const auto& transform = registry.GetComponent<Transform>(entity);
             const auto& collider = registry.GetComponent<Collider>(entity);
 
-            // Collider center = transform position + offset, then expand by half-size
+            // Build a model matrix that maps the unit cube [0,1]^3 to the
+            // collider's world-space AABB (position + offset, scaled by size).
             float centerX = transform.X + collider.OffsetX;
             float centerY = transform.Y + collider.OffsetY;
             float centerZ = transform.Z + collider.OffsetZ;

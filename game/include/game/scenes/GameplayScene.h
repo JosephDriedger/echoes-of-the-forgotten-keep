@@ -1,4 +1,10 @@
 // Created by Adam Van Woerden
+/// @file GameplayScene.h
+/// @brief Core gameplay scene -- dungeon rendering, ECS systems, player control.
+///
+/// Owns the ECS Registry, Camera, asset managers, and all gameplay systems.
+/// On creation it loads the player model, animations, and dungeon prefabs,
+/// then spawns the dungeon and player entity. ESC pushes PauseMenuScene.
 
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEPLAYSCENE_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_GAMEPLAYSCENE_H
@@ -46,9 +52,13 @@ namespace game
     public:
         GameplayScene();
 
+        /// Initializes camera, shader, ECS registry, loads content, spawns dungeon.
         bool OnCreate(engine::Application& application) override;
+        /// Releases all ECS entities, meshes, textures, and animation data.
         void OnDestroy() override;
+        /// Runs all ECS systems (input, movement, collision, AI, combat, etc.).
         void OnUpdate(engine::Application& application, engine::Timestep timestep) override;
+        /// Renders all entities with their meshes/textures, debug overlays, and HUD.
         void OnRender(engine::Application& application) override;
 
         engine::AudioEventQueue& getAudioEventQueue() {
@@ -56,9 +66,13 @@ namespace game
         }
 
     private:
+        /// Loads the player mesh, skeleton, and all animation clip files.
         void LoadContent();
+        /// Registers dungeon tile prefabs (walls, floors, doors, etc.).
         void RegisterPrefabs();
+        /// Spawns the player entity with equipment and generates the dungeon.
         void InitializeScene();
+        /// Searches loaded animation clips by name; returns -1 if not found.
         int FindClipIndex(const std::string& name) const;
 
         engine::Camera m_Camera;
@@ -85,7 +99,7 @@ namespace game
         std::unique_ptr<DungeonSpawnSystem> m_DungeonSpawnSystem;
 
         EnemyAISystem m_EnemyAISystem;
-        HitTimerSystem m_CombatSystem;
+        HitTimerSystem m_HitTimerSystem;
         DamageSystem m_DamageSystem;
         UISystem m_UISystem;
         engine::TextRenderer m_DebugTextRenderer;

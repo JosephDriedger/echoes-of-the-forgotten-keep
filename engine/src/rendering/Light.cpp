@@ -1,4 +1,7 @@
 // Created by Adam Van Woerden
+/// @file Light.cpp
+/// @brief Point light data container. Position, color, and intensity values are
+///        stored as raw floats for direct upload to shader uniforms.
 
 #include "engine/rendering/Light.h"
 

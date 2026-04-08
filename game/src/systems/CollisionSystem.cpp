@@ -102,6 +102,7 @@ namespace game
         bool aStatic = colliderA.IsStatic;
         bool bStatic = colliderB.IsStatic;
 
+        // Push apart along the axis with the smallest overlap (minimum penetration)
         if (overlapX <= overlapY && overlapX <= overlapZ)
         {
             float sign = (aCenterX < bCenterX) ? -1.0f : 1.0f;

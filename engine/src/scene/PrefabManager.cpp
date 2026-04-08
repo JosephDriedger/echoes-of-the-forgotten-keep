@@ -12,6 +12,9 @@ namespace engine {
         m_Definitions[type].variants.push_back(variant);
     }
 
+    // Weighted random selection: sums all variant weights, picks a random point
+    // in [0, totalWeight), then walks the list subtracting each weight until
+    // the remainder hits zero. Falls back to the last variant as a safety net.
     const PrefabVariant* PrefabManager::GetRandom(PrefabType type) {
         auto it = m_Definitions.find(type);
         if (it == m_Definitions.end() || it->second.variants.empty())

@@ -50,6 +50,8 @@ namespace engine
         return *this;
     }
 
+    // Compiles vertex and fragment shaders from disk, links them into a program,
+    // and cleans up intermediate shader objects regardless of success or failure.
     bool Shader::LoadFromFiles(const std::string& vertexPath, const std::string& fragmentPath)
     {
         Destroy();
@@ -86,6 +88,7 @@ namespace engine
 
         const bool linked = LinkProgram(m_ProgramId);
 
+        // Shader objects are no longer needed after linking.
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
@@ -224,6 +227,8 @@ namespace engine
         return GetUniformLocation(name);
     }
 
+    // Queries GL for the uniform location and caches the result.
+    // Returns -1 if the uniform is not found or was optimized away.
     int Shader::GetUniformLocation(const std::string& name) const
     {
         auto it = m_UniformLocationCache.find(name);

@@ -49,6 +49,7 @@ namespace engine
 
         m_IsRunning = true;
 
+        // High-resolution frame timing via SDL performance counters.
         Uint64 previousCounter = SDL_GetPerformanceCounter();
         const double performanceFrequency = static_cast<double>(SDL_GetPerformanceFrequency());
 
@@ -63,6 +64,7 @@ namespace engine
             if (deltaSeconds > 0.1)
                 deltaSeconds = 0.1;
 
+            // Snapshot previous input state, then process new SDL events.
             m_Input.BeginFrame();
             ProcessEvents(listener);
 

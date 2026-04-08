@@ -11,6 +11,9 @@ namespace engine
     class Shader;
     class Texture;
 
+    // Groups a shader program and its associated textures into a single render state.
+    // Shared ownership (via shared_ptr) allows multiple meshes to reference the same
+    // shader and texture resources without duplication.
     class Material
     {
     public:

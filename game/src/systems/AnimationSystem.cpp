@@ -14,6 +14,7 @@ namespace game
 {
     namespace
     {
+        // Initiates a crossfade blend from the current animation clip to a new one.
         void BlendToClip(AnimationState& anim, int clipIndex)
         {
             if (clipIndex < 0 || !anim.Clips || clipIndex >= static_cast<int>(anim.Clips->size()))
@@ -28,6 +29,7 @@ namespace game
             anim.IsBlending = true;
         }
 
+        // Maps combo index (0-2) to the corresponding attack animation clip.
         int GetComboClipIndex(const AnimationState& anim, int comboIndex)
         {
             switch (comboIndex)
@@ -79,18 +81,24 @@ namespace game
             engine::AnimationClip& clip = (*anim.Clips)[anim.CurrentClip];
             anim.CurrentTime += deltaTime * clip.TicksPerSecond * anim.AnimationSpeed;
 
+            // Clamp death animation at the last frame (don't loop).
             if (isDead)
             {
                 if (anim.CurrentTime >= clip.Duration)
                     anim.CurrentTime = clip.Duration;
             }
 
+            // Clear the incoming hit once the hit-react animation finishes playing.
             if (isHit)
             {
                 if (anim.CurrentTime >= clip.Duration && hasCombat)
                     registry.GetComponent<CombatState>(entity).IncomingHit.reset();
             }
 
+            // --- Combo attack state machine ---
+            // Manages 3-hit combo chain. The combo window opens at 50-90% of
+            // the current attack clip, allowing the player to queue the next
+            // hit. The third hit (index 2) triggers a forward lunge.
             if (isAttacking && hasCombat)
             {
                 auto& combat = registry.GetComponent<CombatState>(entity);
@@ -98,6 +106,7 @@ namespace game
                 if (combat.ComboTimer > 0.0f)
                     combat.ComboTimer -= deltaTime;
 
+                // Mid-animation combo chain: advance to next attack once 30% through
                 if (combat.AttackQueued)
                 {
                     float progress = clip.Duration > 0.0f ? anim.CurrentTime / clip.Duration : 0.0f;
@@ -130,7 +139,7 @@ namespace game
                     }
                 }
 
-                // --- Combo window ---
+                // --- Combo window: opens at 50% and closes at 90% of clip duration ---
                 float comboStart = clip.Duration * 0.5f;
 
                 if (anim.CurrentTime >= comboStart &&
@@ -147,7 +156,7 @@ namespace game
                     combat.ComboWindowOpen = false;
                 }
 
-                // --- End of clip ---
+                // --- End of attack clip: chain to next queued attack or exit combat ---
                 if (anim.CurrentTime >= clip.Duration)
                 {
                     if (combat.AttackQueued)
@@ -186,7 +195,8 @@ namespace game
                 }
             }
 
-            // State machine
+            // --- Animation state machine ---
+            // Priority: Death > HitReact > Attack (by combo index) > Run > Idle
             AnimState targetState = AnimState::Idle;
 
             if (isDead)
@@ -236,6 +246,7 @@ namespace game
                 anim.CurrentTime -= clip.Duration;
             }
 
+            // Advance crossfade blend; snap to target clip when blend completes.
             if (anim.IsBlending)
             {
                 anim.NextTime += deltaTime * clip.TicksPerSecond;

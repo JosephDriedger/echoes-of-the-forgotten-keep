@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file SettingsScene.cpp
+/// @brief Settings screen with volume sliders that write to GameSettings singleton.
 
 #include "game/scenes/SettingsScene.h"
 
@@ -23,6 +25,7 @@ namespace game
     {
     }
 
+    /// Initializes renderers and creates volume sliders bound to GameSettings fields.
     bool SettingsScene::OnCreate(engine::Application& application)
     {
         const auto& spec = application.GetSpecification();
@@ -61,6 +64,7 @@ namespace game
         m_QuadRenderer.Destroy();
     }
 
+    /// Creates sliders pointing at GameSettings volume fields and a Back button.
     void SettingsScene::LayoutUI()
     {
         float screenW = static_cast<float>(m_ScreenWidth);
@@ -90,6 +94,7 @@ namespace game
         m_BackButton.Layout(m_TextRenderer);
     }
 
+    /// Updates sliders and applies volume changes to the AudioManager in real time.
     void SettingsScene::OnUpdate(engine::Application& application, engine::Timestep timestep)
     {
         (void)timestep;
@@ -102,8 +107,6 @@ namespace game
         bool vfxChanged   = m_VFXSlider.Update(input);
 
         auto& settings = GameSettings::Instance();
-
-        // You need access to AudioManager (singleton or from Application)
 
 
         if (musicChanged)

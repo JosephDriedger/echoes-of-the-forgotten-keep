@@ -8,6 +8,9 @@
 
 namespace engine
 {
+    // Wraps an OpenGL shader program (vertex + fragment stages).
+    // Handles compilation, linking, uniform uploads, and GPU resource cleanup.
+    // Non-copyable; ownership transfers via move semantics.
     class Shader
     {
     public:
@@ -31,6 +34,7 @@ namespace engine
         void SetFloat(const std::string& name, float value) const;
         void SetVec3(const std::string& name, float x, float y, float z) const;
         void SetMat4(const std::string& name, const float* values) const;
+        // Overload that bypasses name lookup when the location is already known.
         void SetMat4(int location, const float* values) const;
 
         [[nodiscard]] unsigned int GetProgramId() const;
@@ -42,11 +46,13 @@ namespace engine
         static bool CompileStage(unsigned int shaderId, const char* source, const char* label);
         static bool LinkProgram(unsigned int programId);
 
+        // Looks up and caches uniform locations to avoid repeated GL queries.
         int GetUniformLocation(const std::string& name) const;
 
     private:
         unsigned int m_ProgramId;
         bool m_IsLoaded;
+        // Mutable so uniform locations can be cached even from const setter methods.
         mutable std::unordered_map<std::string, int> m_UniformLocationCache;
     };
 }

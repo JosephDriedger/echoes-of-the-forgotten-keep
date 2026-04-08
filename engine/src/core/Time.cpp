@@ -6,6 +6,8 @@ namespace engine
 {
     namespace
     {
+        // Upper bound on frame delta to prevent simulation blow-ups
+        // (e.g. after a debugger pause or window drag).
         constexpr double MAX_FRAME_DELTA_SECONDS = 0.25;
     }
 
@@ -33,6 +35,9 @@ namespace engine
     {
         const Uint64 currentCounter = SDL_GetPerformanceCounter();
 
+        // First call after construction (before Reset): initialise counters
+        // and return a zero-length timestep so the first real frame has a
+        // valid baseline.
         if (m_LastCounter == 0 || m_Frequency == 0)
         {
             m_LastCounter = currentCounter;

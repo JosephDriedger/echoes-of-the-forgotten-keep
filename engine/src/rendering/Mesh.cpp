@@ -60,6 +60,8 @@ namespace engine
         return *this;
     }
 
+    // Uploads vertex and index data to the GPU and configures the vertex attribute
+    // layout. Attribute locations match the Vertex struct field order (see Mesh.h).
     bool Mesh::Create(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     {
         Destroy();
@@ -106,7 +108,7 @@ namespace engine
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
             reinterpret_cast<void*>(offsetof(Vertex, TextureU)));
 
-        // Bone IDs
+        // Bone IDs -- uses glVertexAttribIPointer (integer, not float) for GPU skinning
         glEnableVertexAttribArray(3);
         glVertexAttribIPointer(3, 4, GL_INT, sizeof(Vertex),
             reinterpret_cast<void*>(offsetof(Vertex, BoneIDs)));

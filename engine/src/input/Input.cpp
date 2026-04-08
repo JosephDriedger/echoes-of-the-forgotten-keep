@@ -35,6 +35,7 @@ namespace engine
                 break;
 
             case SDL_EVENT_KEY_DOWN:
+                // Ignore OS key-repeat events so IsKeyPressed fires once.
                 if (!event.key.repeat)
                 {
                     m_CurrentKeys.insert(event.key.key);
@@ -56,6 +57,7 @@ namespace engine
             case SDL_EVENT_MOUSE_MOTION:
                 m_MouseX = static_cast<int>(event.motion.x);
                 m_MouseY = static_cast<int>(event.motion.y);
+                // Accumulate relative motion; multiple events may arrive per frame.
                 m_MouseDeltaX += event.motion.xrel;
                 m_MouseDeltaY += event.motion.yrel;
                 break;

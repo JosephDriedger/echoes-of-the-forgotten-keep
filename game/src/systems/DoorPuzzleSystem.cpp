@@ -11,7 +11,7 @@ namespace game
 {
     void DoorPuzzleSystem::Update(engine::Registry& registry, float deltaTime)
     {
-        // Collect switch/trigger states
+        // First pass: build a lookup of switch ID -> pressed state
         std::unordered_map<std::string, bool> triggerStates;
 
         for (const engine::Entity entity : registry.GetActiveEntities())
@@ -21,7 +21,7 @@ namespace game
             triggerStates[sw.Id] = sw.Pressed;
         }
 
-        // Update doors that have a TriggerId
+        // Second pass: for each trigger-linked door, sync open state to its switch
         for (const engine::Entity entity : registry.GetActiveEntities())
         {
             if (!registry.HasComponent<Door>(entity) ||

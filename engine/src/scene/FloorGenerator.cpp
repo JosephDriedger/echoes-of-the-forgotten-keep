@@ -1,4 +1,7 @@
 // Created by Joey Driedger
+//
+// Procedural dungeon generation using random room placement and L-shaped corridor carving.
+// The algorithm is seeded for deterministic replay: the same seed always produces the same layout.
 
 #include "engine/scene/FloorGenerator.h"
 
@@ -37,6 +40,9 @@ void FloorGenerator::CarveRoom(FloorLayout& layout, const Room& room) {
 }
 
 // ---------------- Corridor ----------------
+// Carves an L-shaped (two-segment) corridor between points a and b.
+// The bend direction is randomized: horizontal-then-vertical or vertical-then-horizontal.
+// This creates more organic-looking paths than straight corridors.
 
 void FloorGenerator::CarveCorridor(FloorLayout& layout,
                                    const glm::ivec2& a,
@@ -44,14 +50,14 @@ void FloorGenerator::CarveCorridor(FloorLayout& layout,
                                    std::mt19937& rng)
 {
     if (Chance(rng, 0.5f)) {
-        // Horizontal → Vertical
+        // Horizontal first, then vertical at b.x
         for (int x = std::min(a.x, b.x); x <= std::max(a.x, b.x); x++)
             layout.get(x, a.y) = CellType::Floor;
 
         for (int y = std::min(a.y, b.y); y <= std::max(a.y, b.y); y++)
             layout.get(b.x, y) = CellType::Floor;
     } else {
-        // Vertical → Horizontal
+        // Vertical first, then horizontal at b.y
         for (int y = std::min(a.y, b.y); y <= std::max(a.y, b.y); y++)
             layout.get(a.x, y) = CellType::Floor;
 
@@ -73,7 +79,10 @@ FloorLayout FloorGenerator::Generate(FloorConfig& config) {
 
     std::vector<Room> rooms;
 
-    // ---- Generate rooms ----
+    // ---- Phase 1: Place rooms ----
+    // Randomly size and position rooms within the grid (with a 1-cell border).
+    // Rooms that overlap an existing room are discarded, so the final count
+    // may be less than config.roomCount.
     for (int i = 0; i < config.roomCount; i++) {
 
         int w = RandRange(rng, config.minRoomSize, config.maxRoomSize);
@@ -103,7 +112,8 @@ FloorLayout FloorGenerator::Generate(FloorConfig& config) {
         return layout;
     }
 
-    // ---- Connect rooms ----
+    // ---- Phase 2: Connect consecutive rooms ----
+    // Guarantees every room is reachable by linking room[i-1] to room[i].
     for (size_t i = 1; i < rooms.size(); i++) {
 
         glm::ivec2 a = rooms[i - 1].center();
@@ -112,7 +122,9 @@ FloorLayout FloorGenerator::Generate(FloorConfig& config) {
         CarveCorridor(layout, a, b, rng);
     }
 
-    // ---- Add maze complexity ----
+    // ---- Phase 3: Add extra corridors for loop complexity ----
+    // mazeFactor controls how many additional random connections are made,
+    // creating alternate paths and making the dungeon feel less linear.
     int extra = static_cast<int>(config.mazeFactor * rooms.size());
 
     for (int i = 0; i < extra; i++) {

@@ -11,11 +11,17 @@
 
 namespace engine
 {
+    // Caches GPU textures keyed by file path.
+    // Uses the file path as both the lookup key and the load source.
     class TextureManager
     {
     public:
+        // Loads a texture from disk, or returns the cached instance if already loaded.
         std::shared_ptr<Texture> Load(const std::string& path);
+
+        // Retrieves a previously loaded texture, or nullptr if not found.
         std::shared_ptr<Texture> Get(const std::string& path) const;
+
         void Clear();
 
     private:

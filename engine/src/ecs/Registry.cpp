@@ -9,6 +9,8 @@ namespace engine
 {
     namespace
     {
+        // Sentinel value for m_ActiveEntityIndices, indicating the entity is not
+        // in the active list (either never created or already destroyed).
         constexpr std::size_t INVALID_ACTIVE_ENTITY_INDEX = std::numeric_limits<std::size_t>::max();
     }
 
@@ -45,6 +47,8 @@ namespace engine
         return Entity(entityId);
     }
 
+    // Destroys an entity: strips all its components, removes it from the active
+    // list via swap-and-pop, resets its state, and returns its ID to the pool.
     void Registry::DestroyEntity(const Entity entity)
     {
         const EntityId entityId = entity.GetId();
@@ -74,6 +78,7 @@ namespace engine
         --m_AliveEntityCount;
     }
 
+    // Copies the active list before iterating because DestroyEntity modifies it.
     void Registry::DestroyAllEntities()
     {
         const std::vector<Entity> activeEntities = m_ActiveEntities;
@@ -119,6 +124,8 @@ namespace engine
             }
         }
 
+        // Push IDs in descending order so the stack pops them in ascending order,
+        // meaning the first entity created gets the lowest available ID.
         for (EntityId entityId = MAX_ENTITIES; entityId >= MIN_ENTITY_ID; --entityId)
         {
             m_AvailableEntityIds.push(entityId);

@@ -7,6 +7,10 @@
 
 namespace game
 {
+    /// Attaches child entities (e.g. weapons) to animated skeleton bones.
+    /// Reads the parent's final bone transforms from AnimationState, combines them
+    /// with the parent's world matrix and a local offset, and writes the result
+    /// into the child's Transform.ModelMatrix for rendering.
     class BoneAttachmentSystem
     {
     public:

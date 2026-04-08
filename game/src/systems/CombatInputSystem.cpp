@@ -38,7 +38,8 @@ namespace game
 
             if (combat.IsAttacking)
             {
-                // Past the interruptible point — accept the next attack
+                // Buffer next combo hit once the current swing is 30% done,
+                // preventing accidental double-taps from retriggering too early
                 float progress = (currentClip && currentClip->Duration > 0.0f) ? anim.CurrentTime / currentClip->Duration : 0.0f;
                 if (progress >= 0.3f)
                 {
@@ -47,6 +48,7 @@ namespace game
             }
             else
             {
+                // Start a fresh combo from the first swing
                 audioEventQueue.push(std::make_unique<engine::AudioEvent>("attack1"));
                 combat.IsAttacking = true;
                 combat.ComboIndex = 0;

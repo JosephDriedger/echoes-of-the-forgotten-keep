@@ -41,6 +41,8 @@ namespace game
         for (const auto& inst : instances)
         {
             SpawnPrefab(inst.prefab, inst.position, inst.rotationY);
+
+            // Below-ground stairs need extra wall pieces to seal the opening
             if (inst.prefab == engine::PrefabType::Stairs && inst.position.y < -1)
             {
                 SpawnPrefab(engine::PrefabType::WallCornerSmall,
@@ -105,8 +107,9 @@ namespace game
 
         if (type == engine::PrefabType::Door)
         {
-            // The door entity is offset from the doorway center by doorOffset (0.82).
-            // Place the trigger at the doorway opening, not at the door hinge.
+            // The door hinge is offset from the doorway center. Shift the
+            // trigger collider back toward the opening so the player walks
+            // through the doorway, not past the hinge, to activate the door.
             float doorOffset = 0.82f;
             float normRot = std::fmod(rotY, 360.0f);
             if (normRot < 0.0f) normRot += 360.0f;
@@ -115,7 +118,7 @@ namespace game
             doorTrigger.IsTrigger = true;
             doorTrigger.IsStatic = false;
 
-            // Offset the trigger collider back toward the doorway center
+            // Choose offset axis based on rotation quadrant
             int rot = static_cast<int>(normRot + 0.5f) % 360;
             if (rot < 45 || rot >= 315)
                 doorTrigger.OffsetX = doorOffset;
@@ -176,10 +179,13 @@ namespace game
         m_Registry.AddComponent(e, c);
     }
 
+    // Creates invisible AABB collider entities matching wall geometry.
+    // Each wall type (straight, corner, T-split, crossing) gets collider
+    // arms along its occupied axes based on the prefab's rotation.
     void DungeonSpawnSystem::SpawnWallColliders(engine::PrefabType type, const glm::vec3& position, float rotY)
     {
-        constexpr float armLength = 4.0f;
-        constexpr float armThick  = 1.2f;
+        constexpr float armLength = 4.0f;  // Length of one wall segment
+        constexpr float armThick  = 1.2f;  // Wall thickness for collision
         constexpr float wallH     = 3.0f;
         constexpr float halfArm   = armLength * 0.5f;
 
@@ -326,7 +332,8 @@ namespace game
         std::mt19937 rng(seed);
         std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
 
-        int count = static_cast<int>(floorPositions.size()) / 1;
+        // Cap enemy count (divisor of 1 means all eligible tiles, up to 100)
+        int count = static_cast<int>(floorPositions.size());
         count = std::max(1, std::min(count, 100));
 
         // Load skeleton enemy mesh (randomly pick from available skeleton types)
@@ -463,7 +470,7 @@ namespace game
 
         if (floorPositions.empty()) return;
 
-        // Use a different seed offset so buttons don't land on enemies
+        // Offset the RNG seed so button placement differs from enemy placement
         std::mt19937 rng(seed + 777);
         std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
 

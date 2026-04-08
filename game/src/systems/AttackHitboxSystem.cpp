@@ -10,7 +10,7 @@ namespace game
 {
     void AttackHitboxSystem::Update(engine::Registry& registry)
     {
-        // Collect all attacking entities this frame
+        // Track which attackers are active this frame so we can clean up stale hitboxes
         std::unordered_set<uint32_t> stillAttacking;
 
         for (const engine::Entity entity : registry.GetActiveEntities())
@@ -27,7 +27,8 @@ namespace game
             {
                 stillAttacking.insert(id);
 
-                // Spawn hitbox if not already active
+                // Detect whether we need a fresh hitbox: either none exists,
+                // or the combo advanced to a new swing
                 bool hitboxExists = m_ActiveHitboxes.find(id) != m_ActiveHitboxes.end()
                         && registry.IsAlive(m_ActiveHitboxes[id]);
 
@@ -43,7 +44,7 @@ namespace game
                         m_ActiveHitboxes.erase(id);
                     }
 
-                    // Spawn fresh hitbox
+                    // Spawn a trigger-only AABB hitbox entity (no physics resolution)
                     engine::Entity hitbox = registry.CreateEntity();
                     Collider hitboxCollider(2.0f, 1.5f, 2.0f);
                     hitboxCollider.IsTrigger = true;
@@ -100,10 +101,12 @@ namespace game
                         auto& targetCombat = registry.GetComponent<CombatState>(target);
                         if (!targetCombat.IsDead)
                         {
+                            // 3rd hit in the combo (index 2) applies extra knockback
                             bool isLastHit = (combat.ComboIndex == 2);
                             float knockbackMult = isLastHit ? combat.FinalHitKnockbackMultiplier : 1.0f;
 
-                            if (targetCombat.HitTimer > 0.0f) continue; // still invincible
+                            if (targetCombat.HitTimer > 0.0f) continue; // i-frames still active
+                            // Queue the hit for DamageSystem to process
                             targetCombat.IncomingHit = PendingHit{ combat.AttackDamage, entity, knockbackMult };
                             m_HitThisSwing[id].insert(targetId);
                         }

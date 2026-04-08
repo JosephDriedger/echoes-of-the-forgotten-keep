@@ -18,6 +18,7 @@ namespace engine
 
     bool Window::Create(const char* title, int width, int height)
     {
+        // Request an OpenGL 4.6 core profile with double buffering.
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -50,6 +51,7 @@ namespace engine
             return false;
         }
 
+        // Load OpenGL function pointers through GLAD using SDL's loader.
         if (!gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)))
         {
             std::cerr << "Failed to initialize GLAD" << std::endl;

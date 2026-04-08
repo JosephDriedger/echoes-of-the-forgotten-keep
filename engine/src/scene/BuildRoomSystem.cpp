@@ -1,4 +1,7 @@
 // Created by Joey Driedger
+//
+// BuildRoomSystem converts a 2D MapGrid into positioned 3D prefab instances.
+// The pipeline is: FloorGenerator -> FloorLayout -> FromFloor() -> MapGrid -> Build() -> SpawnInstances.
 
 #include "engine/scene/BuildRoomSystem.h"
 
@@ -18,12 +21,15 @@ namespace engine {
 
                 CellType cell = map.cells[y * map.width + x];
 
+                // Center the map horizontally around the origin; Z grows southward.
                 glm::vec3 pos = {
                     (x - map.width / 2.0f) * config.tileSize,
                     0,
                     y * config.tileSize
                 };
-                // check north and west
+
+                // Large floor tiles span 2x2 cells, so they are only placed when the
+                // current cell AND its north, west, and north-west neighbors are all non-empty.
                 bool northEmpty = true;
                 bool westEmpty  = true;
                 bool northWestEmpty  = true;
@@ -56,6 +62,7 @@ namespace engine {
                     });
                 }
 
+                // Start tile: stairs leading up (entry point for the floor)
                 if (cell == CellType::Start) {
                     result.push_back({
                         PrefabType::Stairs,
@@ -68,6 +75,7 @@ namespace engine {
                     });
                 }
 
+                // End tile: stairs leading down to the next floor (lowered by 3.8 units)
                 if (cell == CellType::End) {
                     result.push_back({
                         PrefabType::Stairs,
@@ -80,7 +88,8 @@ namespace engine {
                     });
                 }
 
-                // WALLS
+                // WALLS -- determine shape (straight, corner, T, crossing) from neighbors.
+                // Door cells reuse the wall rotation but swap in a doorway + door prefab.
                 if (cell == CellType::Wall || cell == CellType::Door) {
 
                     PrefabType type;
@@ -88,14 +97,13 @@ namespace engine {
 
                     getWallTypeAndRotation(map, x, y, type, rotation_y);
 
-                    // Door uses doorway instead
                     if (cell == CellType::Door) {
                         type = PrefabType::WallDoorway;
                     }
 
                     result.push_back({ type, pos, rotation_y });
 
-                    // Spawn actual door
+                    // Place the interactive door prop, offset from center based on wall orientation.
                     if (cell == CellType::Door) {
 
                         glm::vec3 offset = {0,0,0};
@@ -118,6 +126,8 @@ namespace engine {
         return result;
     }
 
+    // Builds a renderable MapGrid from a raw FloorLayout by adding walls around walkable
+    // areas and detecting door locations at corridor-to-room boundaries.
     MapGrid BuildRoomSystem::FromFloor(const FloorLayout& floor)
     {
         MapGrid map;
@@ -170,8 +180,11 @@ namespace engine {
             }
         }
 
-        // Step 3: Detect room entrances (doors)
-        // Step 3: Detect doors ONLY at room entrances
+        // Step 3: Detect doors at corridor-to-room transitions.
+        // A tile becomes a door when it:
+        //   - is a corridor tile (exactly 2 adjacent floors)
+        //   - forms a straight line (vertical or horizontal)
+        //   - has at least one cardinal neighbor inside a room (3+ adjacent floors)
         for (int y = 1; y < map.height - 1; y++) {
             for (int x = 1; x < map.width - 1; x++) {
 
@@ -180,7 +193,7 @@ namespace engine {
 
                 int adj = CountAdjacentFloors(map, x, y);
 
-                // must be corridor
+                // Only corridor tiles (exactly 2 walkable neighbors) can be doors.
                 if (adj != 2)
                     continue;
 
@@ -189,14 +202,15 @@ namespace engine {
                 bool W = isFloorLike(map.get(x - 1, y));
                 bool E = isFloorLike(map.get(x + 1, y));
 
-                // orientation check
+                // The corridor must run in a straight line (no bends).
                 bool vertical   = N && S && !E && !W;
                 bool horizontal = E && W && !N && !S;
 
                 if (!(vertical || horizontal))
                     continue;
 
-                // 🔥 NEW: detect if touching a ROOM
+                // Check if any cardinal neighbor is a room tile (3+ adjacent floors).
+                // This prevents placing doors in the middle of long corridors.
                 bool nearRoom = false;
 
                 const int dx[4] = {0, 0, -1, 1};
@@ -215,7 +229,6 @@ namespace engine {
                 if (!nearRoom)
                     continue;
 
-                // avoid overwriting special tiles
                 if (map.get(x, y) == CellType::Start ||
                     map.get(x, y) == CellType::End)
                     continue;
@@ -280,6 +293,12 @@ namespace engine {
         return floorCount >= 3; // inside room-ish area
     }
 
+    // Selects the correct wall prefab variant and Y-rotation by inspecting
+    // which cardinal neighbors are also walls/doors.
+    //   4 neighbors -> crossing
+    //   3 neighbors -> T-split (rotated so the open side faces the missing neighbor)
+    //   2 neighbors -> straight wall if collinear, corner otherwise
+    //   0-1 neighbors -> straight wall (dead-end or isolated)
     void BuildRoomSystem::getWallTypeAndRotation(
         const MapGrid& map,
         int x, int y,
@@ -339,6 +358,8 @@ namespace engine {
         return dist(rng) < chance;
     }
 
+    // Creates a simple rectangular test room: walls on the perimeter, floor inside,
+    // and doors centered on the north and south edges.
     MapGrid BuildRoomSystem::GenerateRoom(int width, int height) {
 
         MapGrid map;
@@ -357,8 +378,8 @@ namespace engine {
             }
         }
 
-        // Add doors (randomized)
-        if (RandomChance(1.0f)) // always for now
+        // Doors on north and south edges (chance is 1.0 -- always placed for now)
+        if (RandomChance(1.0f))
             map.get(width / 2, 0) = CellType::Door;
 
         if (RandomChance(1.0f))
@@ -420,6 +441,8 @@ namespace engine {
     }
 
 
+    // Identity mapping for wall types; non-wall types default to Wall.
+    // Kept as a safety guard for future prefab-type remapping.
     PrefabType BuildRoomSystem::ConvertToPrefab(PrefabType type)
     {
         switch (type)

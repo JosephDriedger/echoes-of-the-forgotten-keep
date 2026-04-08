@@ -41,6 +41,7 @@ namespace game
 
     bool GameplayScene::OnCreate(engine::Application& application)
     {
+        // Set up the third-person camera with a top-down offset
         m_Camera.SetPosition(0.0f, 10.0f, 13.0f);
         m_Camera.SetTarget(0.0f, 0.0f, 5.0f);
         m_Camera.SetPerspective(40.0f, 16.0f / 9.0f, 0.1f, 100.0f);
@@ -79,6 +80,7 @@ namespace game
         return true;
     }
 
+    /// Tears down all scene resources so the scene can be recreated cleanly.
     void GameplayScene::OnDestroy()
     {
         m_Registry.Reset();
@@ -260,15 +262,17 @@ namespace game
         m_DungeonSpawnSystem->SpawnDungeon(10, 42, 0.5f);
     }
 
+    /// Runs the full ECS pipeline each frame. Order matters: input -> movement
+    /// -> collision -> animation -> combat -> AI -> doors -> lifetime -> camera.
     void GameplayScene::OnUpdate(engine::Application& application, const engine::Timestep timestep)
     {
         const float dt = timestep.GetSeconds();
         const engine::Input& input = application.GetInput();
 
-        // Debug systems
         m_DebugToggle.Update(input);
         m_FPSCounter.Update(timestep);
 
+        // Push pause overlay on ESC
         if (input.IsKeyPressed(SDLK_ESCAPE))
         {
             application.RequestSceneChange("PauseMenuScene");
@@ -285,7 +289,7 @@ namespace game
         m_DamageSystem.Update(m_Registry);
         DeathSystem::Update(m_Registry, audioEventQueue);
         m_EnemyAISystem.Update(m_Registry, dt);
-        m_CombatSystem.Update(m_Registry, dt);
+        m_HitTimerSystem.Update(m_Registry, dt);
         SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt, audioEventQueue);
         DoorPuzzleSystem::Update(m_Registry, dt);
@@ -294,6 +298,8 @@ namespace game
         audioEventQueue.process(); // process all the audio events
     }
 
+    /// Renders all entities that have Transform + Render components, uploads
+    /// per-entity bone matrices for animated meshes, then draws debug overlays and HUD.
     void GameplayScene::OnRender(engine::Application& application)
     {
         (void)application;
@@ -301,7 +307,7 @@ namespace game
         if (!m_Shader)
             return;
 
-        // Pre-cache bone uniform locations on first render
+        // Cache bone uniform locations once to avoid repeated string lookups
         static std::vector<int> boneUniformLocations;
         if (boneUniformLocations.empty())
         {

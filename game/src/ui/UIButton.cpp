@@ -1,4 +1,6 @@
 // Created by Adam Van Woerden
+/// @file UIButton.cpp
+/// @brief Text button with AABB hover detection and single-frame click check.
 
 #include "game/ui/UIButton.h"
 
@@ -46,6 +48,7 @@ namespace game
         float textX = m_X + (m_Width - textWidth) / 2.0f;
         float textY = m_Y + 15.0f;
 
+        // Gold highlight on hover, white otherwise
         if (m_Hovered)
         {
             textRenderer.RenderText(m_Label, textX, textY, scale,

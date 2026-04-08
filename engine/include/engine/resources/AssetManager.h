@@ -8,12 +8,15 @@
 
 namespace engine
 {
+    // Central facade for all asset sub-managers (shaders, textures).
+    // Owns each sub-manager and provides a single point for bulk cleanup.
     class AssetManager
     {
     public:
         ShaderManager& GetShaderManager();
         TextureManager& GetTextureManager();
 
+        // Releases all cached assets across every sub-manager.
         void Clear();
 
     private:

@@ -6,6 +6,8 @@
 
 namespace game
 {
+    // Register every game-specific component type with the ECS registry.
+    // Must be called once at startup before any entities are created.
     void EntitySpawnSystem::RegisterComponents(engine::Registry& registry)
     {
         registry.RegisterComponent<Transform>();
@@ -37,25 +39,4 @@ namespace game
 
         return entity;
     }
-
-    // engine::Entity EntitySpawnSystem::SpawnEnemy(engine::Registry& registry, const float x, const float y)
-    // {
-    //     const engine::Entity entity = registry.CreateEntity();
-    //
-    //     registry.AddComponent(entity, Transform(x, y, 0.0f));
-    //     registry.AddComponent(entity, Collider(1.0f, 1.0f, 1.0f));
-    //     registry.AddComponent(entity, EnemyAI());
-    //
-    //     return entity;
-    // }
-
-    // engine::Entity EntitySpawnSystem::SpawnExit(engine::Registry& registry, const float x, const float y)
-    // {
-    //     const engine::Entity entity = registry.CreateEntity();
-    //
-    //     registry.AddComponent(entity, Transform(x, y, 0.0f));
-    //     registry.AddComponent(entity, Collider(1.0f, 1.0f, 1.0f, true));
-    //
-    //     return entity;
-    // }
 }

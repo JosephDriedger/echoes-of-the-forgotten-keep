@@ -1,6 +1,8 @@
 //
 // Created by Joseph Driedger on 3/8/2026.
 //
+// Tests for the ECS (Entity Component System) Registry: entity lifecycle,
+// component storage, signatures, and registry reset.
 
 #include "engine/ecs/Registry.h"
 
@@ -9,6 +11,7 @@
 
 namespace
 {
+    // Minimal test components used throughout the ECS tests
     struct Position
     {
         float X;
@@ -35,33 +38,40 @@ int RunECSTests()
     registry.RegisterComponent<Position>();
     registry.RegisterComponent<Velocity>();
 
+    // --- Entity creation and alive tracking ---
     const engine::Entity entityA = registry.CreateEntity();
     const engine::Entity entityB = registry.CreateEntity();
     const engine::Entity entityC = registry.CreateEntity();
 
+    // Verify all three entities are alive and tracked
     assert(registry.IsAlive(entityA));
     assert(registry.IsAlive(entityB));
     assert(registry.IsAlive(entityC));
     assert(registry.GetAliveCount() == 3);
     assert(registry.GetActiveEntities().size() == 3);
 
+    // --- Component add/emplace and ownership queries ---
     registry.AddComponent<Position>(entityA, Position{10.0f, 20.0f});
     registry.AddComponent<Position>(entityB, Position{30.0f, 40.0f});
     registry.EmplaceComponent<Velocity>(entityA, 1.5f, -2.0f);
 
+    // Verify component ownership: entityA has both, entityB only Position
     assert(registry.HasComponent<Position>(entityA));
     assert(registry.HasComponent<Position>(entityB));
     assert(registry.HasComponent<Velocity>(entityA));
     assert(!registry.HasComponent<Velocity>(entityB));
 
+    // Verify stored component data is correct
     const Position& positionA = registry.GetComponent<Position>(entityA);
     assert(positionA.X == 10.0f);
     assert(positionA.Y == 20.0f);
 
+    // --- Signature (component bitmask) verification ---
     const engine::Signature& signatureA = registry.GetSignature(entityA);
     assert(signatureA.test(registry.GetComponentType<Position>()));
     assert(signatureA.test(registry.GetComponentType<Velocity>()));
 
+    // --- Entity destruction removes entity and its components ---
     registry.DestroyEntity(entityB);
 
     assert(!registry.IsAlive(entityB));
@@ -69,11 +79,13 @@ int RunECSTests()
     assert(registry.GetActiveEntities().size() == 2);
     assert(!registry.HasComponent<Position>(entityB));
 
+    // --- Entity ID recycling after destruction ---
     const engine::Entity reusedEntity = registry.CreateEntity();
 
     assert(registry.IsAlive(reusedEntity));
     assert(registry.GetAliveCount() == 3);
 
+    // --- DestroyAllEntities clears every entity ---
     registry.DestroyAllEntities();
 
     assert(registry.GetAliveCount() == 0);
@@ -82,6 +94,7 @@ int RunECSTests()
     assert(!registry.IsAlive(entityC));
     assert(!registry.IsAlive(reusedEntity));
 
+    // --- Registry Reset clears entities and component type registrations ---
     registry.RegisterComponent<Position>();
     registry.RegisterComponent<Velocity>();
 

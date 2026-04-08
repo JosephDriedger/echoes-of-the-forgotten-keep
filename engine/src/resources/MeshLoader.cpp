@@ -14,6 +14,8 @@ namespace engine
 {
     namespace
     {
+        // Assigns a bone ID and weight to the first available slot on a vertex.
+        // Each vertex supports up to MAX_BONE_INFLUENCE bones; excess influences are silently dropped.
         void SetVertexBoneData(Vertex& vertex, int boneID, float weight)
         {
             for (int i = 0; i < MAX_BONE_INFLUENCE; i++)
@@ -27,6 +29,10 @@ namespace engine
             }
         }
 
+        // Recursively walks the Assimp node tree to build a flat array of BoneNodes.
+        // Each node stores its parent index for efficient bottom-up transform traversal.
+        // Nodes that are not actual bones get BoneId == -1 but are still needed
+        // because they may carry intermediate transforms in the hierarchy.
         int BuildRuntimeSkeleton(aiNode* node, Skeleton& skeleton, int parentIndex = -1)
         {
             BoneNode bn;
@@ -56,6 +62,7 @@ namespace engine
         }
     }
 
+    // Creates a 1x1 quad centered at the origin, facing +Z, with full UV coverage.
     std::shared_ptr<Mesh> MeshLoader::LoadQuad() const
     {
         std::vector<Vertex> vertices =
@@ -81,6 +88,8 @@ namespace engine
         Result result;
 
         Assimp::Importer importer;
+        // Triangulate ensures only triangle faces, FlipUVs corrects for OpenGL's
+        // bottom-left origin, and LimitBoneWeights caps influences per vertex.
         const aiScene* scene = importer.ReadFile(
             path,
             aiProcess_Triangulate |
@@ -99,6 +108,8 @@ namespace engine
         std::vector<Vertex> allVertices;
         std::vector<unsigned int> allIndices;
 
+        // Merge all sub-meshes into a single vertex/index buffer.
+        // baseVertex offsets indices so they reference the correct vertices after merging.
         for (unsigned int m = 0; m < scene->mNumMeshes; m++)
         {
             aiMesh* aiMeshPtr = scene->mMeshes[m];
@@ -137,6 +148,8 @@ namespace engine
                 }
             }
 
+            // Extract bone weights and build the bone-name-to-ID map.
+            // Assimp stores offset matrices per bone, which transform from mesh space to bone space.
             if (aiMeshPtr->HasBones())
             {
                 for (unsigned int b = 0; b < aiMeshPtr->mNumBones; b++)

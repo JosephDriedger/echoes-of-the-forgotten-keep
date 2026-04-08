@@ -20,6 +20,9 @@ namespace engine
         Shutdown();
     }
 
+    // Configures the default GL pipeline state for forward rendering:
+    //   - Depth test with LEQUAL (allows equal-depth passes for skybox, etc.)
+    //   - Back-face culling with counter-clockwise front faces
     bool Renderer::Initialize(Window& window)
     {
         if (m_IsInitialized)
@@ -53,6 +56,7 @@ namespace engine
             return;
         }
 
+        // Dark near-black clear color for dungeon atmosphere.
         glClearColor(0.08f, 0.08f, 0.12f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }

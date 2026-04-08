@@ -49,6 +49,7 @@ namespace game
             if (input.IsKeyDown(SDLK_D) || input.IsKeyDown(SDLK_RIGHT))
                 moveX += 1.0f;
 
+            // Normalize the input vector to prevent faster diagonal movement
             float length = std::sqrt(moveX * moveX + moveZ * moveZ);
             bool isMoving = length > 0.0001f;
 
@@ -65,6 +66,9 @@ namespace game
                 moveX /= length;
                 moveZ /= length;
 
+                // Smoothly interpolate rotation toward movement direction.
+                // atan2(sin,cos) wraps the angle to [-pi,pi] to avoid
+                // spinning the long way around.
                 float targetYaw = std::atan2(moveX, moveZ);
 
                 float delta = targetYaw - transform.RotationY;
@@ -81,6 +85,7 @@ namespace game
                 }
             }
 
+            // Apply forward lunge during melee attacks (decelerates over time)
             if (isAttacking)
             {
                 auto& combat = registry.GetComponent<CombatState>(entity);
@@ -88,7 +93,7 @@ namespace game
                 {
                     combat.LungeTimer -= deltaTime;
 
-                    float t = combat.LungeTimer / combat.LungeDuration; // 1 to 0 decelerate
+                    float t = combat.LungeTimer / combat.LungeDuration; // 1->0 deceleration curve
                     transform.X += std::sin(transform.RotationY) * combat.LungeSpeed * t * deltaTime;
                     transform.Z += std::cos(transform.RotationY) * combat.LungeSpeed * t * deltaTime;
 

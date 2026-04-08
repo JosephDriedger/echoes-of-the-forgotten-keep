@@ -12,7 +12,7 @@
 #include "engine/rendering/AnimationData.h"
 #include "engine/rendering/Mesh.h"
 #include "engine/rendering/Texture.h"
-
+#include "ComponentEnum.h"
 #include <glm/glm.hpp>
 
 #include <memory>
@@ -124,29 +124,6 @@ namespace game
         }
     };
 
-    // -----------------------------------------------------------------------
-    // Room -- identifies which dungeon room an entity belongs to.
-    // -----------------------------------------------------------------------
-    struct Room
-    {
-        int Id;
-
-        Room()
-            : Id(0)
-        {
-        }
-
-        explicit Room(const int id)
-            : Id(id)
-        {
-        }
-    };
-
-    // -----------------------------------------------------------------------
-    // EnemyAI -- state machine for enemy behavior.
-    // -----------------------------------------------------------------------
-    enum class AIState { Idle, Patrol, Chase, Attack };
-
     struct EnemyAI
     {
         float MoveSpeed = 1.0f;
@@ -253,20 +230,6 @@ namespace game
         explicit Lifetime(float duration) : Duration(duration) {}
     };
 
-    // -----------------------------------------------------------------------
-    // AnimationState -- skeletal animation playback and blending.
-    // -----------------------------------------------------------------------
-    enum class AnimState
-    {
-        Idle,
-        Run,
-        Attack1,
-        Attack2,
-        Attack3,
-        HitReact,
-        Death
-    };
-
     struct AnimationState
     {
         std::shared_ptr<engine::Skeleton> SkeletonPtr;
@@ -304,16 +267,6 @@ namespace game
             : FinalBoneMatrices(100, glm::mat4(1.0f))
         {
         }
-    };
-
-    // -----------------------------------------------------------------------
-    // CombatState -- attack state, combo system, and incoming damage.
-    // -----------------------------------------------------------------------
-    struct PendingHit
-    {
-        int Damage = 0;
-        engine::Entity Source;
-        float KnockbackMultiplier = 1.0f;
     };
 
     struct CombatState

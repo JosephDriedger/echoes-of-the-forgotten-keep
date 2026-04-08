@@ -21,6 +21,7 @@ namespace game
             if (m_Zoom > kZoomMax) m_Zoom = kZoomMax;
         }
 
+        // Place camera above target; offset along Z scales with zoom for a tilted perspective
         const auto& transform = registry.GetComponent<Transform>(target);
         float zOffset = m_Zoom * 0.4f;
         camera.SetPosition(transform.X, m_Zoom, transform.Z + zOffset);

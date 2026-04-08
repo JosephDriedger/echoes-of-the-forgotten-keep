@@ -4,6 +4,8 @@
 
 namespace game
 {
+    /// Meyer's singleton -- the static local is created on first call and
+    /// persists for the lifetime of the process.
     GameSettings& GameSettings::Instance()
     {
         static GameSettings instance;

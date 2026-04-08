@@ -1,5 +1,9 @@
 // Created by Adam Van Woerden
 
+// EntitySpawnSystem -- Registers all game ECS components with the
+// registry and provides factory methods for spawning core game
+// entities (player, enemies, exits).
+
 #ifndef ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITYSPAWNSYSTEM_H
 #define ECHOES_OF_THE_FORGOTTEN_KEEP_ENTITYSPAWNSYSTEM_H
 
