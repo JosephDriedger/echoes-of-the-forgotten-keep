@@ -124,26 +124,6 @@ namespace game
         }
     };
 
-    // -----------------------------------------------------------------------
-    // Room -- identifies which dungeon room an entity belongs to.
-    // -----------------------------------------------------------------------
-    struct Room
-    {
-        int Id;
-
-        Room()
-            : Id(0)
-        {
-        }
-
-        explicit Room(const int id)
-            : Id(id)
-        {
-        }
-    };
-
-
-
     struct EnemyAI
     {
         float MoveSpeed = 1.0f;
@@ -287,16 +267,6 @@ namespace game
             : FinalBoneMatrices(100, glm::mat4(1.0f))
         {
         }
-    };
-
-    // -----------------------------------------------------------------------
-    // CombatState -- attack state, combo system, and incoming damage.
-    // -----------------------------------------------------------------------
-    struct PendingHit
-    {
-        int Damage = 0;
-        engine::Entity Source;
-        float KnockbackMultiplier = 1.0f;
     };
 
     struct CombatState

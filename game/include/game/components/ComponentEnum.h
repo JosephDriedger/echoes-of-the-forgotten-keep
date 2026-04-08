@@ -24,6 +24,16 @@ namespace game {
     // EnemyAI -- state machine for enemy behavior.
     // -----------------------------------------------------------------------
     enum class AIState { Idle, Patrol, Chase, Attack };
+
+    // -----------------------------------------------------------------------
+    // CombatState -- attack state, combo system, and incoming damage.
+    // -----------------------------------------------------------------------
+    struct PendingHit
+    {
+        int Damage = 0;
+        engine::Entity Source;
+        float KnockbackMultiplier = 1.0f;
+    };
 }
 
 #endif //ECHOES_OF_THE_FORGOTTEN_KEEP_COMPONENTENUM_H

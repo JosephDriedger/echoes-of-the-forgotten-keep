@@ -333,7 +333,7 @@ namespace game
         std::shuffle(floorPositions.begin(), floorPositions.end(), rng);
 
         // Cap enemy count (divisor of 1 means all eligible tiles, up to 100)
-        int count = static_cast<int>(floorPositions.size()) / 1;
+        int count = static_cast<int>(floorPositions.size());
         count = std::max(1, std::min(count, 100));
 
         // Load skeleton enemy mesh (randomly pick from available skeleton types)
