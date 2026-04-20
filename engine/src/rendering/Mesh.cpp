@@ -158,7 +158,24 @@ namespace engine
 
         glBindVertexArray(m_VertexArrayId);
         glDrawElements(GL_TRIANGLES, static_cast<int>(m_IndexCount), GL_UNSIGNED_INT, nullptr);
-        glBindVertexArray(0);
+        // Intentionally no `glBindVertexArray(0)` — the next draw rebinds,
+        // so unbinding here is a wasted driver call per entity per frame.
+    }
+
+    void Mesh::DrawBatched(unsigned int& lastVaoId) const
+    {
+        if (!m_IsCreated)
+        {
+            return;
+        }
+
+        if (m_VertexArrayId != lastVaoId)
+        {
+            glBindVertexArray(m_VertexArrayId);
+            lastVaoId = m_VertexArrayId;
+        }
+
+        glDrawElements(GL_TRIANGLES, static_cast<int>(m_IndexCount), GL_UNSIGNED_INT, nullptr);
     }
 
     bool Mesh::IsCreated() const

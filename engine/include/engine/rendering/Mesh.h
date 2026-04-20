@@ -52,7 +52,18 @@ namespace engine
         void Destroy();
         void Draw() const;
 
+        // Batched draw: binds the VAO only if it isn't already the last-bound
+        // one. Callers seed a single "last VAO id" variable and pass it to
+        // every DrawBatched call in the frame; sequential draws of the same
+        // mesh then skip the glBindVertexArray entirely. Measurable win when
+        // many entities share a mesh (wall/floor tiles).
+        void DrawBatched(unsigned int& lastVaoId) const;
+
         [[nodiscard]] bool IsCreated() const;
+
+        // Exposed so the render loop can compare against a cached "last bound
+        // VAO" id and skip redundant binds when drawing batches of the same mesh.
+        [[nodiscard]] unsigned int GetVertexArrayId() const { return m_VertexArrayId; }
 
     private:
         unsigned int m_VertexArrayId;

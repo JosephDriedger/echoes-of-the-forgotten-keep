@@ -47,13 +47,33 @@ Enemies are also subject to **knockback** — when hit, they are pushed away fro
 
 ## Dungeon Generation
 
-Dungeons are procedurally generated using the `DungeonSpawnSystem`:
+Dungeons are procedurally generated via a three-stage pipeline: `FloorGenerator` → `BuildRoomSystem::FromFloor` → `BuildRoomSystem::Build` → `DungeonSpawnSystem::SpawnDungeon`.
 
-- Rooms are placed on a grid with configurable count and seed
-- Each room contains walls, floors, and decorative elements from the prefab library
-- Doors connect rooms and open automatically when the player approaches
-- Enemies are spawned within rooms
-- Floor switches can be linked to doors via trigger IDs for puzzle mechanics
+### Pipeline
+
+1. **`FloorGenerator::Generate(config)`** — produces a `FloorLayout` (a 2D grid of `CellType` values).
+   1. **Phase 1: Place rooms.** Random-size rectangles are placed one at a time; any new room whose AABB comes within 8 cells of an existing room is rejected. This large padding (`kPad = 8`) guarantees corridors connecting room centers can't graze a third room's wall and produce thin wall peninsulas.
+   2. **Phase 2: Connect consecutive rooms.** Each room[i] is linked to room[i-1] with a single L-shaped corridor (random horizontal-first or vertical-first bend). Corridor width is `1` — required so the door detector (which looks for floor cells with exactly 2 walkable neighbors) can find room/corridor transitions.
+   3. **Phase 3: Extra maze corridors.** `mazeFactor`-controlled; currently set to `0.0` in `GameplayScene` because additional corridors tended to graze third rooms and create noise.
+   4. **Validate & retry.** The candidate layout is rejected if any `Empty` cell has `Floor` neighbors on opposite cardinal sides (would become a wall strip between parallel floors) or has 3+ cardinal floor neighbors (wall peninsula). Up to 50 attempts are made with re-seeded RNG; on exhaustion the last candidate is used and a warning is logged.
+   5. **Mark endpoints.** First room's center becomes `Start` (player spawn), last room's center becomes `End` (stairs down).
+
+2. **`BuildRoomSystem::FromFloor(layout)`** — upgrades a `FloorLayout` into a `MapGrid`.
+   1. Copies `Floor`/`Start`/`End` cells into the output map.
+   2. **Reachability prune.** Flood-fills from the `Start` cell; any walkable cell not reached is erased back to `Empty`, so walls/doors aren't spawned around geometry the player can't access.
+   3. **Wall halo.** Every `Empty` cell adjacent (including diagonals) to a floor is turned into `Wall`.
+   4. **Door detection.** A floor cell with exactly 2 walkable neighbors on opposite cardinal sides, adjacent to at least one room-like tile (3+ walkable neighbors), becomes `Door`.
+
+3. **`BuildRoomSystem::Build(map, config)`** — turns the grid into a list of `SpawnInstance`s. Selects the correct wall variant (straight, corner, T-split, crossing) and rotation by inspecting each wall cell's cardinal neighbors. Places stair props for `Start`/`End` and emits a `Door` prop offset from the `WallDoorway` frame.
+
+4. **`DungeonSpawnSystem::SpawnDungeon(roomCount, seed, mazeFactor)`** — drives the pipeline, instantiates prefabs as ECS entities, caches the generated `MapGrid`, records the world-space `Start` position for player placement, and calls `SpawnEnemies` / `SpawnButtons` to populate the level.
+
+### Runtime Behavior
+
+- Player spawn is set to the Start tile's world position after `SpawnDungeon` (since validation retries can relocate the first room, the player can no longer be placed at a hard-coded world coordinate).
+- Doors open automatically when the player approaches; they can also be linked to floor-switch `TriggerId`s for puzzle mechanics.
+- Enemies spawn only inside rooms, never in corridors.
+- Press **F6** (with debug mode on via F3) to toggle a top-down map overview camera that reveals the entire generated floor — useful for validating generation.
 
 ### Prefab Types
 

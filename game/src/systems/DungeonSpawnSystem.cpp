@@ -108,6 +108,20 @@ namespace game
         Transform t(position.x, position.y, position.z);
         t.RotationY = glm::radians(rotY);
 
+        // Bake the model matrix once. Dungeon geometry (walls/floors/stairs)
+        // never moves, so precomputing spares the render loop a per-frame
+        // translate+rotate+scale chain per entity. Door entities override this
+        // flag when they start animating (see DoorSystem).
+        if (type != engine::PrefabType::Door)
+        {
+            glm::mat4 m(1.0f);
+            m = glm::translate(m, glm::vec3(t.X, t.Y, t.Z));
+            m = glm::rotate(m, t.RotationY, glm::vec3(0.0f, 1.0f, 0.0f));
+            m = glm::scale(m, glm::vec3(t.ScaleX, t.ScaleY, t.ScaleZ));
+            t.ModelMatrix = m;
+            t.UseModelMatrix = true;
+        }
+
         m_Registry.AddComponent(e, t);
         m_Registry.AddComponent(e, Render(mesh.MeshPtr, texture));
 
