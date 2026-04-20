@@ -19,15 +19,23 @@ namespace game
         [[nodiscard]] bool IsEnabled() const { return m_Enabled; }
         [[nodiscard]] bool ShowFPS() const { return m_Enabled && m_ShowFPS; }
         [[nodiscard]] bool ShowColliders() const { return m_Enabled && m_ShowColliders; }
+        [[nodiscard]] bool ShowMapOverview() const { return m_Enabled && m_ShowMapOverview; }
+
+        // True for a single frame after F6 is pressed — use to trigger one-shot
+        // actions like printing the map to stdout.
+        [[nodiscard]] bool MapOverviewJustToggled() const { return m_MapOverviewJustToggled; }
 
     private:
         bool m_Enabled = false;
         bool m_ShowFPS = true;
         bool m_ShowColliders = true;
+        bool m_ShowMapOverview = false;
+        bool m_MapOverviewJustToggled = false;
         // Previous-frame key states for edge detection (press, not hold)
         bool m_F3WasDown = false;
         bool m_F4WasDown = false;
         bool m_F5WasDown = false;
+        bool m_F6WasDown = false;
     };
 }
 

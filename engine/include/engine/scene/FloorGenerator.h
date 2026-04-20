@@ -59,12 +59,17 @@ namespace engine {
 
     // Parameters controlling procedural floor generation.
     struct FloorConfig {
-        int width = 25;
-        int height = 25;
+        int width = 40;
+        int height = 40;
 
         int roomCount = 8;
         int minRoomSize = 4;
         int maxRoomSize = 5;
+
+        // Width (in cells) of every carved corridor. Keep at 1 so the door
+        // detector (which looks for corridor cells with exactly 2 walkable
+        // neighbors) can find room/corridor transitions to place doors at.
+        int corridorWidth = 1;
 
         float corridorChance = 0.2f;
         // Fraction of extra corridors added between random room pairs to create loops.
@@ -85,6 +90,9 @@ namespace engine {
         static FloorLayout Generate(FloorConfig& config);
 
     private:
+        // Single generation attempt. Generate() calls this in a retry loop
+        // and rejects results that would produce wall peninsulas/islands.
+        static FloorLayout GenerateOnce(FloorConfig& config);
         static bool Overlaps(const Room& a, const Room& b);
         static void CarveRoom(FloorLayout& layout, const Room& room);
         // Carves an L-shaped corridor between two points.
@@ -92,7 +100,8 @@ namespace engine {
         static void CarveCorridor(FloorLayout& layout,
                                  const glm::ivec2& a,
                                  const glm::ivec2& b,
-                                 std::mt19937& rng);
+                                 std::mt19937& rng,
+                                 int width);
 
         static int RandRange(std::mt19937& rng, int min, int max);
         static bool Chance(std::mt19937& rng, float probability);

@@ -35,6 +35,30 @@ namespace game
         auto dungeon = engine::FloorGenerator::Generate(config);
         auto map = engine::BuildRoomSystem::FromFloor(dungeon);
 
+        m_LastMap = map;
+        m_MapWorldWidth = map.width * config.buildConfig.tileSize;
+        m_MapWorldDepth = map.height * config.buildConfig.tileSize;
+
+        // Cache Start cell world position so GameplayScene can place the
+        // player on top of the entry stairs (retry-based generation means
+        // the Start cell is no longer at a predictable grid location).
+        m_StartWorldPos = glm::vec3(0.0f);
+        m_HasStartPos = false;
+        for (int y = 0; y < map.height && !m_HasStartPos; y++) {
+            for (int x = 0; x < map.width; x++) {
+                if (map.cells[y * map.width + x] == engine::CellType::Start) {
+                    const float ts = config.buildConfig.tileSize;
+                    m_StartWorldPos = {
+                        (x - map.width / 2.0f) * ts,
+                        0.0f,
+                        y * ts
+                    };
+                    m_HasStartPos = true;
+                    break;
+                }
+            }
+        }
+
         engine::BuildRoomSystem::DebugPrint(map);
         auto instances = engine::BuildRoomSystem::Build(map, config.buildConfig);
 
@@ -518,5 +542,10 @@ namespace game
         }
 
         std::cout << "[DungeonSpawnSystem] Spawned " << buttonCount << " buttons\n";
+    }
+
+    void DungeonSpawnSystem::DebugPrintMap() const
+    {
+        engine::BuildRoomSystem::DebugPrint(m_LastMap);
     }
 }

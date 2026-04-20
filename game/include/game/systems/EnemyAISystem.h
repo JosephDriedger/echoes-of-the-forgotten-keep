@@ -39,6 +39,9 @@ namespace game
         void UpdateAttack(engine::Registry& registry, engine::Entity enemy, engine::Entity player, float dt);
 
         static float Distance(float ax, float az, float bx, float bz);
+        static float DistanceSq(float ax, float az, float bx, float bz);
+
+        engine::Entity m_CachedPlayer;
     };
 }
 

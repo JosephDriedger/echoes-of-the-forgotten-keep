@@ -8,6 +8,8 @@
 #include <fstream>
 #include <random>
 #include <iostream>
+#include <vector>
+#include <utility>
 
 namespace engine {
     std::vector<SpawnInstance> BuildRoomSystem::Build(
@@ -151,6 +153,63 @@ namespace engine {
                 }if (cell == CellType::End)
                 {
                     map.get(x, y) = CellType::End;
+                }
+            }
+        }
+
+        // Step 1.5: Prune floor the player can't reach. Flood-fill from the
+        // Start cell through Floor/Start/End; any walkable cell not visited
+        // is an orphan (a room the corridor carver missed, or a pocket cut
+        // off by overlapping carves). Erase it back to Empty so Step 2
+        // doesn't spawn walls/doors around geometry nobody can walk into.
+        {
+            int startX = -1, startY = -1;
+            for (int y = 0; y < map.height && startY < 0; y++) {
+                for (int x = 0; x < map.width; x++) {
+                    if (map.get(x, y) == CellType::Start) {
+                        startX = x;
+                        startY = y;
+                        break;
+                    }
+                }
+            }
+
+            if (startX >= 0) {
+                std::vector<bool> reachable(map.width * map.height, false);
+                std::vector<std::pair<int,int>> stack;
+                stack.push_back({startX, startY});
+                reachable[startY * map.width + startX] = true;
+
+                const int dx4[4] = {0, 0, -1, 1};
+                const int dy4[4] = {-1, 1, 0, 0};
+
+                while (!stack.empty()) {
+                    auto [cx, cy] = stack.back();
+                    stack.pop_back();
+                    for (int i = 0; i < 4; i++) {
+                        int nx = cx + dx4[i];
+                        int ny = cy + dy4[i];
+                        if (nx < 0 || ny < 0 || nx >= map.width || ny >= map.height)
+                            continue;
+                        int nIdx = ny * map.width + nx;
+                        if (reachable[nIdx]) continue;
+                        CellType nc = map.get(nx, ny);
+                        if (nc == CellType::Floor ||
+                            nc == CellType::Start ||
+                            nc == CellType::End) {
+                            reachable[nIdx] = true;
+                            stack.push_back({nx, ny});
+                        }
+                    }
+                }
+
+                for (int y = 0; y < map.height; y++) {
+                    for (int x = 0; x < map.width; x++) {
+                        int idx = y * map.width + x;
+                        if (!reachable[idx] && map.cells[idx] != CellType::Empty) {
+                            map.cells[idx] = CellType::Empty;
+                        }
+                    }
                 }
             }
         }

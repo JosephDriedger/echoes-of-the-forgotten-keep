@@ -22,6 +22,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/gl.h>
 
+#include <algorithm>
 #include <iostream>
 
 #include "game/systems/DoorPuzzleSystem.h"
@@ -44,7 +45,7 @@ namespace game
         // Set up the third-person camera with a top-down offset
         m_Camera.SetPosition(0.0f, 10.0f, 13.0f);
         m_Camera.SetTarget(0.0f, 0.0f, 5.0f);
-        m_Camera.SetPerspective(40.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+        m_Camera.SetPerspective(40.0f, 16.0f / 9.0f, 0.1f, 600.0f);
         m_UISystem.Initialize(m_AssetManager);
 
         m_Shader = m_AssetManager.GetShaderManager().Load(
@@ -259,7 +260,20 @@ namespace game
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
-        m_DungeonSpawnSystem->SpawnDungeon(10, 42, 0.5f);
+        m_DungeonSpawnSystem->SpawnDungeon(10, 42, 0.0f);
+
+        // Re-position player onto the Start tile. The hard-coded (32, 0, 25)
+        // spawn above assumed a fixed-seed generation; now that FloorGenerator
+        // retries on invalid layouts, the Start cell lands in a different spot
+        // per run, so we teleport the player to match.
+        if (m_DungeonSpawnSystem->HasStartPos())
+        {
+            const glm::vec3& s = m_DungeonSpawnSystem->GetStartWorldPos();
+            auto& t = m_Registry.GetComponent<Transform>(m_PlayerEntity);
+            t.X = s.x;
+            t.Y = s.y;
+            t.Z = s.z;
+        }
     }
 
     /// Runs the full ECS pipeline each frame. Order matters: input -> movement
@@ -295,6 +309,25 @@ namespace game
         DoorPuzzleSystem::Update(m_Registry, dt);
         LifetimeSystem::Update(m_Registry, dt);
         m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);
+
+        // Debug: top-down overview of the entire dungeon (F6). Overrides
+        // the follow camera so we can see the whole generated map at once.
+        // Also dumps the ASCII grid to stdout each time it's toggled.
+        if (m_DebugToggle.ShowMapOverview() && m_DungeonSpawnSystem)
+        {
+            const float mapDepth = m_DungeonSpawnSystem->GetMapWorldDepth();
+            const float mapWidth = m_DungeonSpawnSystem->GetMapWorldWidth();
+            const float centerZ = mapDepth * 0.5f;
+            // Height chosen so a 40° vertical FOV comfortably covers the map.
+            const float height = std::max(mapWidth, mapDepth) * 1.6f;
+            m_Camera.SetPosition(0.0f, height, centerZ + 20.0f);
+            m_Camera.SetTarget(0.0f, 0.0f, centerZ);
+        }
+        if (m_DebugToggle.MapOverviewJustToggled() && m_DungeonSpawnSystem)
+        {
+            m_DungeonSpawnSystem->DebugPrintMap();
+        }
+
         audioEventQueue.process(); // process all the audio events
     }
 
@@ -324,19 +357,9 @@ namespace game
         m_Shader->SetMat4("projection", m_Camera.GetProjectionMatrix());
         m_Shader->SetInt("texture_diffuse1", 0);
 
-        // Upload identity bones once at start for non-animated entities
-        static bool identityUploaded = false;
-        if (!identityUploaded)
-        {
-            glm::mat4 identity(1.0f);
-            for (int i = 0; i < 100; i++)
-            {
-                m_Shader->SetMat4(boneUniformLocations[i], glm::value_ptr(identity));
-            }
-            identityUploaded = true;
-        }
-
-        bool lastWasAnimated = false;
+        // Treat the start of each frame as if the previous entity was animated so the
+        // first non-animated entity always gets identity bones, regardless of draw order.
+        bool lastWasAnimated = true;
 
         for (const engine::Entity entity : m_Registry.GetActiveEntities())
         {
