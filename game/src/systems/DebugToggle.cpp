@@ -35,5 +35,16 @@ namespace game
             std::cout << "[Debug] Collider rendering " << (m_ShowColliders ? "ON" : "OFF") << "\n";
         }
         m_F5WasDown = f5Down;
+
+        // F6 toggles top-down map overview camera (within debug mode)
+        m_MapOverviewJustToggled = false;
+        bool f6Down = input.IsKeyDown(SDLK_F6);
+        if (f6Down && !m_F6WasDown)
+        {
+            m_ShowMapOverview = !m_ShowMapOverview;
+            m_MapOverviewJustToggled = true;
+            std::cout << "[Debug] Map overview " << (m_ShowMapOverview ? "ON" : "OFF") << "\n";
+        }
+        m_F6WasDown = f6Down;
     }
 }

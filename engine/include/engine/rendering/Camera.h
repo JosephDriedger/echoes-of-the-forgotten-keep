@@ -21,6 +21,11 @@ namespace engine
         [[nodiscard]] const float* GetViewMatrix() const;
         [[nodiscard]] const float* GetProjectionMatrix() const;
 
+        // Accessors used for distance-based culling in the render loop.
+        [[nodiscard]] float GetPositionX() const { return m_Position[0]; }
+        [[nodiscard]] float GetPositionY() const { return m_Position[1]; }
+        [[nodiscard]] float GetPositionZ() const { return m_Position[2]; }
+
     private:
         void RecalculateViewMatrix();
         void RecalculateProjectionMatrix();

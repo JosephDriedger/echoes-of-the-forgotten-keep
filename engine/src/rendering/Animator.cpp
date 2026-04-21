@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <algorithm>
 #include <cmath>
 
 namespace engine
@@ -21,13 +22,11 @@ namespace engine
         if (positions.empty()) return glm::vec3(0.0f);
         if (positions.size() == 1) return positions[0].Position;
 
-        // Find the last keyframe at or before 'time'.
-        int i = 0;
-        for (; i < static_cast<int>(positions.size()) - 1; i++)
-        {
-            if (time < positions[i + 1].TimeStamp)
-                break;
-        }
+        // Binary search: find first keyframe in [1..end) with TimeStamp > time.
+        auto it = std::upper_bound(positions.begin() + 1, positions.end(), time,
+            [](float t, const KeyPosition& k) { return t < k.TimeStamp; });
+        int i = static_cast<int>(it - positions.begin()) - 1;
+        i = std::max(0, std::min(i, static_cast<int>(positions.size()) - 2));
 
         const KeyPosition& p0 = positions[i];
         const KeyPosition& p1 = positions[i + 1];
@@ -47,12 +46,10 @@ namespace engine
         if (rotations.empty()) return glm::quat(1, 0, 0, 0);
         if (rotations.size() == 1) return rotations[0].Orientation;
 
-        int i = 0;
-        for (; i < static_cast<int>(rotations.size()) - 1; i++)
-        {
-            if (time < rotations[i + 1].TimeStamp)
-                break;
-        }
+        auto it = std::upper_bound(rotations.begin() + 1, rotations.end(), time,
+            [](float t, const KeyRotation& k) { return t < k.TimeStamp; });
+        int i = static_cast<int>(it - rotations.begin()) - 1;
+        i = std::max(0, std::min(i, static_cast<int>(rotations.size()) - 2));
 
         const KeyRotation& r0 = rotations[i];
         const KeyRotation& r1 = rotations[i + 1];
@@ -70,12 +67,10 @@ namespace engine
         if (scales.empty()) return glm::vec3(1.0f);
         if (scales.size() == 1) return scales[0].Scale;
 
-        int i = 0;
-        for (; i < static_cast<int>(scales.size()) - 1; i++)
-        {
-            if (time < scales[i + 1].TimeStamp)
-                break;
-        }
+        auto it = std::upper_bound(scales.begin() + 1, scales.end(), time,
+            [](float t, const KeyScale& k) { return t < k.TimeStamp; });
+        int i = static_cast<int>(it - scales.begin()) - 1;
+        i = std::max(0, std::min(i, static_cast<int>(scales.size()) - 2));
 
         const KeyScale& s0 = scales[i];
         const KeyScale& s1 = scales[i + 1];

@@ -22,6 +22,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/gl.h>
 
+#include <algorithm>
 #include <iostream>
 
 #include "game/systems/DoorPuzzleSystem.h"
@@ -44,7 +45,7 @@ namespace game
         // Set up the third-person camera with a top-down offset
         m_Camera.SetPosition(0.0f, 10.0f, 13.0f);
         m_Camera.SetTarget(0.0f, 0.0f, 5.0f);
-        m_Camera.SetPerspective(40.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+        m_Camera.SetPerspective(40.0f, 16.0f / 9.0f, 0.1f, 600.0f);
         m_UISystem.Initialize(m_AssetManager);
 
         m_Shader = m_AssetManager.GetShaderManager().Load(
@@ -295,6 +296,25 @@ namespace game
         DoorPuzzleSystem::Update(m_Registry, dt);
         LifetimeSystem::Update(m_Registry, dt);
         m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);
+
+        // Debug: top-down overview of the entire dungeon (F6). Overrides
+        // the follow camera so we can see the whole generated map at once.
+        // Also dumps the ASCII grid to stdout each time it's toggled.
+        if (m_DebugToggle.ShowMapOverview() && m_DungeonSpawnSystem)
+        {
+            const float mapDepth = m_DungeonSpawnSystem->GetMapWorldDepth();
+            const float mapWidth = m_DungeonSpawnSystem->GetMapWorldWidth();
+            const float centerZ = mapDepth * 0.5f;
+            // Height chosen so a 40° vertical FOV comfortably covers the map.
+            const float height = std::max(mapWidth, mapDepth) * 1.6f;
+            m_Camera.SetPosition(0.0f, height, centerZ + 20.0f);
+            m_Camera.SetTarget(0.0f, 0.0f, centerZ);
+        }
+        if (m_DebugToggle.MapOverviewJustToggled() && m_DungeonSpawnSystem)
+        {
+            m_DungeonSpawnSystem->DebugPrintMap();
+        }
+
         audioEventQueue.process(); // process all the audio events
     }
 
@@ -324,19 +344,25 @@ namespace game
         m_Shader->SetMat4("projection", m_Camera.GetProjectionMatrix());
         m_Shader->SetInt("texture_diffuse1", 0);
 
-        // Upload identity bones once at start for non-animated entities
-        static bool identityUploaded = false;
-        if (!identityUploaded)
-        {
-            glm::mat4 identity(1.0f);
-            for (int i = 0; i < 100; i++)
-            {
-                m_Shader->SetMat4(boneUniformLocations[i], glm::value_ptr(identity));
-            }
-            identityUploaded = true;
-        }
+        // Treat the start of each frame as if the previous entity was animated so the
+        // first non-animated entity always gets identity bones, regardless of draw order.
+        bool lastWasAnimated = true;
 
-        bool lastWasAnimated = false;
+        // Track last-bound GPU state so we can skip redundant glBindTexture /
+        // glBindVertexArray calls when consecutive entities share resources
+        // (common in the dungeon where dozens of wall/floor tiles share
+        // meshes and textures).
+        unsigned int lastTextureId = 0;
+        unsigned int lastVaoId = 0;
+
+        // Distance cull: skip entities that are far enough from the camera
+        // that they can't possibly be on screen. 80 units squared radius
+        // comfortably covers the 3rd-person view; the overview camera (F6)
+        // sits well above this so we disable culling when it's active.
+        const bool useCull = !m_DebugToggle.ShowMapOverview();
+        const float cullRadiusSq = 80.0f * 80.0f;
+        const float camX = m_Camera.GetPositionX();
+        const float camZ = m_Camera.GetPositionZ();
 
         for (const engine::Entity entity : m_Registry.GetActiveEntities())
         {
@@ -351,6 +377,19 @@ namespace game
 
             if (!render.MeshPtr || !render.TexturePtr)
                 continue;
+
+            // Bone-attached entities (sword, shield, etc.) carry a stale
+            // (0,0,0) transform -- BoneAttachmentSystem writes their real
+            // world position into ModelMatrix each frame. Skip distance
+            // culling for them so equipment riding on the player doesn't
+            // get culled when the player roams far from the origin.
+            if (useCull && !m_Registry.HasComponent<BoneAttachment>(entity))
+            {
+                const float dx = transform.X - camX;
+                const float dz = transform.Z - camZ;
+                if (dx * dx + dz * dz > cullRadiusSq)
+                    continue;
+            }
 
             // Build model matrix
             glm::mat4 modelMat;
@@ -389,8 +428,16 @@ namespace game
                 lastWasAnimated = false;
             }
 
-            render.TexturePtr->Bind(0);
-            render.MeshPtr->Draw();
+            const unsigned int texId = render.TexturePtr->GetId();
+            if (texId != lastTextureId)
+            {
+                render.TexturePtr->Bind(0);
+                lastTextureId = texId;
+            }
+
+            // DrawBatched compares against lastVaoId and only calls
+            // glBindVertexArray when the mesh actually changes.
+            render.MeshPtr->DrawBatched(lastVaoId);
         }
 
         // Render debug colliders after main scene

@@ -15,18 +15,30 @@ namespace game
         return std::sqrt(dx * dx + dz * dz);
     }
 
+    float EnemyAISystem::DistanceSq(float ax, float az, float bx, float bz)
+    {
+        float dx = ax - bx;
+        float dz = az - bz;
+        return dx * dx + dz * dz;
+    }
+
     void EnemyAISystem::Update(engine::Registry& registry, float deltaTime)
     {
-        // Find the player entity
-        engine::Entity playerEntity(0);
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        // Cache player entity; only re-search when the cached handle goes stale.
+        if (!m_CachedPlayer.IsValid() || !registry.IsAlive(m_CachedPlayer) ||
+            !registry.HasComponent<Player>(m_CachedPlayer))
         {
-            if (registry.HasComponent<Player>(entity) && registry.HasComponent<Transform>(entity))
+            m_CachedPlayer = engine::Entity(0);
+            for (const engine::Entity entity : registry.GetActiveEntities())
             {
-                playerEntity = entity;
-                break;
+                if (registry.HasComponent<Player>(entity) && registry.HasComponent<Transform>(entity))
+                {
+                    m_CachedPlayer = entity;
+                    break;
+                }
             }
         }
+        engine::Entity playerEntity = m_CachedPlayer;
 
         // Update each enemy
         for (const engine::Entity entity : registry.GetActiveEntities())
@@ -78,10 +90,9 @@ namespace game
                 ai.LoseTargetTimer <= 0.0f &&
                 (ai.State == AIState::Idle || ai.State == AIState::Patrol))
             {
-                const auto& et = registry.GetComponent<Transform>(entity);
                 const auto& pt = registry.GetComponent<Transform>(playerEntity);
-                float dist = Distance(et.X, et.Z, pt.X, pt.Z);
-                if (dist < ai.VisionRange)
+                float distSq = DistanceSq(et.X, et.Z, pt.X, pt.Z);
+                if (distSq < ai.VisionRange * ai.VisionRange)
                 {
                     ai.State = AIState::Chase;
                     ai.StateTimer = 0.0f;

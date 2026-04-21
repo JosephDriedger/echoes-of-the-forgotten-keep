@@ -30,6 +30,19 @@ namespace game
                            engine::AssetManager& assetManager);
 
         void SpawnDungeon(int roomCount, int seed, float mazeFactor);
+
+        // Reprints the generated map grid to stdout for debugging.
+        void DebugPrintMap() const;
+
+        // World-space dimensions of the generated map (in game units).
+        [[nodiscard]] float GetMapWorldWidth() const { return m_MapWorldWidth; }
+        [[nodiscard]] float GetMapWorldDepth() const { return m_MapWorldDepth; }
+
+        // World-space position of the Start tile (player spawn). Returns
+        // (0,0,0) and HasStartPos()==false if no Start cell was produced.
+        [[nodiscard]] bool HasStartPos() const { return m_HasStartPos; }
+        [[nodiscard]] const glm::vec3& GetStartWorldPos() const { return m_StartWorldPos; }
+
         void SpawnEnemies(engine::MapGrid& map, const engine::BuildRoomConfig& config, int seed);
         void SpawnButtons(engine::MapGrid& map, const engine::BuildRoomConfig& config, int seed);
 
@@ -46,6 +59,12 @@ namespace game
         engine::Registry& m_Registry;
         engine::MeshManager& m_MeshManager;
         engine::AssetManager& m_AssetManager;
+
+        engine::MapGrid m_LastMap;
+        float m_MapWorldWidth = 0.0f;
+        float m_MapWorldDepth = 0.0f;
+        glm::vec3 m_StartWorldPos = glm::vec3(0.0f);
+        bool m_HasStartPos = false;
 
     public:
         std::shared_ptr<std::vector<engine::AnimationClip>> SharedClips; // Shared animation clips for enemies

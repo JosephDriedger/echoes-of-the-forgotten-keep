@@ -68,10 +68,20 @@ This deferred approach prevents destroying the active scene while it is still ex
 The engine uses OpenGL 4.6 (loaded via GLAD) with a **forward rendering pipeline** — each object is drawn once per frame with its final lighting and texturing applied in a single pass. This is the simplest rendering approach (as opposed to deferred rendering, which separates geometry and lighting into multiple passes) and is well-suited for a scene with a moderate number of objects:
 
 - **Shader** - Compiles GLSL vertex/fragment programs, caches uniform locations for performance
-- **Mesh** - GPU-resident vertex data (position, normal, UV, bone IDs/weights) with VAO/VBO/EBO
+- **Mesh** - GPU-resident vertex data (position, normal, UV, bone IDs/weights) with VAO/VBO/EBO. Exposes both `Draw()` (always binds the VAO) and `DrawBatched(lastVaoId)`, which skips the bind when the same mesh is drawn back-to-back.
 - **Texture** - 2D textures loaded from PNG files via SDL3_image
-- **Camera** - Supports both perspective (gameplay) and orthographic (UI) projections
+- **Camera** - Supports both perspective (gameplay) and orthographic (UI) projections. Exposes `GetPositionX/Y/Z()` for distance-based culling.
 - **RenderSystem** - Utility for drawing meshes with shaders and optional textures
+
+### Render-Loop Optimizations
+
+The main render loop in `GameplayScene::OnRender` applies several cheap optimizations that compound well as the dungeon grows:
+
+- **Distance culling** - Entities farther than a fixed XZ radius (80 units squared) from the camera are skipped entirely. Automatically disabled while the F6 map-overview camera is active so the whole map stays visible. Bone-attached entities (sword, shield) bypass the cull because their real position lives in the `ModelMatrix`, not `Transform.X/Z`.
+- **Redundant bind elimination** - The loop tracks `lastTextureId` and `lastVaoId`; consecutive entities sharing a texture or mesh skip the corresponding `glBindTexture` / `glBindVertexArray` call.
+- **Baked model matrices** - Static dungeon geometry (walls, floors, stairs, doorway frames) has its `ModelMatrix` precomputed once at spawn time in `DungeonSpawnSystem::SpawnPrefab`. The render loop uses the `UseModelMatrix` branch and avoids the per-frame `translate/rotate/scale` chain. Animated entities (doors, the player) keep the dynamic path.
+- **Bone-matrix transition batching** - The 100 identity bone matrices needed by non-animated meshes are only uploaded once per animated→static transition, not per entity.
+- **Binary-search keyframe lookup** - `Animator::InterpolatePosition/Rotation/Scale` uses `std::upper_bound` instead of a linear scan to find the active keyframe pair.
 
 ### Skeletal Animation
 

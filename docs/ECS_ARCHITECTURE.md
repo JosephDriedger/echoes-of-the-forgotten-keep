@@ -269,7 +269,7 @@ All game systems are in `game/include/game/systems/`. Systems come in two styles
 | System | Style | Purpose |
 |--------|-------|---------|
 | **UISystem** | Instance | Renders HUD elements (health bar) |
-| **DebugToggle** | Instance | Toggles debug visualizations via F3/F4/F5 |
+| **DebugToggle** | Instance | Toggles debug visualizations (F3 master, F4 FPS, F5 colliders, F6 map overview camera) |
 | **DebugColliderRenderer** | Instance | Draws wireframe collider boxes in 3D space |
 | **FPSCounter** | Instance | Tracks and displays FPS as on-screen overlay |
 
