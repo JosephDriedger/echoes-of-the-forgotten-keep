@@ -6,7 +6,7 @@
 
 namespace game
 {
-    void CollisionSystem::Update(engine::Registry& registry) const
+    void CollisionSystem::Update(engine::Registry& registry)
     {
         const std::vector<engine::Entity>& entities = registry.GetActiveEntities();
 

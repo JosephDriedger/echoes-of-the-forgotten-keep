@@ -283,19 +283,19 @@ namespace game
         // ECS systems
         CombatInputSystem::Update(m_Registry, input, audioEventQueue);
         MovementSystem::Update(m_Registry, input, dt);
-        m_CollisionSystem.Update(m_Registry);
+        CollisionSystem::Update(m_Registry);
         AnimationSystem::Update(m_Registry, dt, audioEventQueue);
         BoneAttachmentSystem::Update(m_Registry);
-        m_AttackHitboxSystem.Update(m_Registry);
-        m_DamageSystem.Update(m_Registry);
+        AttackHitboxSystem::Update(m_Registry);
+        DamageSystem::Update(m_Registry);
         DeathSystem::Update(m_Registry, audioEventQueue);
-        m_EnemyAISystem.Update(m_Registry, dt);
-        m_HitTimerSystem.Update(m_Registry, dt);
+        EnemyAISystem::Update(m_Registry, dt);
+        HitTimerSystem::Update(m_Registry, dt);
         SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt, audioEventQueue);
         DoorPuzzleSystem::Update(m_Registry, dt);
         LifetimeSystem::Update(m_Registry, dt);
-        m_CameraFollowSystem.Update(m_Registry, m_PlayerEntity, m_Camera, input);
+        CameraFollowSystem::Update(m_Registry, m_PlayerEntity, m_Camera, input);
 
         // Debug: top-down overview of the entire dungeon (F6). Overrides
         // the follow camera so we can see the whole generated map at once.

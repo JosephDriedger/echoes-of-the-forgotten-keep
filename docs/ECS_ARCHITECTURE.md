@@ -219,20 +219,35 @@ Automatic entity destruction after a duration.
 Duration  - Seconds remaining (default 5.0)
 ```
 
+### AttackStateComponent
+Per-attacker state owned by `AttackHitboxSystem`. Stored on the attacking entity so the system remains stateless.
+```
+ActiveHitbox    - The hitbox entity currently spawned for this attacker
+HasActiveHitbox - Whether a live hitbox entity exists
+HitThisSwing    - Set of target entity IDs already struck in the current swing (prevents multi-hit)
+LastComboIndex  - ComboIndex value from the last frame, used to detect when a new swing begins
+```
+
+### CameraFollowState
+Per-target state owned by `CameraFollowSystem`. Stored on the followed entity so the system remains stateless.
+```
+Zoom  - Current camera height / zoom distance (default 20.0, range 8–60)
+```
+
 ## Systems
 
 All game systems are in `game/include/game/systems/`. Systems come in two styles:
 
-- **Static** systems have no member variables. All their methods are `static`, so they are called directly on the class (e.g., `MovementSystem::Update(registry, input, dt)`). This is used when the system needs no persistent state between frames — it simply reads components, does work, and writes results back.
-- **Instance** systems are created as member variables of GameplayScene (e.g., `m_CollisionSystem`). They hold state that persists across frames, such as cached data structures, tracked entity sets, or GPU resources. They are called on the instance (e.g., `m_CollisionSystem.Update(registry)`).
+- **Static** systems have no member variables. All their methods are `static`, so they are called directly on the class (e.g., `MovementSystem::Update(registry, input, dt)`). All game-logic systems follow this style — any state they need between frames is stored in components on the relevant entities.
+- **Instance** systems are created as member variables of GameplayScene and hold state that cannot live in ECS components: GPU resources (VAO, VBO, shader handles), debug flags, or construction-time dependencies. They are called on the instance (e.g., `m_UISystem.Render(...)`).
 
 ### Core Gameplay Systems
 
 | System | Style | Purpose |
 |--------|-------|---------|
 | **MovementSystem** | Static | Reads keyboard input (WASD), moves entities with `Player` + `Transform` components, updates facing direction |
-| **CollisionSystem** | Instance | AABB collision detection between all `Collider` + `Transform` entities, resolves overlaps for non-static entities |
-| **CameraFollowSystem** | Instance | Smoothly follows the player entity, handles mouse wheel zoom (range 8-60) |
+| **CollisionSystem** | Static | AABB collision detection between all `Collider` + `Transform` entities, resolves overlaps for non-static entities |
+| **CameraFollowSystem** | Static | Follows the player entity; reads and writes zoom from `CameraFollowState` on the target entity; handles mouse wheel zoom (range 8-60) |
 | **AnimationSystem** | Static | Advances animation time, evaluates bone keyframes, writes `FinalBoneMatrices`, fires attack sound effects via `AudioEventQueue` |
 | **BoneAttachmentSystem** | Static | Updates `Transform` of entities with `BoneAttachment` to follow parent bones (e.g., sword in hand) |
 
@@ -240,17 +255,17 @@ All game systems are in `game/include/game/systems/`. Systems come in two styles
 
 | System | Style | Purpose |
 |--------|-------|---------|
-| **CombatInputSystem** | Static | Translates mouse clicks into `CombatState` attack requests, manages combo queuing |
-| **AttackHitboxSystem** | Instance | Tracks active attack hitboxes, prevents multi-hit per swing |
-| **DamageSystem** | Instance | Processes `IncomingHit` on `CombatState`, applies damage to `Health` |
-| **HitTimerSystem** | Instance | Counts down `HitTimer` on `CombatState` each frame; while >0, entity has invincibility frames (i-frames) and cannot receive new hits |
+| **CombatInputSystem** | Static | Translates spacebar input into `CombatState` attack requests, manages combo queuing |
+| **AttackHitboxSystem** | Static | Spawns and positions hitbox entities; reads and writes per-swing state from `AttackStateComponent` on the attacker |
+| **DamageSystem** | Static | Processes `IncomingHit` on `CombatState`, applies damage to `Health` |
+| **HitTimerSystem** | Static | Counts down `HitTimer` on `CombatState` each frame; while >0, entity has invincibility frames (i-frames) and cannot receive new hits |
 | **DeathSystem** | Static | Marks dead entities (Health <= 0) with `IsDead`, converts their collider to a trigger (so corpses don't block movement), plays death sound via `AudioEventQueue`, clears movement, adds corpse `Lifetime` |
 
 ### AI Systems
 
 | System | Style | Purpose |
 |--------|-------|---------|
-| **EnemyAISystem** | Instance | Runs AI state machine: Idle / Patrol / Chase / Attack (skips dead entities) |
+| **EnemyAISystem** | Static | Runs AI state machine: Idle / Patrol / Chase / Attack (skips dead entities; queries registry for the player each frame via the `Player` marker component) |
 
 ### World Systems
 

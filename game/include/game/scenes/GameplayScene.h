@@ -93,14 +93,7 @@ namespace game
         FPSCounter m_FPSCounter;
         DebugToggle m_DebugToggle;
         DebugColliderRenderer m_DebugColliderRenderer;
-        CollisionSystem m_CollisionSystem;
-        AttackHitboxSystem m_AttackHitboxSystem;
-        CameraFollowSystem m_CameraFollowSystem;
         std::unique_ptr<DungeonSpawnSystem> m_DungeonSpawnSystem;
-
-        EnemyAISystem m_EnemyAISystem;
-        HitTimerSystem m_HitTimerSystem;
-        DamageSystem m_DamageSystem;
         UISystem m_UISystem;
         engine::TextRenderer m_DebugTextRenderer;
         engine::AudioEventQueue audioEventQueue;

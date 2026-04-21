@@ -16,7 +16,7 @@ namespace game
     class CollisionSystem
     {
     public:
-        void Update(engine::Registry& registry) const;
+        static void Update(engine::Registry& registry);
 
     private:
         /// Returns true if the two AABBs (with collider offsets) overlap on all three axes.

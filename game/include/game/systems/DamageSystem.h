@@ -14,7 +14,7 @@ namespace game
     class DamageSystem
     {
     public:
-        void Update(engine::Registry& registry);
+        static void Update(engine::Registry& registry);
     };
 }
 

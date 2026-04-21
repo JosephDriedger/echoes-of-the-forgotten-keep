@@ -14,7 +14,7 @@ namespace game
     class HitTimerSystem
     {
     public:
-        void Update(engine::Registry& registry, float deltaTime);
+        static void Update(engine::Registry& registry, float deltaTime);
     };
 }
 
