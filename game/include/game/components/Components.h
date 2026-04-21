@@ -19,6 +19,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace game
@@ -267,6 +268,19 @@ namespace game
             : FinalBoneMatrices(100, glm::mat4(1.0f))
         {
         }
+    };
+
+    struct AttackStateComponent
+    {
+        engine::Entity ActiveHitbox{0};
+        bool HasActiveHitbox = false;
+        std::unordered_set<uint32_t> HitThisSwing;
+        int LastComboIndex = -1;
+    };
+
+    struct CameraFollowState
+    {
+        float Zoom = 20.0f;
     };
 
     struct CombatState

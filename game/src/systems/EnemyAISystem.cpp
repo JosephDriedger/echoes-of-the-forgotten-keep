@@ -24,21 +24,15 @@ namespace game
 
     void EnemyAISystem::Update(engine::Registry& registry, float deltaTime)
     {
-        // Cache player entity; only re-search when the cached handle goes stale.
-        if (!m_CachedPlayer.IsValid() || !registry.IsAlive(m_CachedPlayer) ||
-            !registry.HasComponent<Player>(m_CachedPlayer))
+        engine::Entity playerEntity;
+        for (const engine::Entity entity : registry.GetActiveEntities())
         {
-            m_CachedPlayer = engine::Entity(0);
-            for (const engine::Entity entity : registry.GetActiveEntities())
+            if (registry.HasComponent<Player>(entity) && registry.HasComponent<Transform>(entity))
             {
-                if (registry.HasComponent<Player>(entity) && registry.HasComponent<Transform>(entity))
-                {
-                    m_CachedPlayer = entity;
-                    break;
-                }
+                playerEntity = entity;
+                break;
             }
         }
-        engine::Entity playerEntity = m_CachedPlayer;
 
         // Update each enemy
         for (const engine::Entity entity : registry.GetActiveEntities())

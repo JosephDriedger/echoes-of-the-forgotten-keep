@@ -29,6 +29,8 @@ The engine follows a modular architecture with a clean separation between the `e
 | Collider | AABB collision volume with trigger/static flags |
 | AnimationState | Skeletal animation playback and bone matrices |
 | CombatState | Attack state, combo chain, incoming damage, lunge, knockback |
+| AttackStateComponent | Per-attacker hitbox entity and per-swing hit tracking (owned by AttackHitboxSystem) |
+| CameraFollowState | Camera zoom level for the followed entity (owned by CameraFollowSystem) |
 | EnemyAI | AI behavior state machine (Idle/Patrol/Chase/Attack), knockback |
 | Door | Door swing state and proximity-based opening |
 | Switch | Floor switch for puzzle interactions |

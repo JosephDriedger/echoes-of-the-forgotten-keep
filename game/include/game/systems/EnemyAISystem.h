@@ -30,18 +30,16 @@ namespace game
     class EnemyAISystem
     {
     public:
-        void Update(engine::Registry& registry, float deltaTime);
+        static void Update(engine::Registry& registry, float deltaTime);
 
     private:
-        void UpdateIdle(engine::Registry& registry, engine::Entity enemy, float dt);
-        void UpdatePatrol(engine::Registry& registry, engine::Entity enemy, float dt);
-        void UpdateChase(engine::Registry& registry, engine::Entity enemy, engine::Entity player, float dt);
-        void UpdateAttack(engine::Registry& registry, engine::Entity enemy, engine::Entity player, float dt);
+        static void UpdateIdle(engine::Registry& registry, engine::Entity enemy, float dt);
+        static void UpdatePatrol(engine::Registry& registry, engine::Entity enemy, float dt);
+        static void UpdateChase(engine::Registry& registry, engine::Entity enemy, engine::Entity player, float dt);
+        static void UpdateAttack(engine::Registry& registry, engine::Entity enemy, engine::Entity player, float dt);
 
         static float Distance(float ax, float az, float bx, float bz);
         static float DistanceSq(float ax, float az, float bx, float bz);
-
-        engine::Entity m_CachedPlayer;
     };
 }
 

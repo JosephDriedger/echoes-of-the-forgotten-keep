@@ -12,19 +12,22 @@ namespace game
         if (!target.IsValid() || !registry.IsAlive(target))
             return;
 
-        // Scroll wheel zoom
+        if (!registry.HasComponent<CameraFollowState>(target))
+            registry.AddComponent(target, CameraFollowState{});
+
+        auto& state = registry.GetComponent<CameraFollowState>(target);
+
         float scroll = input.GetMouseWheelY();
         if (scroll != 0.0f)
         {
-            m_Zoom -= scroll * kZoomSpeed;
-            if (m_Zoom < kZoomMin) m_Zoom = kZoomMin;
-            if (m_Zoom > kZoomMax) m_Zoom = kZoomMax;
+            state.Zoom -= scroll * kZoomSpeed;
+            if (state.Zoom < kZoomMin) state.Zoom = kZoomMin;
+            if (state.Zoom > kZoomMax) state.Zoom = kZoomMax;
         }
 
-        // Place camera above target; offset along Z scales with zoom for a tilted perspective
         const auto& transform = registry.GetComponent<Transform>(target);
-        float zOffset = m_Zoom * 0.4f;
-        camera.SetPosition(transform.X, m_Zoom, transform.Z + zOffset);
+        float zOffset = state.Zoom * 0.4f;
+        camera.SetPosition(transform.X, state.Zoom, transform.Z + zOffset);
         camera.SetTarget(transform.X, 0.0f, transform.Z);
     }
 }
