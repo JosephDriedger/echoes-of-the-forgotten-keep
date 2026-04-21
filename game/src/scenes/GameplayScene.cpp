@@ -260,20 +260,7 @@ namespace game
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
-        m_DungeonSpawnSystem->SpawnDungeon(10, 42, 0.0f);
-
-        // Re-position player onto the Start tile. The hard-coded (32, 0, 25)
-        // spawn above assumed a fixed-seed generation; now that FloorGenerator
-        // retries on invalid layouts, the Start cell lands in a different spot
-        // per run, so we teleport the player to match.
-        if (m_DungeonSpawnSystem->HasStartPos())
-        {
-            const glm::vec3& s = m_DungeonSpawnSystem->GetStartWorldPos();
-            auto& t = m_Registry.GetComponent<Transform>(m_PlayerEntity);
-            t.X = s.x;
-            t.Y = s.y;
-            t.Z = s.z;
-        }
+        m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
     }
 
     /// Runs the full ECS pipeline each frame. Order matters: input -> movement
