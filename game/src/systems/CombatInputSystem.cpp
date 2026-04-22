@@ -12,8 +12,8 @@ namespace game
 {
     void CombatInputSystem::Update(engine::Registry& registry, const engine::Input& input, engine::AudioEventQueue& audioEventQueue)
     {
-        if (!input.IsKeyPressed(SDLK_SPACE))
-            return;
+        // if (!input.IsKeyPressed(SDLK_SPACE))
+        //     return;
 
         for (const engine::Entity entity : registry.GetActiveEntities())
         {
@@ -35,6 +35,24 @@ namespace game
 
             if (combat.IsDead)
                 continue;
+
+            // --- Dash: Left Shift ---
+            if (input.IsKeyPressed(SDLK_LSHIFT) &&
+                !combat.IsDashing && !combat.IsAttacking &&
+                combat.DashCooldownTimer <= 0.0f &&
+                registry.HasComponent<Transform>(entity))
+            {
+                const auto& tf    = registry.GetComponent<Transform>(entity);
+                combat.IsDashing        = true;
+                combat.DashTimer        = combat.DashDuration;
+                combat.DashCooldownTimer = combat.DashCooldown;
+                combat.DashDX           = std::sin(tf.RotationY);
+                combat.DashDZ           = std::cos(tf.RotationY);
+                audioEventQueue.push(std::make_unique<engine::AudioEvent>("dash"));
+            }
+
+            // --- Attack: Space (unchanged logic, just can't start while dashing) ---
+            if (!input.IsKeyPressed(SDLK_SPACE) || combat.IsDashing) continue;
 
             if (combat.IsAttacking)
             {

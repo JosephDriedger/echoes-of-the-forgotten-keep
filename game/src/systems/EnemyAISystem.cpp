@@ -55,22 +55,25 @@ namespace game
 
             // Knockback override: linearly decelerate the enemy away from
             // the damage source. Skips all AI state logic until recovery.
-            if (ai.IsKnockedBack)
-            {
-                ai.KnockbackTimer -= deltaTime;
-
-                float t = ai.KnockbackTimer / ai.KnockbackDuration; // 1->0 deceleration
-                et.X += ai.KnockbackVX * ai.KnockbackSpeed * t * deltaTime;
-                et.Z += ai.KnockbackVZ * ai.KnockbackSpeed * t * deltaTime;
-
-                if (ai.KnockbackTimer <= 0.0f)
+            if (registry.HasComponent<Knockback>(entity)) {
+                auto& kb = registry.GetComponent<Knockback>(entity);
+                if (kb.IsKnockedBack)
                 {
-                    ai.IsKnockedBack = false;
-                    ai.State         = AIState::Chase; // resume chasing after recovery
-                    ai.StateTimer    = 0.0f;
-                }
+                    kb.KnockbackTimer -= deltaTime;
 
-                continue; // skip all AI state logic this frame
+                    float t = kb.KnockbackTimer / kb.KnockbackDuration; // 1->0 deceleration
+                    et.X += kb.KnockbackVX * kb.KnockbackSpeed * t * deltaTime;
+                    et.Z += kb.KnockbackVZ * kb.KnockbackSpeed * t * deltaTime;
+
+                    if (kb.KnockbackTimer <= 0.0f)
+                    {
+                        kb.IsKnockedBack = false;
+                        ai.State         = AIState::Chase; // resume chasing after recovery
+                        ai.StateTimer    = 0.0f;
+                    }
+
+                    continue; // skip all AI state logic this frame
+                }
             }
 
             // Decrease lose-target cooldown

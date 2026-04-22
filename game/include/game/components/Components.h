@@ -148,6 +148,14 @@ namespace game
         bool MovingToB = true;
         float IdleBeforePatrol = 2.0f;
 
+        explicit EnemyAI(const float moveSpeed = 1.0f)
+            : MoveSpeed(moveSpeed)
+        {
+        }
+    };
+
+    struct Knockback
+    {
         // Knockback
         bool IsKnockedBack = false;
         float KnockbackTimer = 0.0f;
@@ -155,11 +163,6 @@ namespace game
         float KnockbackVX = 0.0f;
         float KnockbackVZ = 0.0f;
         float KnockbackSpeed = 4.0f;
-
-        explicit EnemyAI(const float moveSpeed = 1.0f)
-            : MoveSpeed(moveSpeed)
-        {
-        }
     };
 
     // -----------------------------------------------------------------------
@@ -263,6 +266,7 @@ namespace game
         int Attack3ClipIndex = -1;
         int HitClipIndex = -1;
         int DeathClipIndex = -1;
+        int DashClipIndex = -1;
 
         AnimationState()
             : FinalBoneMatrices(100, glm::mat4(1.0f))
@@ -299,6 +303,15 @@ namespace game
         float LungeDuration = 0.7f;
         float LungeTimer = 0.0f;
         float LungeSpeed = 7.0f;
+
+        bool  IsDashing          = false;
+        float DashDuration       = 0.35f;
+        float DashTimer          = 0.0f;
+        float DashSpeed          = 12.0f;
+        float DashCooldown       = 0.8f;
+        float DashCooldownTimer  = 0.0f;
+        float DashDX             = 0.0f;  // direction frozen at dash start
+        float DashDZ             = 0.0f;
 
         std::optional<PendingHit> IncomingHit;
         bool IsDead = false;

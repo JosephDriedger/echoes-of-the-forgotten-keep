@@ -23,10 +23,32 @@ namespace game
                 continue;
             }
 
+            auto& transform = registry.GetComponent<Transform>(entity);
+
             // Check combat state to block movement during attacks/hits
             if (registry.HasComponent<CombatState>(entity))
             {
-                const auto& combat = registry.GetComponent<CombatState>(entity);
+                auto& combat = registry.GetComponent<CombatState>(entity);
+
+                if (combat.DashCooldownTimer > 0.0f)
+                    combat.DashCooldownTimer -= deltaTime;
+
+                if (combat.IsDashing)
+                {
+                    combat.DashTimer -= deltaTime;
+                    float t = combat.DashTimer / combat.DashDuration;
+                    transform.X += combat.DashDX * combat.DashSpeed * t * deltaTime;
+                    transform.Z += combat.DashDZ * combat.DashSpeed * t * deltaTime;
+
+                    if (registry.HasComponent<AnimationState>(entity))
+                        registry.GetComponent<AnimationState>(entity).IsMoving = false;
+
+                    if (combat.DashTimer <= 0.0f)
+                        combat.IsDashing = false;
+
+                    continue;  // skip normal movement this frame
+                }
+
                 if (combat.IncomingHit.has_value() || combat.IsDead)
                 {
                     if (registry.HasComponent<AnimationState>(entity))
@@ -34,8 +56,6 @@ namespace game
                     continue;
                 }
             }
-
-            auto& transform = registry.GetComponent<Transform>(entity);
 
             float moveX = 0.0f;
             float moveZ = 0.0f;

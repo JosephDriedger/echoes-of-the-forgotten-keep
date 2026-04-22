@@ -432,6 +432,7 @@ namespace game
             m_Registry.AddComponent(e, ai);
             m_Registry.AddComponent(e, Health(3, 3));
             m_Registry.AddComponent(e, CombatState());
+            m_Registry.AddComponent(e, Knockback());
 
             // Add animation state if clips are available
             if (SharedClips && EnemySkeleton)

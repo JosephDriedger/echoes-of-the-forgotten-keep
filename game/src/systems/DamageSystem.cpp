@@ -22,7 +22,7 @@ namespace game
                 health.Current -= combat.IncomingHit->Damage;
 
                 // Enemy-specific: compute knockback direction and interrupt AI
-                if (registry.HasComponent<EnemyAI>(entity) &&
+                if (registry.HasComponent<Knockback>(entity) &&
                     registry.HasComponent<Transform>(entity))
                 {
                     engine::Entity source = combat.IncomingHit->Source;
@@ -40,14 +40,19 @@ namespace game
 
                         float knockbackMult = combat.IncomingHit->KnockbackMultiplier;
 
-                        auto& ai = registry.GetComponent<EnemyAI>(entity);
-                        ai.IsKnockedBack    = true;
-                        ai.KnockbackTimer   = ai.KnockbackDuration;
-                        ai.KnockbackVX      = dx;
-                        ai.KnockbackVZ      = dz;
-                        ai.KnockbackSpeed   = ai.KnockbackSpeed * knockbackMult;
+                        auto& kb = registry.GetComponent<Knockback>(entity);
+                        kb.IsKnockedBack    = true;
+                        kb.KnockbackTimer   = kb.KnockbackDuration;
+                        kb.KnockbackVX      = dx;
+                        kb.KnockbackVZ      = dz;
+                        kb.KnockbackSpeed   = kb.KnockbackSpeed * knockbackMult;
 
+                    }
+
+                    if (registry.HasComponent<EnemyAI>(entity))
+                    {
                         // Force AI back to Idle so it re-evaluates after recovering
+                        auto& ai      = registry.GetComponent<EnemyAI>(entity);
                         ai.State      = AIState::Idle;
                         ai.StateTimer = 0.0f;
                     }

@@ -224,6 +224,7 @@ namespace game
         // Add combat state and health
         m_Registry.AddComponent(m_PlayerEntity, CombatState());
         m_Registry.AddComponent(m_PlayerEntity, Health(10, 10));
+        m_Registry.AddComponent(m_PlayerEntity, Knockback());
 
         // Spawn sword (right hand)
         {
