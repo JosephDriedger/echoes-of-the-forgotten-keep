@@ -45,8 +45,6 @@ namespace game
 
                     if (combat.DashTimer <= 0.0f)
                         combat.IsDashing = false;
-
-                    continue;  // skip normal movement this frame
                 }
 
                 if (combat.IncomingHit.has_value() || combat.IsDead)

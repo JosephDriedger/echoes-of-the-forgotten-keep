@@ -46,8 +46,24 @@ namespace game
                 combat.IsDashing        = true;
                 combat.DashTimer        = combat.DashDuration;
                 combat.DashCooldownTimer = combat.DashCooldown;
-                combat.DashDX           = std::sin(tf.RotationY);
-                combat.DashDZ           = std::cos(tf.RotationY);
+                // combat.DashDX           = std::sin(tf.RotationY);
+                // combat.DashDZ           = std::cos(tf.RotationY);
+
+                float dashX = 0.0f;
+                float dashZ = 0.0f;
+                if (input.IsKeyDown(SDLK_W) || input.IsKeyDown(SDLK_UP))    dashZ -= 1.0f;
+                if (input.IsKeyDown(SDLK_S) || input.IsKeyDown(SDLK_DOWN))  dashZ += 1.0f;
+                if (input.IsKeyDown(SDLK_A) || input.IsKeyDown(SDLK_LEFT))  dashX -= 1.0f;
+                if (input.IsKeyDown(SDLK_D) || input.IsKeyDown(SDLK_RIGHT)) dashX += 1.0f;
+
+                // Normalize, fall back to facing direction if no input held
+                float len = std::sqrt(dashX * dashX + dashZ * dashZ);
+                if (len > 0.0001f) { dashX /= len; dashZ /= len; }
+                else { dashX = std::sin(tf.RotationY); dashZ = std::cos(tf.RotationY); }
+
+                combat.DashDX = dashX;
+                combat.DashDZ = dashZ;
+
                 audioEventQueue.push(std::make_unique<engine::AudioEvent>("dash"));
             }
 
