@@ -187,10 +187,6 @@ namespace game
     {
         // Spawn player
         m_PlayerEntity = EntitySpawnSystem::SpawnPlayer(m_Registry);
-        auto& playerTransform = m_Registry.GetComponent<Transform>(m_PlayerEntity);
-        playerTransform.X = 32.0f;
-        playerTransform.Y = 0.0f;
-        playerTransform.Z = 25.0f;
 
         auto& playerCollider = m_Registry.GetComponent<Collider>(m_PlayerEntity);
         playerCollider.Width = 1.2f;
@@ -261,6 +257,16 @@ namespace game
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
         m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
+
+        // Place player at the dungeon's start cell
+        if (m_DungeonSpawnSystem->HasStartPos())
+        {
+            const glm::vec3& start = m_DungeonSpawnSystem->GetStartWorldPos();
+            auto& t = m_Registry.GetComponent<Transform>(m_PlayerEntity);
+            t.X = start.x;
+            t.Y = start.y;
+            t.Z = start.z;
+        }
     }
 
     /// Runs the full ECS pipeline each frame. Order matters: input -> movement
