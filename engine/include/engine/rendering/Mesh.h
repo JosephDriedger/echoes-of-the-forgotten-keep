@@ -65,12 +65,17 @@ namespace engine
         // VAO" id and skip redundant binds when drawing batches of the same mesh.
         [[nodiscard]] unsigned int GetVertexArrayId() const { return m_VertexArrayId; }
 
+        glm::vec3 GetBoundsCenter() const;
+        float GetBoundsRadius() const;
+
     private:
         unsigned int m_VertexArrayId;
         unsigned int m_VertexBufferId;
         unsigned int m_IndexBufferId;
         unsigned int m_IndexCount;
         bool m_IsCreated;
+        glm::vec3 m_BoundsCenter = glm::vec3(0.0f);
+        float m_BoundsRadius = 0.0f;
     };
 }
 

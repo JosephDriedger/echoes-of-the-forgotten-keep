@@ -35,6 +35,7 @@
 
 #include <memory>
 
+#include "engine/math/Frustum.h"
 #include "engine/resources/AudioEventQueue.h"
 
 namespace engine
@@ -97,6 +98,13 @@ namespace game
         UISystem m_UISystem;
         engine::TextRenderer m_DebugTextRenderer;
         engine::AudioEventQueue audioEventQueue;
+
+        engine::Frustum m_Frustum;
+
+        // Debug stats
+        int m_FramesCulled = 0;
+        int m_FramesRendered = 0;
+        int m_FramesTotal = 0;
     };
 }
 

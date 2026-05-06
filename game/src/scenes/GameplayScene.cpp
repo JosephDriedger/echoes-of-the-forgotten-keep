@@ -328,6 +328,10 @@ namespace game
     /// per-entity bone matrices for animated meshes, then draws debug overlays and HUD.
     void GameplayScene::OnRender(engine::Application& application)
     {
+        m_FramesCulled = 0;
+        m_FramesRendered = 0;
+        m_FramesTotal = 0;
+
         (void)application;
 
         if (!m_Shader)
@@ -370,6 +374,9 @@ namespace game
         const float camX = m_Camera.GetPositionX();
         const float camZ = m_Camera.GetPositionZ();
 
+        m_Frustum.Update(glm::make_mat4(m_Camera.GetProjectionMatrix()) *
+                 glm::make_mat4(m_Camera.GetViewMatrix()));
+
         for (const engine::Entity entity : m_Registry.GetActiveEntities())
         {
             if (!m_Registry.HasComponent<Transform>(entity) ||
@@ -383,6 +390,25 @@ namespace game
 
             if (!render.MeshPtr || !render.TexturePtr)
                 continue;
+
+            m_FramesTotal++;
+
+            if (!m_DebugToggle.ShowMapOverview())
+            {
+                const auto& mesh = render.MeshPtr;
+
+                glm::vec3 center = glm::vec3(transform.X, transform.Y, transform.Z)
+                                 + mesh->GetBoundsCenter();
+
+                float radius = mesh->GetBoundsRadius() *
+                               std::max({transform.ScaleX, transform.ScaleY, transform.ScaleZ});
+
+                if (!m_Frustum.IntersectsSphere(center, radius))
+                {
+                    m_FramesCulled++;
+                    continue;
+                }
+            }
 
             // Bone-attached entities (sword, shield, etc.) carry a stale
             // (0,0,0) transform -- BoneAttachmentSystem writes their real
@@ -444,6 +470,14 @@ namespace game
             // DrawBatched compares against lastVaoId and only calls
             // glBindVertexArray when the mesh actually changes.
             render.MeshPtr->DrawBatched(lastVaoId);
+            m_FramesRendered++;
+            if (m_DebugToggle.ShowFPS())
+            {
+                std::cout
+                    << "[Render Stats] Total: " << m_FramesTotal
+                    << " | Rendered: " << m_FramesRendered
+                    << " | Culled: " << m_FramesCulled << "\n";
+            }
         }
 
         // Render debug colliders after main scene
