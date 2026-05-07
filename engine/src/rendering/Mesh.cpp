@@ -5,6 +5,8 @@
 #include <glad/gl.h>
 
 #include <cstddef>
+#include <limits>
+#include <glm/glm.hpp>
 
 namespace engine
 {
@@ -120,6 +122,22 @@ namespace engine
 
         glBindVertexArray(0);
 
+        glm::vec3 min(FLT_MAX);
+        glm::vec3 max(-FLT_MAX);
+
+        for (const auto& v : vertices)
+        {
+            glm::vec3 p(v.PositionX, v.PositionY, v.PositionZ);
+
+            min = glm::min(min, p);
+            max = glm::max(max, p);
+        }
+
+        m_BoundsCenter = (min + max) * 0.5f;
+
+        const glm::vec3 extents = max - m_BoundsCenter;
+        m_BoundsRadius = glm::length(extents);
+
         m_IndexCount = static_cast<unsigned int>(indices.size());
         m_IsCreated = true;
         return true;
@@ -181,5 +199,15 @@ namespace engine
     bool Mesh::IsCreated() const
     {
         return m_IsCreated;
+    }
+
+    glm::vec3 Mesh::GetBoundsCenter() const
+    {
+        return m_BoundsCenter;
+    }
+
+    float Mesh::GetBoundsRadius() const
+    {
+        return m_BoundsRadius;
     }
 }
