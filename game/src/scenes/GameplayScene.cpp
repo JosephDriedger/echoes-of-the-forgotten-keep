@@ -187,10 +187,6 @@ namespace game
     {
         // Spawn player
         m_PlayerEntity = EntitySpawnSystem::SpawnPlayer(m_Registry);
-        auto& playerTransform = m_Registry.GetComponent<Transform>(m_PlayerEntity);
-        playerTransform.X = 32.0f;
-        playerTransform.Y = 0.0f;
-        playerTransform.Z = 25.0f;
 
         auto& playerCollider = m_Registry.GetComponent<Collider>(m_PlayerEntity);
         playerCollider.Width = 1.2f;
@@ -262,6 +258,16 @@ namespace game
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
         m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
+
+        // Place player at the dungeon's start cell
+        if (m_DungeonSpawnSystem->HasStartPos())
+        {
+            const glm::vec3& start = m_DungeonSpawnSystem->GetStartWorldPos();
+            auto& t = m_Registry.GetComponent<Transform>(m_PlayerEntity);
+            t.X = start.x;
+            t.Y = start.y;
+            t.Z = start.z;
+        }
     }
 
     /// Runs the full ECS pipeline each frame. Order matters: input -> movement
@@ -273,6 +279,7 @@ namespace game
 
         m_DebugToggle.Update(input);
         m_FPSCounter.Update(timestep);
+        m_RenderStats.Update(timestep);
 
         // Push pause overlay on ESC
         if (input.IsKeyPressed(SDLK_ESCAPE))
@@ -323,6 +330,8 @@ namespace game
     /// per-entity bone matrices for animated meshes, then draws debug overlays and HUD.
     void GameplayScene::OnRender(engine::Application& application)
     {
+        m_RenderStats.BeginFrame();
+
         (void)application;
 
         if (!m_Shader)
@@ -365,6 +374,9 @@ namespace game
         const float camX = m_Camera.GetPositionX();
         const float camZ = m_Camera.GetPositionZ();
 
+        m_Frustum.Update(glm::make_mat4(m_Camera.GetProjectionMatrix()) *
+                 glm::make_mat4(m_Camera.GetViewMatrix()));
+
         for (const engine::Entity entity : m_Registry.GetActiveEntities())
         {
             if (!m_Registry.HasComponent<Transform>(entity) ||
@@ -378,6 +390,28 @@ namespace game
 
             if (!render.MeshPtr || !render.TexturePtr)
                 continue;
+
+
+
+            if (!m_DebugToggle.ShowMapOverview())
+            {
+                const auto& mesh = render.MeshPtr;
+
+                glm::vec3 center = glm::vec3(transform.X, transform.Y, transform.Z)
+                                 + mesh->GetBoundsCenter();
+
+                float radius = mesh->GetBoundsRadius() *
+                               std::max({transform.ScaleX, transform.ScaleY, transform.ScaleZ});
+
+                if (!m_Frustum.IntersectsSphere(center, radius))
+                {
+                    m_RenderStats.OnEntityCulled();
+                    continue;
+                }
+                else {
+                    m_RenderStats.OnEntityRendered();
+                }
+            }
 
             // Bone-attached entities (sword, shield, etc.) carry a stale
             // (0,0,0) transform -- BoneAttachmentSystem writes their real
@@ -439,6 +473,7 @@ namespace game
             // DrawBatched compares against lastVaoId and only calls
             // glBindVertexArray when the mesh actually changes.
             render.MeshPtr->DrawBatched(lastVaoId);
+
         }
 
         // Render debug colliders after main scene
@@ -455,11 +490,17 @@ namespace game
         if (m_DebugToggle.ShowFPS())
         {
             const std::string& fps = m_FPSCounter.GetDisplayString();
+            const std::string& render = m_RenderStats.GetDisplayString();
+
             float scale = 0.5f;
             float textW = m_DebugTextRenderer.MeasureTextWidth(fps, scale);
             m_DebugTextRenderer.RenderText(fps,
                 static_cast<float>(w) - textW - 10.0f, 10.0f,
                 scale, 0.0f, 1.0f, 0.0f);
+            float textWR = m_DebugTextRenderer.MeasureTextWidth(render, scale);
+            m_DebugTextRenderer.RenderText(render,
+                static_cast<float>(w) - textWR - 10.0f, 40.0f,
+                scale, 1.0f, 1.0f, 0.0f);
         }
     }
 }

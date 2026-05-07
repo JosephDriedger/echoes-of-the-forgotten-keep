@@ -41,6 +41,8 @@
 *.dwo
 
 cmake-build-debug/
+cmake-build-release/
+installer-output/
 .deps/
 .vs/
 .vscode/

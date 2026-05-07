@@ -86,10 +86,34 @@ SDL3 and GLM are downloaded automatically via CMake `FetchContent` if not found 
 
 ## Build
 
-```bash
-cmake -B build
-cmake --build build
+### Debug (CLion)
+
+Open the project in CLion and use the built-in **Debug** run configuration.
+
+### Release (Windows)
+
+Requires CLion 2025.3.1 installed (provides bundled CMake and MinGW).
+
+**1. Configure and build:**
+
+```powershell
+$cmake = "C:\Program Files\JetBrains\CLion 2025.3.1\bin\cmake\win\x64\bin\cmake.exe"
+$mingw  = "C:\Program Files\JetBrains\CLion 2025.3.1\bin\mingw\bin"
+
+& $cmake -B cmake-build-release -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$mingw\gcc.exe" -DCMAKE_CXX_COMPILER="$mingw\g++.exe"
+& $cmake --build cmake-build-release --target echoes_of_the_forgotten_keep
 ```
+
+**2. Copy MinGW runtime DLLs into the output folder:**
+
+```powershell
+Copy-Item "$mingw\libgcc_s_seh-1.dll", "$mingw\libstdc++-6.dll", "$mingw\libwinpthread-1.dll" -Destination "cmake-build-release\bin"
+```
+
+**3. Build the installer:**
+
+Open `installer.iss` in [Inno Setup](https://jrsoftware.org/isdl.php) and compile it.
+The finished installer is written to `installer-output/EchoesOfTheForgottenKeep-Setup.exe`.
 
 ## Controls
 
