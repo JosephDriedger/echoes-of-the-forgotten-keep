@@ -53,6 +53,9 @@ namespace game
             glm::mat4 finalTransform = parentMatrix * boneTransform * attach.Offset;
 
             auto& transform = registry.GetComponent<Transform>(entity);
+            transform.X = parentTransform.X;
+            transform.Y = parentTransform.Y;
+            transform.Z = parentTransform.Z;
             transform.ModelMatrix = finalTransform;
             transform.UseModelMatrix = true; // bypass normal TRS; use precomputed matrix
         }
