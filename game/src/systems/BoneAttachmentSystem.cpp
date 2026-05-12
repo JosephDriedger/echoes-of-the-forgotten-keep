@@ -11,14 +11,8 @@ namespace game
 {
     void BoneAttachmentSystem::Update(engine::Registry& registry)
     {
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<BoneAttachment, Transform>())
         {
-            if (!registry.HasComponent<BoneAttachment>(entity) ||
-                !registry.HasComponent<Transform>(entity))
-            {
-                continue;
-            }
-
             auto& attach = registry.GetComponent<BoneAttachment>(entity);
             engine::Entity parent = attach.ParentEntity;
 

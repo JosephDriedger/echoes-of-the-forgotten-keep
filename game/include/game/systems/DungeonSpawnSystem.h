@@ -29,7 +29,7 @@ namespace game
                            engine::MeshManager& meshManager,
                            engine::AssetManager& assetManager);
 
-        void SpawnDungeon(int roomCount, int seed, float mazeFactor);
+        void SpawnDungeon(engine::FloorConfig config);
 
         // Reprints the generated map grid to stdout for debugging.
         void DebugPrintMap() const;

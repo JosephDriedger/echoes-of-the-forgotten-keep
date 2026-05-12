@@ -13,12 +13,8 @@ namespace game
     {
         std::unordered_set<uint32_t> stillAttacking;
 
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<CombatState, Transform>())
         {
-            if (!registry.HasComponent<CombatState>(entity) ||
-                !registry.HasComponent<Transform>(entity))
-                continue;
-
             const auto& combat = registry.GetComponent<CombatState>(entity);
             const auto& transform = registry.GetComponent<Transform>(entity);
             uint32_t id = entity.GetId();
@@ -68,7 +64,7 @@ namespace game
             hitTransform.Z = hitZ;
 
             // Check overlaps against valid targets
-            for (const engine::Entity target : registry.GetActiveEntities())
+            for (const engine::Entity target : registry.View<CombatState, Transform>())
             {
                 if (target == entity) continue;
                 uint32_t targetId = target.GetId();
@@ -115,9 +111,8 @@ namespace game
         }
 
         // Clean up hitboxes for entities that stopped attacking
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<AttackStateComponent>())
         {
-            if (!registry.HasComponent<AttackStateComponent>(entity)) continue;
             if (stillAttacking.count(entity.GetId())) continue;
 
             auto& state = registry.GetComponent<AttackStateComponent>(entity);

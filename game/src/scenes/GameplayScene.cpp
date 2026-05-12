@@ -26,6 +26,7 @@
 #include <iostream>
 
 #include "game/systems/DoorPuzzleSystem.h"
+#include "game/systems/VisibilitySystem.h"
 
 namespace game
 {
@@ -198,6 +199,8 @@ namespace game
         auto playerMesh = m_MeshManager.Get("asset/characters/Knight.glb");
         auto playerTexture = m_AssetManager.GetTextureManager().Load("asset/characters/knight_texture.png");
         m_Registry.AddComponent(m_PlayerEntity, Render(playerMesh, playerTexture));
+        Visibility v;
+        m_Registry.AddComponent(m_PlayerEntity, v);
 
         // Add animation state
         AnimationState animState;
@@ -233,6 +236,8 @@ namespace game
                 m_Registry.AddComponent(swordEntity, Render(swordResult.MeshPtr, swordTexture));
                 m_Registry.AddComponent(swordEntity,
                     BoneAttachment(m_PlayerEntity, "handslot.r", glm::mat4(1.0f)));
+                Visibility v;
+                m_Registry.AddComponent(swordEntity, v);
             }
         }
 
@@ -249,6 +254,8 @@ namespace game
                 m_Registry.AddComponent(shieldEntity,
                     BoneAttachment(m_PlayerEntity, "handslot.l",
                         glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.15f))));
+                Visibility v;
+                m_Registry.AddComponent(shieldEntity, v);
             }
         }
 
@@ -256,7 +263,13 @@ namespace game
         m_DungeonSpawnSystem = std::make_unique<DungeonSpawnSystem>(
             m_Registry, m_MeshManager, m_AssetManager);
         m_DungeonSpawnSystem->SharedClips = m_PlayerClips;
-        m_DungeonSpawnSystem->SpawnDungeon(5, 42, 0.5f);
+        engine::FloorConfig config;
+        config.roomCount = 25;
+        config.seed = 42;
+        config.mazeFactor = 0.5f;
+        config.height = 50;
+        config.width = 50;
+        m_DungeonSpawnSystem->SpawnDungeon(config);
 
         // Place player at the dungeon's start cell
         if (m_DungeonSpawnSystem->HasStartPos())
@@ -288,21 +301,32 @@ namespace game
         }
 
         // ECS systems
-        CombatInputSystem::Update(m_Registry, input, audioEventQueue);
-        MovementSystem::Update(m_Registry, input, dt);
+        // Gameplay simulation
+        CombatInputSystem::Update(m_Registry, m_PlayerEntity, input, audioEventQueue);
+        MovementSystem::Update(m_Registry, m_PlayerEntity, input, dt);
         CollisionSystem::Update(m_Registry);
+        EnemyAISystem::Update(m_Registry, dt);
+
+        // Camera updates
+        CameraFollowSystem::Update(m_Registry, m_PlayerEntity, m_Camera, input);
+
+        // Visibility pass
+        VisibilitySystem::Update(m_Registry,m_Camera,m_Frustum,
+            m_RenderStats,m_DebugToggle.ShowMapOverview());
+
+        // Expensive systems that can skip
         AnimationSystem::Update(m_Registry, dt, audioEventQueue);
         BoneAttachmentSystem::Update(m_Registry);
+
+        // Gameplay systems
         AttackHitboxSystem::Update(m_Registry);
         DamageSystem::Update(m_Registry);
         DeathSystem::Update(m_Registry, audioEventQueue);
-        EnemyAISystem::Update(m_Registry, dt);
         HitTimerSystem::Update(m_Registry, dt);
         SwitchTriggerSystem::Update(m_Registry);
         DoorSystem::Update(m_Registry, dt, audioEventQueue);
         DoorPuzzleSystem::Update(m_Registry, dt);
         LifetimeSystem::Update(m_Registry, dt);
-        CameraFollowSystem::Update(m_Registry, m_PlayerEntity, m_Camera, input);
 
         // Debug: top-down overview of the entire dungeon (F6). Overrides
         // the follow camera so we can see the whole generated map at once.
@@ -329,8 +353,6 @@ namespace game
     /// per-entity bone matrices for animated meshes, then draws debug overlays and HUD.
     void GameplayScene::OnRender(engine::Application& application)
     {
-        m_RenderStats.BeginFrame();
-
         (void)application;
 
         if (!m_Shader)
@@ -364,23 +386,10 @@ namespace game
         unsigned int lastTextureId = 0;
         unsigned int lastVaoId = 0;
 
-        // Distance cull: skip entities that are far enough from the camera
-        // that they can't possibly be on screen. 80 units squared radius
-        // comfortably covers the 3rd-person view; the overview camera (F6)
-        // sits well above this so we disable culling when it's active.
-        const bool useCull = !m_DebugToggle.ShowMapOverview();
-        const float cullRadiusSq = 80.0f * 80.0f;
-        const float camX = m_Camera.GetPositionX();
-        const float camZ = m_Camera.GetPositionZ();
+        for (const engine::Entity entity : m_Registry.View<Transform, Render, Visibility>()) {
 
-        m_Frustum.Update(glm::make_mat4(m_Camera.GetProjectionMatrix()) *
-                 glm::make_mat4(m_Camera.GetViewMatrix()));
-
-        for (const engine::Entity entity : m_Registry.GetActiveEntities())
-        {
-            if (!m_Registry.HasComponent<Transform>(entity) ||
-                !m_Registry.HasComponent<Render>(entity))
-            {
+            const auto& visibility = m_Registry.GetComponent<Visibility>(entity);
+            if (!visibility.IsVisible) {
                 continue;
             }
 
@@ -389,41 +398,6 @@ namespace game
 
             if (!render.MeshPtr || !render.TexturePtr)
                 continue;
-
-
-
-            if (!m_DebugToggle.ShowMapOverview())
-            {
-                const auto& mesh = render.MeshPtr;
-
-                glm::vec3 center = glm::vec3(transform.X, transform.Y, transform.Z)
-                                 + mesh->GetBoundsCenter();
-
-                float radius = mesh->GetBoundsRadius() *
-                               std::max({transform.ScaleX, transform.ScaleY, transform.ScaleZ});
-
-                if (!m_Frustum.IntersectsSphere(center, radius))
-                {
-                    m_RenderStats.OnEntityCulled();
-                    continue;
-                }
-                else {
-                    m_RenderStats.OnEntityRendered();
-                }
-            }
-
-            // Bone-attached entities (sword, shield, etc.) carry a stale
-            // (0,0,0) transform -- BoneAttachmentSystem writes their real
-            // world position into ModelMatrix each frame. Skip distance
-            // culling for them so equipment riding on the player doesn't
-            // get culled when the player roams far from the origin.
-            if (useCull && !m_Registry.HasComponent<BoneAttachment>(entity))
-            {
-                const float dx = transform.X - camX;
-                const float dz = transform.Z - camZ;
-                if (dx * dx + dz * dz > cullRadiusSq)
-                    continue;
-            }
 
             // Build model matrix
             glm::mat4 modelMat;

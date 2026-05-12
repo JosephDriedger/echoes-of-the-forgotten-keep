@@ -16,7 +16,7 @@ namespace game
         float playerZ = 0.0f;
         bool playerFound = false;
 
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Player, Transform>())
         {
             if (registry.HasComponent<Player>(entity) &&
                 registry.HasComponent<Transform>(entity))
@@ -32,12 +32,8 @@ namespace game
         if (!playerFound)
             return;
 
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Door, Transform>())
         {
-            if (!registry.HasComponent<Door>(entity) ||
-                !registry.HasComponent<Transform>(entity))
-                continue;
-
             auto& door = registry.GetComponent<Door>(entity);
 
             auto& doorT = registry.GetComponent<Transform>(entity);

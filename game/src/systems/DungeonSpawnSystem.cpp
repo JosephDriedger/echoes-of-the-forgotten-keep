@@ -25,13 +25,8 @@ namespace game
     {
     }
 
-    void DungeonSpawnSystem::SpawnDungeon(int roomCount, int seed, float mazeFactor)
+    void DungeonSpawnSystem::SpawnDungeon(engine::FloorConfig config)
     {
-        engine::FloorConfig config;
-        config.roomCount = roomCount;
-        config.seed = seed;
-        config.mazeFactor = mazeFactor;
-
         auto dungeon = engine::FloorGenerator::Generate(config);
         auto map = engine::BuildRoomSystem::FromFloor(dungeon);
 
@@ -78,8 +73,8 @@ namespace game
             }
         }
 
-        SpawnEnemies(map, config.buildConfig, seed);
-        SpawnButtons(map, config.buildConfig, seed);
+        SpawnEnemies(map, config.buildConfig, config.seed);
+        SpawnButtons(map, config.buildConfig, config.seed);
     }
 
     engine::Entity DungeonSpawnSystem::SpawnPrefab(
@@ -124,6 +119,8 @@ namespace game
 
         m_Registry.AddComponent(e, t);
         m_Registry.AddComponent(e, Render(mesh.MeshPtr, texture));
+        Visibility v;
+        m_Registry.AddComponent(e, v);
 
         if (IsWallPrefab(type))
         {
@@ -414,6 +411,8 @@ namespace game
             Transform t(pos.x, pos.y, pos.z);
             m_Registry.AddComponent(e, t);
             m_Registry.AddComponent(e, Render(meshResult.MeshPtr, texture));
+            Visibility v;
+            m_Registry.AddComponent(e, v);
 
             Collider col(1.2f, 1.8f, 1.2f);
             col.IsStatic = false;
@@ -536,6 +535,8 @@ namespace game
             Transform t(pos.x, pos.y, pos.z);
             m_Registry.AddComponent(e, t);
             m_Registry.AddComponent(e, Render(buttonMeshResult.MeshPtr, buttonTexture));
+            Visibility v;
+            m_Registry.AddComponent(e, v);
 
             Collider col(1.5f, 0.5f, 1.5f);
             col.IsTrigger = true;

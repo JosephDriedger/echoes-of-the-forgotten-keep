@@ -8,11 +8,8 @@ namespace game
 {
     void DeathSystem::Update(engine::Registry& registry, engine::AudioEventQueue &audioEventQueue)
     {
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Health>())
         {
-            if (!registry.HasComponent<Health>(entity))
-                continue;
-
             const auto& health = registry.GetComponent<Health>(entity);
             if (health.Current > 0)
                 continue;

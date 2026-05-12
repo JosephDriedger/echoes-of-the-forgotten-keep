@@ -19,7 +19,7 @@ namespace game
 
         void Update(const engine::Timestep& timestep);
 
-        const std::string& GetDisplayString() const { return m_DisplayString; }
+        [[nodiscard]] const std::string& GetDisplayString() const { return m_DisplayString; }
 
     private:
         int m_Total = 0;

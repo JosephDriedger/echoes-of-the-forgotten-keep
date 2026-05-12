@@ -88,6 +88,8 @@ namespace game
 
         engine::Entity m_PlayerEntity;
 
+
+
         std::shared_ptr<std::vector<engine::AnimationClip>> m_PlayerClips;
         std::shared_ptr<engine::Skeleton> m_PlayerSkeleton;
 

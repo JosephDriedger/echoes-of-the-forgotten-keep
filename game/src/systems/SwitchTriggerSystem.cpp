@@ -16,7 +16,7 @@ namespace game
         float playerX = 0.0f, playerZ = 0.0f;
         float playerW = 0.0f, playerD = 0.0f;
 
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Player, Transform>())
         {
             if (registry.HasComponent<Player>(entity) &&
                 registry.HasComponent<Transform>(entity))
@@ -39,15 +39,8 @@ namespace game
         if (!playerEntity.IsValid()) return;
 
         // Check each switch for overlap with player
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Switch, Transform, Collider>())
         {
-            if (!registry.HasComponent<Switch>(entity) ||
-                !registry.HasComponent<Transform>(entity) ||
-                !registry.HasComponent<Collider>(entity))
-            {
-                continue;
-            }
-
             auto& sw = registry.GetComponent<Switch>(entity);
             const auto& swT = registry.GetComponent<Transform>(entity);
             const auto& swC = registry.GetComponent<Collider>(entity);

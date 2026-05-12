@@ -44,10 +44,12 @@ namespace game
 
     void AnimationSystem::Update(engine::Registry& registry, float deltaTime, engine::AudioEventQueue &audioEventQueue)
     {
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<AnimationState, Visibility>())
         {
-            if (!registry.HasComponent<AnimationState>(entity))
+            const auto& visibility = registry.GetComponent<Visibility>(entity);
+            if (!visibility.IsVisible) {
                 continue;
+            }
 
             auto& anim = registry.GetComponent<AnimationState>(entity);
 

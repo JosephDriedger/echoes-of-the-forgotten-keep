@@ -25,7 +25,7 @@ namespace game
     void EnemyAISystem::Update(engine::Registry& registry, float deltaTime)
     {
         engine::Entity playerEntity;
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Player, Transform>())
         {
             if (registry.HasComponent<Player>(entity) && registry.HasComponent<Transform>(entity))
             {
@@ -35,14 +35,8 @@ namespace game
         }
 
         // Update each enemy
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<EnemyAI, Transform>())
         {
-            if (!registry.HasComponent<EnemyAI>(entity) ||
-                !registry.HasComponent<Transform>(entity))
-            {
-                continue;
-            }
-
             auto& ai = registry.GetComponent<EnemyAI>(entity);
             auto& et = registry.GetComponent<Transform>(entity);
 
