@@ -8,10 +8,8 @@ namespace game
 {
     void LifetimeSystem::Update(engine::Registry& registry, float deltaTime)
     {
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Lifetime>())
         {
-            if (!registry.HasComponent<Lifetime>(entity)) continue;
-
             auto& life = registry.GetComponent<Lifetime>(entity);
             life.Duration -= deltaTime;
 

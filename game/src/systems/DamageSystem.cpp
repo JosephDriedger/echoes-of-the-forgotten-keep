@@ -8,12 +8,8 @@ namespace game
 {
     void DamageSystem::Update(engine::Registry& registry)
     {
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Health, CombatState>())
         {
-            if (!registry.HasComponent<Health>(entity) ||
-                !registry.HasComponent<CombatState>(entity))
-                continue;
-
             auto& health = registry.GetComponent<Health>(entity);
             auto& combat = registry.GetComponent<CombatState>(entity);
 

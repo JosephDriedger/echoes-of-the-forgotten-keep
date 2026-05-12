@@ -15,7 +15,7 @@ namespace game
     class MovementSystem
     {
     public:
-        static void Update(engine::Registry& registry, const engine::Input& input, float deltaTime);
+        static void Update(engine::Registry& registry, engine::Entity playerEntity, const engine::Input& input, float deltaTime);
     };
 }
 

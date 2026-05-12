@@ -10,52 +10,51 @@
 
 namespace game
 {
-    void CombatInputSystem::Update(engine::Registry& registry, const engine::Input& input, engine::AudioEventQueue& audioEventQueue)
+    void CombatInputSystem::Update(engine::Registry& registry, engine::Entity playerEntity, const engine::Input& input, engine::AudioEventQueue& audioEventQueue)
     {
         if (!input.IsKeyPressed(SDLK_SPACE))
             return;
 
-        for (const engine::Entity entity : registry.GetActiveEntities())
+
+        if (!registry.HasComponent<Player>(playerEntity) ||
+            !registry.HasComponent<CombatState>(playerEntity) ||
+            !registry.HasComponent<AnimationState>(playerEntity))
+            return;
+
+        auto& combat = registry.GetComponent<CombatState>(playerEntity);
+        auto& anim = registry.GetComponent<AnimationState>(playerEntity);
+
+        // get the current clip for progress check
+        const engine::AnimationClip* currentClip = nullptr;
+        if (anim.Clips && anim.CurrentClip >= 0 &&
+            anim.CurrentClip < (int)anim.Clips->size())
         {
-            if (!registry.HasComponent<Player>(entity) ||
-                !registry.HasComponent<CombatState>(entity) ||
-                !registry.HasComponent<AnimationState>(entity))
-                continue;
+            currentClip = &(*anim.Clips)[anim.CurrentClip];
+        }
 
-            auto& combat = registry.GetComponent<CombatState>(entity);
-            auto& anim = registry.GetComponent<AnimationState>(entity);
+        if (combat.IsDead)
+            return;
 
-            // get the current clip for progress check
-            const engine::AnimationClip* currentClip = nullptr;
-            if (anim.Clips && anim.CurrentClip >= 0 &&
-                anim.CurrentClip < (int)anim.Clips->size())
+        if (combat.IsAttacking)
+        {
+            // Buffer next combo hit once the current swing is 30% done,
+            // preventing accidental double-taps from retriggering too early
+            float progress = (currentClip && currentClip->Duration > 0.0f) ? anim.CurrentTime / currentClip->Duration : 0.0f;
+            if (progress >= 0.3f)
             {
-                currentClip = &(*anim.Clips)[anim.CurrentClip];
-            }
-
-            if (combat.IsDead)
-                continue;
-
-            if (combat.IsAttacking)
-            {
-                // Buffer next combo hit once the current swing is 30% done,
-                // preventing accidental double-taps from retriggering too early
-                float progress = (currentClip && currentClip->Duration > 0.0f) ? anim.CurrentTime / currentClip->Duration : 0.0f;
-                if (progress >= 0.3f)
-                {
-                    combat.AttackQueued = true;
-                }
-            }
-            else
-            {
-                // Start a fresh combo from the first swing
-                audioEventQueue.push(std::make_unique<engine::AudioEvent>("attack1"));
-                combat.IsAttacking = true;
-                combat.ComboIndex = 0;
-                anim.CurrentTime = 0.0f;
-                if (anim.Attack1ClipIndex >= 0)
-                    anim.CurrentClip = anim.Attack1ClipIndex;
+                combat.AttackQueued = true;
             }
         }
+        else
+        {
+            // Start a fresh combo from the first swing
+            audioEventQueue.push(std::make_unique<engine::AudioEvent>("attack1"));
+            combat.IsAttacking = true;
+            combat.ComboIndex = 0;
+            anim.CurrentTime = 0.0f;
+            if (anim.Attack1ClipIndex >= 0)
+                anim.CurrentClip = anim.Attack1ClipIndex;
+        }
+
     }
 }

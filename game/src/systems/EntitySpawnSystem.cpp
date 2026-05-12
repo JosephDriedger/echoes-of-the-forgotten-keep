@@ -24,6 +24,7 @@ namespace game
         registry.RegisterComponent<Lifetime>();
         registry.RegisterComponent<AttackStateComponent>();
         registry.RegisterComponent<CameraFollowState>();
+        registry.RegisterComponent<Visibility>();
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

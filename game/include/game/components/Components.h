@@ -283,6 +283,11 @@ namespace game
         float Zoom = 20.0f;
     };
 
+    struct Visibility
+    {
+        bool IsVisible = true;
+    };
+
     struct CombatState
     {
         int AttackDamage = 1;

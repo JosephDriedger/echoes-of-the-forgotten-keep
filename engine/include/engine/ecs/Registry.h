@@ -55,6 +55,11 @@ namespace engine
 
         [[nodiscard]] const std::vector<Entity>& GetActiveEntities() const;
 
+        template <typename... TComponents>
+        std::vector<Entity> View() const;
+
+        std::array<std::vector<Entity>, MAX_COMPONENTS> m_ComponentEntityCache;
+
         // Assigns a new ComponentType ID to TComponent and creates its storage.
         // Safe to call multiple times; subsequent calls for the same type are no-ops.
         template <typename TComponent>
@@ -134,6 +139,30 @@ namespace engine
         ++m_NextComponentType;
     }
 
+    template <typename... TComponents>
+    std::vector<Entity> Registry::View() const
+    {
+        std::vector<Entity> result;
+
+        // pick first component as base list
+        using First = std::tuple_element_t<0, std::tuple<TComponents...>>;
+
+        const auto& base = m_ComponentEntityCache[GetComponentType<First>()];
+
+        for (Entity entity : base)
+        {
+            if (!IsAlive(entity))
+                continue;
+
+            if ((HasComponent<TComponents>(entity) && ...))
+            {
+                result.push_back(entity);
+            }
+        }
+
+        return result;
+    }
+
     template <typename TComponent>
     ComponentType Registry::GetComponentType() const
     {
@@ -196,6 +225,7 @@ namespace engine
         storage.Add(entity, component);
 
         m_Signatures[entity.GetId()].set(GetComponentType<TComponent>());
+        m_ComponentEntityCache[GetComponentType<TComponent>()].push_back(entity);
     }
 
     template <typename TComponent, typename... TArgs>
@@ -226,6 +256,8 @@ namespace engine
         storage.Remove(entity);
 
         m_Signatures[entity.GetId()].reset(GetComponentType<TComponent>());
+        auto& vec = m_ComponentEntityCache[GetComponentType<TComponent>()];
+        vec.erase(std::remove(vec.begin(), vec.end(), entity), vec.end());
     }
 
     template <typename TComponent>

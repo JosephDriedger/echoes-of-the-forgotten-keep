@@ -8,41 +8,94 @@ namespace game
 {
     void CollisionSystem::Update(engine::Registry& registry)
     {
-        const std::vector<engine::Entity>& entities = registry.GetActiveEntities();
+        auto players = registry.View<Player, Transform, Collider>();
+        auto enemies = registry.View<EnemyAI, Transform, Collider>();
+        auto world   = registry.View<Transform, Collider>();
 
-        for (std::size_t i = 0; i < entities.size(); ++i)
+        for (auto player : players)
         {
-            const engine::Entity entityA = entities[i];
+            auto& pTransform = registry.GetComponent<Transform>(player);
+            auto& pCollider  = registry.GetComponent<Collider>(player);
 
-            if (!registry.HasComponent<Transform>(entityA) || !registry.HasComponent<Collider>(entityA))
-                continue;
-
-            Transform& transformA = registry.GetComponent<Transform>(entityA);
-            const Collider& colliderA = registry.GetComponent<Collider>(entityA);
-
-            for (std::size_t j = i + 1; j < entities.size(); ++j)
+            for (auto other : world)
             {
-                const engine::Entity entityB = entities[j];
-
-                if (!registry.HasComponent<Transform>(entityB) || !registry.HasComponent<Collider>(entityB))
+                if (other == player)
                     continue;
 
-                // Skip if both are static
-                if (colliderA.IsStatic && registry.GetComponent<Collider>(entityB).IsStatic)
+                if (!registry.HasComponent<Transform>(other) ||
+                    !registry.HasComponent<Collider>(other))
                     continue;
 
-                Transform& transformB = registry.GetComponent<Transform>(entityB);
-                const Collider& colliderB = registry.GetComponent<Collider>(entityB);
+                auto& oTransform = registry.GetComponent<Transform>(other);
+                auto& oCollider  = registry.GetComponent<Collider>(other);
 
-                if (!IsColliding(transformA, colliderA, transformB, colliderB))
+                if (!IsColliding(pTransform, pCollider, oTransform, oCollider))
                     continue;
 
-                if (!colliderA.IsTrigger && !colliderB.IsTrigger)
+                if (!pCollider.IsTrigger && !oCollider.IsTrigger)
                 {
-                    ResolveCollision(transformA, colliderA, transformB, colliderB);
+                    ResolveCollision(pTransform, pCollider, oTransform, oCollider);
                 }
             }
         }
+
+        for (auto enemy : enemies)
+        {
+            auto& eTransform = registry.GetComponent<Transform>(enemy);
+            auto& eCollider  = registry.GetComponent<Collider>(enemy);
+
+            for (auto other : world)
+            {
+                if (other == enemy)
+                    continue;
+
+                auto& oTransform = registry.GetComponent<Transform>(other);
+                auto& oCollider  = registry.GetComponent<Collider>(other);
+
+                if (!IsColliding(eTransform, eCollider, oTransform, oCollider))
+                    continue;
+
+                if (!eCollider.IsTrigger && !oCollider.IsTrigger)
+                {
+                    ResolveCollision(eTransform, eCollider, oTransform, oCollider);
+                }
+            }
+        }
+        // const std::vector<engine::Entity>& entities = registry.GetActiveEntities();
+        //
+        // for (std::size_t i = 0; i < entities.size(); ++i)
+        // {
+        //     const engine::Entity entityA = entities[i];
+        //
+        //     if (!registry.HasComponent<Transform>(entityA) || !registry.HasComponent<Collider>(entityA))
+        //         continue;
+        //
+        //     Transform& transformA = registry.GetComponent<Transform>(entityA);
+        //     const Collider& colliderA = registry.GetComponent<Collider>(entityA);
+        //
+        //     for (std::size_t j = i + 1; j < entities.size(); ++j)
+        //     {
+        //         const engine::Entity entityB = entities[j];
+        //
+        //         if (!registry.HasComponent<Transform>(entityB) || !registry.HasComponent<Collider>(entityB))
+        //             continue;
+        //
+        //         // Skip if both are static
+        //         if (colliderA.IsStatic && registry.GetComponent<Collider>(entityB).IsStatic)
+        //             continue;
+        //
+        //         Transform& transformB = registry.GetComponent<Transform>(entityB);
+        //         const Collider& colliderB = registry.GetComponent<Collider>(entityB);
+        //
+        //         if (!IsColliding(transformA, colliderA, transformB, colliderB))
+        //             continue;
+        //
+        //         if (!colliderA.IsTrigger && !colliderB.IsTrigger)
+        //         {
+        //             ResolveCollision(transformA, colliderA, transformB, colliderB);
+        //         }
+        //     }
+        // }
     }
 
     bool CollisionSystem::IsColliding(const Transform& transformA,

@@ -16,7 +16,7 @@ namespace game
     class CombatInputSystem
     {
     public:
-        static void Update(engine::Registry& registry, const engine::Input& input, engine::AudioEventQueue& audioEventQueue);
+        static void Update(engine::Registry& registry, engine::Entity playerEntity, const engine::Input& input, engine::AudioEventQueue& audioEventQueue);
     };
 }
 

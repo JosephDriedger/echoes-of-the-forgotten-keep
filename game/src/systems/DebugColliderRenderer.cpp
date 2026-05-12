@@ -153,14 +153,8 @@ namespace game
 
         glBindVertexArray(m_VAO);
 
-        for (const engine::Entity entity : registry.GetActiveEntities())
+        for (const engine::Entity entity : registry.View<Transform, Collider>())
         {
-            if (!registry.HasComponent<Transform>(entity) ||
-                !registry.HasComponent<Collider>(entity))
-            {
-                continue;
-            }
-
             const auto& transform = registry.GetComponent<Transform>(entity);
             const auto& collider = registry.GetComponent<Collider>(entity);
 
