@@ -22,8 +22,9 @@ namespace game
         registry.RegisterComponent<Health>();
         registry.RegisterComponent<Switch>();
         registry.RegisterComponent<Lifetime>();
-        registry.RegisterComponent<AttackStateComponent>();
+        registry.RegisterComponent<Knockback>();
         registry.RegisterComponent<CameraFollowState>();
+        registry.RegisterComponent<AttackStateComponent>();
     }
 
     void EntitySpawnSystem::Register(engine::Registry& registry)

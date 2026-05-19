@@ -17,7 +17,8 @@ namespace game {
         Attack2,
         Attack3,
         HitReact,
-        Death
+        Death,
+        Dash
     };
 
     // -----------------------------------------------------------------------
