@@ -28,10 +28,11 @@ The engine follows a modular architecture with a clean separation between the `e
 | Health | Current and maximum hit points |
 | Collider | AABB collision volume with trigger/static flags |
 | AnimationState | Skeletal animation playback and bone matrices |
-| CombatState | Attack state, combo chain, incoming damage, lunge, knockback |
+| CombatState | Attack state, combo chain, incoming damage, lunge, dash (direction, speed, cooldown) |
 | AttackStateComponent | Per-attacker hitbox entity and per-swing hit tracking (owned by AttackHitboxSystem) |
 | CameraFollowState | Camera zoom level for the followed entity (owned by CameraFollowSystem) |
-| EnemyAI | AI behavior state machine (Idle/Patrol/Chase/Attack), knockback |
+| EnemyAI | AI behavior state machine (Idle/Patrol/Chase/Attack) |
+| Knockback | Reusable knockback state (direction, speed, timer) — added to both enemies and player |
 | Door | Door swing state and proximity-based opening |
 | Switch | Floor switch for puzzle interactions |
 | BoneAttachment | Attaches entity to a parent's skeleton bone |
@@ -120,7 +121,8 @@ The finished installer is written to `installer-output/EchoesOfTheForgottenKeep-
 | Input | Action |
 |-------|--------|
 | W/A/S/D or Arrow Keys | Move player |
-| Space | Attack (3-hit combo chain) |
+| Space | Attack (3-hit combo chain, blocked while dashing) |
+| Left Shift | Dash in movement direction (0.35s, 0.8s cooldown, blocked while attacking) |
 | Mouse Wheel | Camera zoom |
 | ESC | Pause menu |
 | F3 | Toggle debug mode (enables F4/F5) |
